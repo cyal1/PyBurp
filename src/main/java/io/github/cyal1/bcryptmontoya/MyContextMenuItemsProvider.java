@@ -28,8 +28,6 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
         EDIT_REQUEST // set xff header
     }
 
-//    public MyContextMenu myContextMenu;
-
     public MyContextMenuItemsProvider() {
         MENUS = new EnumMap<>(MenuType.class);
     }
@@ -220,13 +218,13 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
             } else {
                 lastSection = ByteArray.byteArrayOfLength(0);
             }
-            PyObject[] pythonArguments = Py.javas2pys(selectText);
+            PyObject[] pythonArguments = Py.javas2pys(selectText.toString());
             PyObject r = func.__call__(pythonArguments);
             String newText = (String) r.__tojava__(String.class);
             messageEditor.setRequest(HttpRequest.httpRequest(firstSection.withAppended(newText).withAppended(lastSection)));
         } else {
             ByteArray selectText = messageEditor.requestResponse().response().toByteArray().subArray(selectionRange.get());
-            PyObject[] pythonArguments = Py.javas2pys(selectText);
+            PyObject[] pythonArguments = Py.javas2pys(selectText.toString());
             PyObject r = func.__call__(pythonArguments);
             String newText = (String) r.__tojava__(String.class);
             JFrame parentFrame = new JFrame();

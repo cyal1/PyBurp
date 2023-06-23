@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+}
+
+group 'net.portswigger.burp.extensions.example'
+version '1.0.0'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+//    compileOnly 'net.portswigger.burp.extensionsls:montoya-api:2023.6'
+    compileOnly files('/Users/cyal1/Downloads/montoya-api-2023.6.jar')
+    implementation 'org.mozilla:rhino:1.7.14'
+    implementation 'org.json:json:20230227'
+    implementation 'com.fifesoft:rsyntaxtextarea:3.3.3'
+    implementation 'org.python:jython-standalone:2.7.3'
+    runtimeOnly 'io.grpc:grpc-netty-shaded:1.54.1'
+    implementation 'io.grpc:grpc-protobuf:1.54.1'
+    implementation 'io.grpc:grpc-stub:1.54.1'
+    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+sourceCompatibility = JavaVersion.VERSION_19
+targetCompatibility = JavaVersion.VERSION_19

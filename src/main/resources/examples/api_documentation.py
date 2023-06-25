@@ -31,6 +31,9 @@
 """
     FUNCTIONS
 """
+    # return HttpRequestResponse
+    sendReqeust(request)
+
     urlencode()
     urldecode()
     base64encode()
@@ -137,6 +140,24 @@ def registerContextMenu(menus):
                For example:  menus.register("Base64 Encode", base64Encode, MenuType.SELECTED_TEXT)
     """
     pass
+
+
+def passiveScan(baseRequestResponse):
+    """
+    :param baseRequestResponse: HttpRequestResponse
+
+    """
+    pass
+
+
+def activeScan(baseRequestResponse, auditInsertionPoint):
+    """
+    :param baseRequestResponse: HttpRequestResponse
+    :param auditInsertionPoint: AuditInsertionPoint
+    :return auditIssue: AuditIssue
+
+    """
+    return None
 
 
 def finish():

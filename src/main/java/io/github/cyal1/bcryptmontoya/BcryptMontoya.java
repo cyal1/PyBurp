@@ -21,7 +21,6 @@ import burp.api.montoya.ui.Theme;
 import org.python.core.Py;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
-
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -57,8 +56,10 @@ public class BcryptMontoya implements BurpExtension
         api.http().registerHttpHandler(new MyHttpHandler());
         api.proxy().registerRequestHandler(new MyProxyRequestHandler());
         api.proxy().registerResponseHandler(new MyProxyResponseHandler());
+        api.scanner().registerScanCheck(new MyScanCheck());
         api.userInterface().registerContextMenuItemsProvider(new ContentTypeContextMenu());
         api.userInterface().registerContextMenuItemsProvider(contextMenu);
+//        api.userInterface().registerHttpResponseEditorProvider(new MyHttpResponseEditorProvider());
         codePanel.runButton.addActionListener(e -> {
             if(status==STATUS.STOP){
                     // do start things on STOP status while button clicked
@@ -183,7 +184,9 @@ public class BcryptMontoya implements BurpExtension
     public static void addIssue(java.lang.String name, java.lang.String detail, java.lang.String remediation, java.lang.String baseUrl, burp.api.montoya.scanner.audit.issues.AuditIssueSeverity severity, burp.api.montoya.scanner.audit.issues.AuditIssueConfidence confidence, java.lang.String background, java.lang.String remediationBackground, burp.api.montoya.scanner.audit.issues.AuditIssueSeverity typicalSeverity, java.util.List<burp.api.montoya.http.message.HttpRequestResponse> requestResponses){
         Api.siteMap().add(AuditIssue.auditIssue(name,detail,remediation,baseUrl,severity,confidence,background,remediationBackground,typicalSeverity,requestResponses));
     }
-
+    public static HttpRequestResponse  sendRequest(HttpRequest args){
+        return BcryptMontoya.Api.http().sendRequest(args);
+    }
     public static List<Marker> getResponseHighlights(HttpRequestResponse requestResponse, String match)
     {
         List<Marker> highlights = new LinkedList<>();

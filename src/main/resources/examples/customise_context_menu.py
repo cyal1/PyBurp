@@ -1,5 +1,5 @@
 import json, copy
-import urllib2, ssl, threading
+import urllib2, ssl
 
 pool = RequestPool(10)
 
@@ -23,6 +23,7 @@ def fuzzParamPerRequest(request):
         pool.sendRequest(request.withParameter(parameter(param.name(), param.value() + payload, param.type())))
 
 
+@run_in_thread
 def fuzzParamsOneRequest(request):
     payload = "'\">"
     if request.contentType() == ContentType.JSON:
@@ -33,7 +34,8 @@ def fuzzParamsOneRequest(request):
         if param.type() == HttpParameterType.JSON:
             continue
         request = request.withParameter(parameter(param.name(), param.value() + payload, param.type()))
-    pool.sendRequest(request)
+    resp = sendRequest(request).response()
+#    print(resp.statusCode())
 
 
 def bypass403(editor, request):
@@ -66,6 +68,15 @@ def noSqliScanCallBack(requestResponse):
             break
 
 
+def unicodeEscape(selectedText):
+    return selectedText.encode('utf-8').decode('unicode_escape')
+
+
+def jsonUnicodeEscape(selectedText):
+    json_object = json.loads(selectedText)
+    return json.dumps(json_object, ensure_ascii=False, indent=2)
+
+
 def registerContextMenu(menus):
     """
     To register a custom context menu using the register method,
@@ -80,6 +91,8 @@ def registerContextMenu(menus):
     menus.register("NOSQL Injection", noSqliScan, MenuType.REQUEST)
     menus.register("Send to Xray", sendRequestWithProxy, MenuType.REQUEST)
     menus.register("File Extension Cache Poison", cachePoison, MenuType.REQUEST)
+    menus.register("Unicode Escape", unicodeEscape, MenuType.SELECTED_TEXT)
+    menus.register("JSON Unicode Escape", jsonUnicodeEscape, MenuType.SELECTED_TEXT)
 
 
 def finish():
@@ -132,6 +145,7 @@ def traverse_and_modify_all(node, new_value):
             traverse_and_modify(item, new_value)
 
 
+@run_in_thread
 def sendRequestWithProxy(request):
     proxy = "127.0.0.1:9999"
     method = request.method().encode()
@@ -144,8 +158,7 @@ def sendRequestWithProxy(request):
         h = {header.name().encode(): header.value().encode()}
         headers.update(h)
     body = request.bodyToString().encode()
-    thread = threading.Thread(target=send_request_with_proxy, args=(url, method, headers, body, proxy))
-    thread.start()
+    send_request_with_proxy(url, method, headers, body, proxy)
 
 
 def send_request_with_proxy(url, method, headers, body, proxy):

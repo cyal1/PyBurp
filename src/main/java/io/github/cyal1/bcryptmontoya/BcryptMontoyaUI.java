@@ -2,7 +2,6 @@ package io.github.cyal1.bcryptmontoya;
 
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.RTextScrollPane;
-
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
@@ -76,6 +75,7 @@ public class BcryptMontoyaUI extends JPanel {
             if (codeCombo.getSelectedIndex() == 0) {
                 saveButton.setEnabled(false);
                 textEditor.setText(getDefaultScript());
+                readScriptDirectories();
                 return;
             }
             String fileName = Objects.requireNonNull(codeCombo.getSelectedItem()).toString();

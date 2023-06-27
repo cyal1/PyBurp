@@ -52,10 +52,10 @@ def noSqliScan(request):
         for payload in traverse_and_modify(json.loads(request.bodyToString().encode()), {"$83b3j45b": "xxx"}):
             pool.sendRequest(request.withBody(json.dumps(payload)), noSqliScanCallBack)
     for param in request.parameters():
-        ptype = param.type()
-        if ptype == HttpParameterType.BODY or ptype == HttpParameterType.URL or ptype == HttpParameterType.COOKIE:
+        paramType = param.type()
+        if paramType == HttpParameterType.BODY or paramType == HttpParameterType.URL or paramType == HttpParameterType.COOKIE:
             pool.sendRequest(request.withRemovedParameters(param).withParameter(
-                parameter(param.name() + "[$83b3j45b]", param.value(), ptype)), noSqliScanCallBack)
+                parameter(param.name() + "[$83b3j45b]", param.value(), paramType)), noSqliScanCallBack)
 
 
 def noSqliScanCallBack(requestResponse):

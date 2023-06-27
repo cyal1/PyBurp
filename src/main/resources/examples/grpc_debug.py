@@ -7,7 +7,7 @@ print(dir(result))
 
 result=result.toStringUtf8().encode()
 
-print(result,type(result))
+print(result, type(result))
 
 result = server.callFunc('test',"arg1",2,"arg3",1).encode()
-print(result,type(result))
+print(result, type(result))

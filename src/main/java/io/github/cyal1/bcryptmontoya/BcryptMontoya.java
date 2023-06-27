@@ -10,16 +10,17 @@ package io.github.cyal1.bcryptmontoya;
 
 import burp.api.montoya.BurpExtension;
 import burp.api.montoya.MontoyaApi;
+import burp.api.montoya.core.Annotations;
 import burp.api.montoya.core.Marker;
-import burp.api.montoya.http.handler.HttpResponseReceived;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
-import burp.api.montoya.proxy.http.InterceptedResponse;
 import burp.api.montoya.scanner.audit.issues.AuditIssue;
 import burp.api.montoya.ui.Theme;
 import org.python.core.Py;
+import org.python.core.PyFunction;
 import org.python.core.PyObject;
+import org.python.core.PyTuple;
 import org.python.util.PythonInterpreter;
 import javax.swing.*;
 import java.util.ArrayList;
@@ -60,6 +61,7 @@ public class BcryptMontoya implements BurpExtension
         api.userInterface().registerContextMenuItemsProvider(new ContentTypeContextMenu());
         api.userInterface().registerContextMenuItemsProvider(contextMenu);
 //        api.userInterface().registerHttpResponseEditorProvider(new MyHttpResponseEditorProvider());
+        initPyEnv();
         codePanel.runButton.addActionListener(e -> {
             if(status==STATUS.STOP){
                     // do start things on STOP status while button clicked
@@ -76,18 +78,18 @@ public class BcryptMontoya implements BurpExtension
         pyInterp.setErr(Api.logging().error());
         // https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/utilities/Utilities.html
         pyInterp.set("Utils", Api.utilities());
-        pyInterp.set("contextMenu", contextMenu);
-        pyInterp.set("urls", ALLOWED_URL_PREFIX);
         pyInterp.exec(BcryptMontoyaUI.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/initEnv.py")));
-//        pyInterp.set("menus",pyContextMenu);
-//        pyInterp.exec("registerContextMenu(menus)");
     }
     private void runBtnClick(){
         try{
-            initPyEnv();
             pyInterp.exec(codePanel.getCode());
-            pyInterp.exec("registerContextMenu(contextMenu)");
-            pyInterp.exec("urlPrefixAllowed(urls)");
+            PyFunction registerContextMenu = (PyFunction) pyInterp.get("registerContextMenu");
+            PyObject pythonArguments = Py.java2py(contextMenu);
+            registerContextMenu.__call__(pythonArguments);
+
+            PyFunction urlPrefixAllowed = (PyFunction) pyInterp.get("urlPrefixAllowed");
+            PyObject[] urls = Py.javas2pys(ALLOWED_URL_PREFIX);
+            urlPrefixAllowed.__call__(urls);
         }catch (Exception ex){
             JOptionPane.showMessageDialog(null, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
             return;
@@ -101,7 +103,8 @@ public class BcryptMontoya implements BurpExtension
         Api.persistence().preferences().setString("defaultScript", codePanel.getCode().replace("\r\n","\n"));
     }
     private void stopBtnClick(){
-        pyInterp.exec("finish()");
+        PyFunction finish = (PyFunction) pyInterp.get("finish");
+        finish.__call__();
         contextMenu.MENUS.clear();
         ALLOWED_URL_PREFIX.clear();
         codePanel.textEditor.setHighlightCurrentLine(true);
@@ -111,62 +114,39 @@ public class BcryptMontoya implements BurpExtension
         pyInterp = null;
         status = STATUS.STOP;
         codePanel.runButton.setText("Run");
+        initPyEnv();
     }
-
-    /**
-     * Modify HttpResponse By Python
-     *
-     * @param httpResponse Montoya Api HttpResponse instance
-     * @param pyFuncName python function
-     * @return Modified HttpResponse instance by Python
-     */
-    public static <T extends HttpResponse> HttpResponse modifyHttpResponse(T httpResponse, String pyFuncName){
-        if(status == STATUS.STOP){
-            return httpResponse;
+    public static <T extends HttpRequest> ArrayList<Object> invokePyRequest(T httpRequest, Annotations annotations, String pyFuncName){
+        PyObject method = BcryptMontoya.pyInterp.get( pyFuncName );
+        PyObject[] pythonArguments = new PyObject[2];
+        pythonArguments[0] = Py.java2py(httpRequest);
+        pythonArguments[1] = Py.java2py(annotations);
+        PyObject result = method.__call__(pythonArguments);
+        HttpRequest newHttpRequest;
+        if (result instanceof PyTuple tupleResult) {
+            newHttpRequest = (HttpRequest) tupleResult.__getitem__(0).__tojava__(HttpRequest.class);
+            annotations = (Annotations) tupleResult.__getitem__(1).__tojava__(Annotations.class);
+        } else {
+            newHttpRequest = (HttpRequest) result.__tojava__( HttpRequest.class);
         }
-
-        // url prefix allowed
-        String url;
-        if(httpResponse instanceof HttpResponseReceived){
-            url = ((HttpResponseReceived) httpResponse).initiatingRequest().url();
-        }else if(httpResponse instanceof InterceptedResponse){
-            url = ((InterceptedResponse) httpResponse).initiatingRequest().url();
-        }else{
-            throw new RuntimeException("Unexpect Instance" + httpResponse.getClass().getName());
-        }
-        if(!isPrefixAllowed(url)){
-            return httpResponse;
-        }
-
-        PyObject method = pyInterp.get( pyFuncName );
-        PyObject[] pythonArguments = Py.javas2pys( httpResponse );
-        PyObject r = method.__call__( pythonArguments );
-        return (HttpResponse) r.__tojava__( HttpResponse.class);
+        return new ArrayList<>(List.of(newHttpRequest, annotations));
     }
-    /**
-     * Modify HttpRequest By Python
-     *
-     * @param httpRequest Montoya Api HttpRequest instance
-     * @param pyFuncName python function
-     * @return Modified HttpRequest instance by Python
-     */
-    public static  <T extends HttpRequest> HttpRequest modifyHttpRequest(T httpRequest, String pyFuncName){
-        if(status == STATUS.STOP){
-            return httpRequest;
+    public static <T extends HttpResponse> ArrayList<Object> invokePyResponse(T httpResponse, Annotations annotations, String pyFuncName){
+        PyObject method = BcryptMontoya.pyInterp.get( pyFuncName );
+        PyObject[] pythonArguments = new PyObject[2];
+        pythonArguments[0] = Py.java2py(httpResponse);
+        pythonArguments[1] = Py.java2py(annotations);
+        PyObject result = method.__call__(pythonArguments);
+        HttpResponse newHttpResponse;
+        if (result instanceof PyTuple tupleResult) {
+            newHttpResponse = (HttpResponse) tupleResult.__getitem__(0).__tojava__(HttpResponse.class);
+            annotations = (Annotations) tupleResult.__getitem__(1).__tojava__(Annotations.class);
+        } else {
+            newHttpResponse = (HttpResponse) result.__tojava__( HttpResponse.class);
         }
-
-        // url prefix allowed
-        if(!isPrefixAllowed(httpRequest.url())){
-            return httpRequest;
-        }
-
-        PyObject method = pyInterp.get( pyFuncName );
-        PyObject[] pythonArguments = Py.javas2pys( httpRequest );
-        PyObject r = method.__call__( pythonArguments );
-        return (HttpRequest) r.__tojava__( HttpRequest.class);
+        return new ArrayList<>(List.of(newHttpResponse, annotations));
     }
-
-    private static boolean isPrefixAllowed(String url){
+    public static boolean isPrefixAllowed(String url){
         if (ALLOWED_URL_PREFIX.size() == 0){
             return false;
         }
@@ -184,8 +164,11 @@ public class BcryptMontoya implements BurpExtension
     public static void addIssue(java.lang.String name, java.lang.String detail, java.lang.String remediation, java.lang.String baseUrl, burp.api.montoya.scanner.audit.issues.AuditIssueSeverity severity, burp.api.montoya.scanner.audit.issues.AuditIssueConfidence confidence, java.lang.String background, java.lang.String remediationBackground, burp.api.montoya.scanner.audit.issues.AuditIssueSeverity typicalSeverity, java.util.List<burp.api.montoya.http.message.HttpRequestResponse> requestResponses){
         Api.siteMap().add(AuditIssue.auditIssue(name,detail,remediation,baseUrl,severity,confidence,background,remediationBackground,typicalSeverity,requestResponses));
     }
-    public static HttpRequestResponse  sendRequest(HttpRequest args){
-        return BcryptMontoya.Api.http().sendRequest(args);
+    public static HttpRequestResponse sendRequest(HttpRequest httpRequest){
+        return BcryptMontoya.Api.http().sendRequest(httpRequest);
+    }
+    public static HttpRequestResponse sendRequest(String url){
+        return BcryptMontoya.Api.http().sendRequest(HttpRequest.httpRequestFromUrl(url));
     }
     public static List<Marker> getResponseHighlights(HttpRequestResponse requestResponse, String match)
     {

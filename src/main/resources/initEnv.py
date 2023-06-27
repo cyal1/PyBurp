@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import io.github.cyal1.bcryptmontoya.CallFuncClient as Grpc
 from io.github.cyal1.bcryptmontoya.BcryptMontoya import addIssue, getResponseHighlights, sendRequest
 from io.github.cyal1.bcryptmontoya.MyContextMenuItemsProvider import MenuType
@@ -20,19 +19,17 @@ def run_in_thread(func):
 def urlPrefixAllowed(urls):
     pass
 
-# https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/requests/HttpRequest.html
-def handleRequest(request):
-    return request
+def handleRequest(request, annotations):
+    return request, annotations
 
-def handleProxyRequest(request):
-    return request
+def handleProxyRequest(request, annotations):
+    return request, annotations
 
-# https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html
-def handleResponse(response):
-    return response
+def handleResponse(response, annotations):
+    return response, annotations
 
-def handleProxyResponse(response):
-    return response
+def handleProxyResponse(response, annotations):
+    return response, annotations
 
 def registerContextMenu(menus):
     pass
@@ -46,8 +43,6 @@ def passiveScan(baseRequestResponse):
 def activeScan(baseRequestResponse, auditInsertionPoint):
     pass
 
-
-# build-in function
 def urlencode(text):
     return Utils.urlUtils().encode(text).encode()
 

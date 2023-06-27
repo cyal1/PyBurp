@@ -2,6 +2,7 @@ package io.github.cyal1.bcryptmontoya;
 
 import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.core.Range;
+import burp.api.montoya.core.ToolType;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
@@ -11,6 +12,7 @@ import burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse;
 import org.python.core.Py;
 import org.python.core.PyFunction;
 import org.python.core.PyObject;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -73,16 +75,16 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
             }
 
             // todo caret
-            if (messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST) {
+            if (event.isFromTool(ToolType.REPEATER) && messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST) {
                 List<Component> caretMenu = registerIterm(MenuType.CARET, event);
                 menus.addAll(caretMenu);
 
                 List<Component> editRequestMenu = registerIterm(MenuType.EDIT_REQUEST, event);
                 menus.addAll(editRequestMenu);
-            }
 
-            if(menus.size()!=0){
-                menus.add(new JSeparator(JSeparator.HORIZONTAL));
+                if(caretMenu.size() + editRequestMenu.size() != 0){
+                    menus.add(new JSeparator(JSeparator.HORIZONTAL));
+                }
             }
 
             // selected text
@@ -142,11 +144,11 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
         if (!event.selectedRequestResponses().isEmpty()) {
             for (HttpRequestResponse httpRequestResponse : event.selectedRequestResponses()) {
                 HttpRequest req = httpRequestResponse.request();
-                PyObject[] pythonArguments = Py.javas2pys(req);
+                PyObject pythonArguments = Py.java2py(req);
                 func.__call__(pythonArguments);
             }
         } else {
-            PyObject[] pythonArguments = Py.javas2pys(event.messageEditorRequestResponse().get().requestResponse().request());
+            PyObject pythonArguments = Py.java2py(event.messageEditorRequestResponse().get().requestResponse().request());
             func.__call__(pythonArguments);
         }
     }
@@ -207,7 +209,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
         int startIndex = selectionRange.get().startIndexInclusive();
         int endIndex = selectionRange.get().endIndexExclusive();
 
-        if (messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST) {
+        if (event.isFromTool(ToolType.REPEATER) && messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST) {
             HttpRequest request = messageEditor.requestResponse().request();
             ByteArray httpMessage = request.toByteArray();
             ByteArray firstSection = httpMessage.subArray(0, startIndex);
@@ -218,13 +220,18 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
             } else {
                 lastSection = ByteArray.byteArrayOfLength(0);
             }
-            PyObject[] pythonArguments = Py.javas2pys(selectText.toString());
+            PyObject pythonArguments = Py.java2py(selectText.toString());
             PyObject r = func.__call__(pythonArguments);
             String newText = (String) r.__tojava__(String.class);
             messageEditor.setRequest(HttpRequest.httpRequest(firstSection.withAppended(newText).withAppended(lastSection)));
         } else {
-            ByteArray selectText = messageEditor.requestResponse().response().toByteArray().subArray(selectionRange.get());
-            PyObject[] pythonArguments = Py.javas2pys(selectText.toString());
+            ByteArray selectText;
+            if(MessageEditorHttpRequestResponse.SelectionContext.REQUEST == messageEditor.selectionContext()){
+                selectText = messageEditor.requestResponse().request().toByteArray().subArray(selectionRange.get());
+            }else{
+                selectText = messageEditor.requestResponse().response().toByteArray().subArray(selectionRange.get());
+            }
+            PyObject pythonArguments = Py.java2py(selectText.toString());
             PyObject r = func.__call__(pythonArguments);
             String newText = (String) r.__tojava__(String.class);
             JFrame parentFrame = new JFrame();

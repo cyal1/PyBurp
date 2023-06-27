@@ -1,3 +1,4 @@
+
 # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/params/HttpParameterType.html
 def getParamByName(params, key, locate=HttpParameterType.URL, index=0):  # do not forget change locate
     for param in params:
@@ -10,21 +11,19 @@ def urlPrefixAllowed(urls):
     urls.add("https://www.example.com/api/")
 
 
-# https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/requests/HttpRequest.html
-def handleRequest(request):
-    return request
+def handleRequest(request, annotations):
+    return request, annotations
 
 
-def handleProxyRequest(request):
+def handleProxyRequest(request, annotations):
     params = request.parameters()
     token = getParamByName(params, "token")
-    return request.withUpdatedParameters(parameter("token", base64encode(token), HttpParameterType.URL))
+    return request.withUpdatedParameters(parameter("token", base64encode(token), HttpParameterType.URL)), annotations
 
 
-# https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html
-def handleResponse(response):
-    return response
+def handleResponse(response, annotations):
+    return response, annotations
 
 
-def handleProxyResponse(response):
-    return response
+def handleProxyResponse(response, annotations):
+    return response, annotations

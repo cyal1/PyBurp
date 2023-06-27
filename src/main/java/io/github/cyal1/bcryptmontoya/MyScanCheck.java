@@ -32,7 +32,7 @@ class MyScanCheck implements ScanCheck {
             return AuditResult.auditResult();
         }
         PyObject method = BcryptMontoya.pyInterp.get("passiveScan");
-        PyObject[] pythonArguments = Py.javas2pys(baseRequestResponse);
+        PyObject pythonArguments = Py.java2py(baseRequestResponse);
         AuditIssue r = (AuditIssue) method.__call__(pythonArguments).__tojava__(AuditIssue.class);
         if (r != null) {
             return AuditResult.auditResult(r);

@@ -5,7 +5,7 @@
     # RequestPool
     pool = RequestPool(10)
     pool.sendRequest(String url)
-    pool.sendRequest(HttpRequest request) # check response in Logger
+    pool.sendRequest(HttpRequest request)
     pool.sendRequest(String url, PyFunction callback)
     pool.sendRequest(HttpRequest request, PyFunction callback) # Handling response through callback functions. callback(HttpRequestResponse httpRequestResponse).
     pool.shutdown()
@@ -19,11 +19,23 @@
 """
     INSTANCE OF CLASS
 """
+    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/HttpRequestResponse.html
+    HttpRequestResponse requestResponse
+
+    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/requests/HttpRequest.html
+    HttpRequest request
+
+    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html
+    HttpResponse response
+
+    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/Annotations.html
+    Annotations annotations
+
     # Provide when registering a context menu of type EDIT_REQUEST.
     # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/ui/contextmenu/MessageEditorHttpRequestResponse.html
     MessageEditorHttpRequestResponse  editor
 
-    # Various data conversion and querying features
+    # Various data conversion and querying features.
     # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/utilities/Utilities.html
     Utilities Utils
 
@@ -31,9 +43,7 @@
 """
     FUNCTIONS
 """
-    # return HttpRequestResponse
-    sendReqeust(request)
-
+    sendReqeust(request) -> HttpRequestResponse
     urlencode()
     urldecode()
     base64encode()
@@ -54,7 +64,6 @@
     addIssue(*args)
 
     # Create a list with the added markers. Used as the argument for withResponseMarkers and withRequestMarkers.
-    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/HttpRequestResponse.html
     getResponseHighlights(HttpRequestResponse requestResponse, String highlightString)
 
 
@@ -62,7 +71,7 @@
     
               handleProxyRequest                         handleRequest
      client   -----------------------> BurpSuit proxy ----------------------->  server
-    (browser) <-----------------------                <-----------------------
+              <-----------------------                <-----------------------
               handleProxyResponse                        handleResponse
 
 """
@@ -72,97 +81,97 @@ def urlPrefixAllowed(urls):
     """
     Match requests based on URL prefixes and only work on those prefixes.
 
-    Args:
-        urls (ArrayList<String>): URL prefix.
+    :param (ArrayList<String>) urls: URL prefix.
+    :return:
     """
     pass
 
 
-def handleRequest(request):
+def handleRequest(request, annotations):
     """
-     Handle requests between BurpSuite proxy and the Server.
+    Handle requests between BurpSuite proxy and the Server.
 
-     Args:
-         request (HttpRequest): HTTP request.
-
-     Returns:
-         request (HttpRequest)
-     """
-    return request
-
-
-def handleProxyRequest(request):
+    :param (HttpRequest) request: Burp HTTP request able to retrieve and modify details of an HTTP request.
+    :param (Annotations) annotations: Annotations stored with requests and responses in Burp Suite.
+    :return: request, annotations
     """
-     Handle requests between Client and the BurpSuite proxy.
+    return request, annotations
 
-     Args:
-         request (HttpRequest): HTTP request.
 
-     Returns:
-         request (HttpRequest)
+def handleProxyRequest(request, annotations):
     """
-    return request
+    Handle requests between Client and the BurpSuite proxy.
+
+    :param (HttpRequest) request: Burp HTTP request able to retrieve and modify details of an HTTP request.
+    :param (Annotations) annotations: Annotations stored with requests and responses in Burp Suite.
+    :return: request, annotations
+    """
+    return request, annotations
 
 
-def handleResponse(response):
+def handleResponse(response, annotations):
     """
     Handle responses from the Server to BurpSuite.
 
-    Args:
-        response (HttpResponse): HTTP response.
-
-    Returns:
-        response (HttpResponse)
+    :param (HttpResponse) response: Burp HTTP response able to retrieve and modify details about an HTTP response.
+    :param (Annotations) annotations: Annotations stored with requests and responses in Burp Suite.
+    :return: response, annotations
     """
-    return response
+    return response, annotations
 
 
-def handleProxyResponse(response):
+def handleProxyResponse(response, annotations):
     """
     Handle responses from the BurpSuite to Client.
 
-    Args:
-        response (HttpResponse): HTTP response.
-
-    Returns:
-        response (HttpResponse)
+    :param (HttpResponse) response: Burp HTTP response able to retrieve and modify details about an HTTP response.
+    :param (Annotations) annotations: Annotations stored with requests and responses in Burp Suite.
+    :return: response, annotations
     """
-    return response
+    return response, annotations
 
 
 def registerContextMenu(menus):
     """
     To register a custom context menu.
 
-    Args:
-        menus: using the `register(String menuItemName, PyFunction functionName, MenuType menuType)` method to register a custom context menu.
-               The menu types include CARET, SELECTED_TEXT, REQUEST, and EDIT_REQUEST.
-               For example:  menus.register("Base64 Encode", base64Encode, MenuType.SELECTED_TEXT)
+    :param menus: Using the `register(String menuItemName, PyFunction functionName, MenuType menuType)` method to register a custom context menu.
+                  The menu types include CARET, SELECTED_TEXT, REQUEST, and EDIT_REQUEST.
+                  For example:  menus.register("Base64 Encode", base64Encode, MenuType.SELECTED_TEXT)
+    :return:
     """
     pass
 
 
 def passiveScan(baseRequestResponse):
     """
-    :param baseRequestResponse: HttpRequestResponse
+    The BurpSuite invokes this method for each base request / response that is passively audited.
+    Note: Extensions should only analyze the HTTP messages provided during a passive audit, and should not make any new HTTP requests of their own.
 
+    :param (HttpRequestResponse) baseRequestResponse: A coupling of HttpRequest and HttpResponse.
+    :return:
     """
     pass
 
 
 def activeScan(baseRequestResponse, auditInsertionPoint):
     """
-    :param baseRequestResponse: HttpRequestResponse
-    :param auditInsertionPoint: AuditInsertionPoint
-    :return auditIssue: AuditIssue
+    The BurpSuite invokes this method for each insertion point that is actively audited.
+    Extensions may issue HTTP requests as required to carry out an active audit, and should use the AuditInsertionPoint object provided to build requests for particular payloads.
+    Note: Scan checks should submit raw non-encoded payloads to insertion points, and the insertion point has responsibility for performing any data encoding that is necessary given the nature and location of the insertion point.
 
+    :param (HttpRequestResponse) baseRequestResponse: A coupling of HttpRequest and HttpResponse.
+    :param (AuditInsertionPoint) auditInsertionPoint: Define an insertion point for use by active Scan checks
+    :return:
     """
-    return None
+    pass
 
 
 def finish():
     """
     Tasks performed upon stopping (clicking "Stop" button).
+
+    :return:
     """
     pass
 

@@ -37,22 +37,17 @@ def urlPrefixAllowed(urls):
     urls.add("https://www.example.com/api/")
 
 
-# https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/requests/HttpRequest.html
-def handleRequest(request):
-    return request
+def handleRequest(request, annotations):
+    return request, annotations
 
 
-def handleProxyRequest(request):
-    return request
+def handleProxyRequest(request, annotations):
+    return request, annotations
 
-
-# https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html
-def handleResponse(response):
-    # body = response.bodyToString()
+def handleResponse(response, annotations):
     body = aes_decrypt_cbc("V275hhZ6+Ix3fg7ERcM5Jw==", "aaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaa")
-    return response.withBody(body)
+    return response.withBody(body), annotations
 
 
-def handleProxyResponse(response):
-    return response
-
+def handleProxyResponse(response, annotations):
+    return response, annotations

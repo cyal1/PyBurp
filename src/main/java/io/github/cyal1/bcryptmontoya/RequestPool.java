@@ -25,7 +25,7 @@ public class RequestPool {
     public void sendRequest(HttpRequest request, PyFunction pyFunc) {
         executor.execute(() -> {
             HttpRequestResponse httpRequestResponse = BcryptMontoya.Api.http().sendRequest(request);
-            PyObject[] pythonArguments = Py.javas2pys(httpRequestResponse);
+            PyObject pythonArguments = Py.java2py(httpRequestResponse);
             pyFunc.__call__( pythonArguments );
         });
     }
@@ -39,7 +39,7 @@ public class RequestPool {
         executor.execute(() -> {
             HttpRequest request = HttpRequest.httpRequestFromUrl(url);
             HttpRequestResponse httpRequestResponse = BcryptMontoya.Api.http().sendRequest(request);
-            PyObject[] pythonArguments = Py.javas2pys(httpRequestResponse);
+            PyObject pythonArguments = Py.java2py(httpRequestResponse);
             pyFunc.__call__( pythonArguments );
         });
     }

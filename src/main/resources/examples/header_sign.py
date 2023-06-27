@@ -12,22 +12,8 @@ def urlPrefixAllowed(urls):
 
 
 # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/requests/HttpRequest.html
-def handleRequest(request):
-    return request
-
-
-def handleProxyRequest(request):
+def handleProxyRequest(request, annotations):
     cookie = getHeader(request.headers(), "cookie")
     sign = hashlib.md5(request.bodyToString() + request.path() + cookie + "salt").hexdigest()
     request = request.withHeader("X-sign", sign)
-    return request
-
-
-# https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html
-def handleResponse(response):
-    return response
-
-
-def handleProxyResponse(response):
-    return response
-
+    return request, annotations

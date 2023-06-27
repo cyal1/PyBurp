@@ -7,26 +7,24 @@ def urlPrefixAllowed(urls):
     urls.add("https://www.example.com/api/")
 
 
-# https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/requests/HttpRequest.html
-def handleRequest(request):
-    result = server.callFunc('encrypt',request.bodyToString())
-    return request.withBody(result)
+def handleRequest(request, annotations):
+    result = server.callFunc('encrypt', request.bodyToString())
+    return request.withBody(result), annotations
 
 
-def handleProxyRequest(request):
-    result = server.callFunc('decrypt',request.bodyToString())
-    return request.withBody(result)
+def handleProxyRequest(request, annotations):
+    result = server.callFunc('decrypt', request.bodyToString())
+    return request.withBody(result), annotations
 
 
-# https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html
-def handleResponse(response):
+def handleResponse(response, annotations):
     result = server.callFunc('decrypt', response.bodyToString())
-    return response.withBody(result)
+    return response.withBody(result), annotations
 
 
-def handleProxyResponse(response):
+def handleProxyResponse(response, annotations):
     result = server.callFunc('encrypt', response.bodyToString())
-    return response.withBody(result)
+    return response.withBody(result), annotations
 
 
 def finish():

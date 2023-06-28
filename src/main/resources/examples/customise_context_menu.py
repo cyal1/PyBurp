@@ -39,11 +39,11 @@ def fuzzParamsOneRequest(request):
 
 
 def bypass403(editor, request):
-    editor.setRequest(request.withHeader("X-Forwarded-For", "127.0.0.1"). \
-        withHeader("X-Originating-IP", "127.0.0.1").withHeader("X-Remote-IP", "127.0.0.1"). \
-        withHeader("X-Remote-Addr", "127.0.0.1").withHeader("X-Real-IP", "127.0.0.1"). \
-        withHeader("X-Forwarded-Host", "127.0.0.1").withHeader("X-Client-IP", "127.0.0.1"). \
-        withHeader("X-Host", "127.0.0.1")
+    ip = "127.0.0.1"
+    editor.setRequest(request.withHeader("X-Forwarded-For", ip). \
+        withHeader("X-Originating-IP", ip).withHeader("X-Remote-IP", ip). \
+        withHeader("X-Remote-Addr", ip).withHeader("X-Real-IP", ip). \
+        withHeader("X-Forwarded-Host", ip).withHeader("X-Client-IP", ip).withHeader("X-Host", ip)
     )
 
 
@@ -88,7 +88,7 @@ def registerContextMenu(menus):
     menus.register("FUZZ Param perReq", fuzzParamPerRequest, MenuType.REQUEST)
     menus.register("FUZZ Param oneReq", fuzzParamsOneRequest, MenuType.REQUEST)
     menus.register("Bypass 403", bypass403, MenuType.EDIT_REQUEST)
-    menus.register("NOSQL Injection", noSqliScan, MenuType.REQUEST)
+    menus.register("NoSQL Injection", noSqliScan, MenuType.REQUEST)
     menus.register("Send to Xray", sendRequestWithProxy, MenuType.REQUEST)
     menus.register("File Extension Cache Poison", cachePoison, MenuType.REQUEST)
     menus.register("Unicode Escape", unicodeEscape, MenuType.SELECTED_TEXT)

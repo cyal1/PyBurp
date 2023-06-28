@@ -60,7 +60,7 @@ public class BcryptMontoya implements BurpExtension
         api.scanner().registerScanCheck(new MyScanCheck());
         api.userInterface().registerContextMenuItemsProvider(new ContentTypeContextMenu());
         api.userInterface().registerContextMenuItemsProvider(contextMenu);
-//        api.userInterface().registerHttpResponseEditorProvider(new MyHttpResponseEditorProvider());
+        api.userInterface().registerHttpResponseEditorProvider(new MyHttpResponseEditorProvider());
         initPyEnv();
         codePanel.runButton.addActionListener(e -> {
             if(status==STATUS.STOP){

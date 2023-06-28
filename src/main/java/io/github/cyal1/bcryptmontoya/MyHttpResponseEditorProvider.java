@@ -46,7 +46,7 @@ public class MyHttpResponseEditorProvider implements HttpResponseEditorProvider 
 
             @Override
             public String caption() {
-                return "Json";
+                return "Json Unicode Escaped";
             }
 
             @Override

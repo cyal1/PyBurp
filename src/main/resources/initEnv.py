@@ -9,6 +9,14 @@ from burp.api.montoya.core import Annotations, HighlightColor
 from burp.api.montoya.scanner.audit.issues import AuditIssue, AuditIssueSeverity, AuditIssueConfidence
 from burp.api.montoya.scanner.audit.insertionpoint import AuditInsertionPoint
 from threading import Thread
+import random, string
+
+
+def randomstring(length=8):
+    characters = string.ascii_letters + string.digits
+    random_string = ''.join(random.choice(characters) for _ in range(length))
+    return random_string
+
 
 def run_in_thread(func):
     def wrapper(*args, **kwargs):

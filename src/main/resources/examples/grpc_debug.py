@@ -1,3 +1,8 @@
+
+# grpc example server
+# https://github.com/cyal1/BcryptRpcServer/tree/main/python
+
+
 server = Grpc("localhost",30051)
 
 result = server.callFunc('test',"arg1",2,"arg3",1,1)

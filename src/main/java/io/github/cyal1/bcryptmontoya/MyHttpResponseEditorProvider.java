@@ -41,12 +41,12 @@ public class MyHttpResponseEditorProvider implements HttpResponseEditorProvider 
             public boolean isEnabledFor(HttpRequestResponse httpRequestResponse) {
                 String body = httpRequestResponse.response().bodyToString().strip();
                 return ((body.startsWith("{") && body.endsWith("}")) || (body.startsWith("[") && body.endsWith("]"))) &&
-                        body.toLowerCase().contains(":\"\\u");
+                        body.toLowerCase().contains("\"\\u");
             }
 
             @Override
             public String caption() {
-                return "Json Unicode Escaped";
+                return "JSON Unicode Escaped";
             }
 
             @Override

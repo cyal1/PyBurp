@@ -48,6 +48,7 @@
     urldecode()
     base64encode()
     base64decode()
+    randomstring(length=8)
 
     # Create a new ByteArray from the provided.
     # Same to the `ByteArray byteArray()`.

@@ -1,7 +1,9 @@
 import io.github.cyal1.bcryptmontoya.CallFuncClient as Grpc
-from io.github.cyal1.bcryptmontoya.BcryptMontoya import addIssue, getResponseHighlights, sendRequest
+from io.github.cyal1.bcryptmontoya.BcryptMontoya import addIssue, getResponseHighlights, http
 from io.github.cyal1.bcryptmontoya.MyContextMenuItemsProvider import MenuType
 from io.github.cyal1.bcryptmontoya import RequestPool
+from burp.api.montoya.http.message.requests import HttpRequest
+from burp.api.montoya.http import HttpMode
 from burp.api.montoya.http.message.params import HttpParameterType, HttpParameter
 from burp.api.montoya.http.message import ContentType
 import burp.api.montoya.core.ByteArray.byteArray as bytearray
@@ -12,17 +14,47 @@ from threading import Thread
 import random, string
 
 
+def sendRequest(*args):
+    return http.sendRequest(*args)
+
+def makeRequest(url):
+    return HttpRequest.httpRequestFromUrl(url)
+
 def randomstring(length=8):
     characters = string.ascii_letters + string.digits
     random_string = ''.join(random.choice(characters) for _ in range(length))
     return random_string
-
 
 def run_in_thread(func):
     def wrapper(*args, **kwargs):
         thread = Thread(target=func, args=args, kwargs=kwargs)
         thread.start()
     return wrapper
+
+def urlencode(text):
+    return Utils.urlUtils().encode(text).encode()
+
+def urldecode(text):
+    return Utils.urlUtils().decode(text).encode()
+
+def base64encode(text):
+    return Utils.base64Utils().encodeToString(text).encode()
+
+def base64decode(text):
+    return Utils.base64Utils().decode(text).toString().encode()
+
+def parameter(*args):
+    return HttpParameter.parameter(*args)
+
+def urlparameter(*args):
+    return HttpParameter.urlParameter(*args)
+
+def bodyparameter(*args):
+    return HttpParameter.bodyParameter(*args)
+
+def cookieparameter(*args):
+    return HttpParameter.cookieParameter(*args)
+
 
 def urlPrefixAllowed(urls):
     pass
@@ -50,18 +82,3 @@ def passiveScan(baseRequestResponse):
 
 def activeScan(baseRequestResponse, auditInsertionPoint):
     pass
-
-def urlencode(text):
-    return Utils.urlUtils().encode(text).encode()
-
-def urldecode(text):
-    return Utils.urlUtils().decode(text).encode()
-
-def base64encode(text):
-    return Utils.base64Utils().encodeToString(text).encode()
-
-def base64decode(text):
-    return Utils.base64Utils().decode(text).toString().encode()
-
-def parameter(*args):
-    return HttpParameter.parameter(*args)

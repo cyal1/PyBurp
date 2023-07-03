@@ -57,7 +57,7 @@ public class BcryptMontoyaUI extends JPanel {
             if (option == JFileChooser.APPROVE_OPTION) {
                 File file = directoryChooser.getSelectedFile();
                 BcryptMontoya.Api.persistence().preferences().setString("scriptsPath", file.getAbsolutePath());
-                readScriptDirectories();
+//                readScriptDirectories();
             }
         });
 

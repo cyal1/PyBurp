@@ -4,9 +4,7 @@
 """
     # RequestPool
     pool = RequestPool(10)
-    pool.sendRequest(String url)
     pool.sendRequest(HttpRequest request)
-    pool.sendRequest(String url, PyFunction callback)
     pool.sendRequest(HttpRequest request, PyFunction callback) # Handling response through callback functions. callback(HttpRequestResponse httpRequestResponse).
     pool.shutdown()
     
@@ -43,7 +41,8 @@
 """
     FUNCTIONS
 """
-    sendReqeust(request) -> HttpRequestResponse
+    makeRequest(url: str) -> HttpRequest
+    sendReqeust() # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/Http.html
     urlencode()
     urldecode()
     base64encode()
@@ -56,13 +55,15 @@
     bytearray()
 
     # Create a new Instance of HttpParameter with the specified type.
-    # Same as the `static HttpParameter parameter(String name, String value, HttpParameterType type)`
     # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/params/HttpParameter.html
-    parameter(String name, String value, HttpParameterType type)
+    parameter()
+    urlparameter()
+    bodyparameter()
+    cookieparameter()
 
     # Create an issue. Same to auditIssue(*args)
     # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/scanner/audit/issues/AuditIssue.html
-    addIssue(*args)
+    addIssue()
 
     # Create a list with the added markers. Used as the argument for withResponseMarkers and withRequestMarkers.
     getResponseHighlights(HttpRequestResponse requestResponse, String highlightString)

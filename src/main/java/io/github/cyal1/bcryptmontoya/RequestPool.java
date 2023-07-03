@@ -18,38 +18,26 @@ public class RequestPool {
 
     public void sendRequest(HttpRequest request) {
         executor.execute(() -> {
-            BcryptMontoya.Api.http().sendRequest(request);
+            BcryptMontoya.http.sendRequest(request);
         });
     }
 
     public void sendRequest(HttpRequest request, PyFunction pyFunc) {
         executor.execute(() -> {
-            HttpRequestResponse httpRequestResponse = BcryptMontoya.Api.http().sendRequest(request);
-            PyObject pythonArguments = Py.java2py(httpRequestResponse);
-            pyFunc.__call__( pythonArguments );
-        });
-    }
-    public void sendRequest(String url) {
-        executor.execute(() -> {
-            HttpRequest request = HttpRequest.httpRequestFromUrl(url);
-            HttpRequestResponse httpRequestResponse = BcryptMontoya.Api.http().sendRequest(request);
-        });
-    }
-    public void sendRequest(String url, PyFunction pyFunc) {
-        executor.execute(() -> {
-            HttpRequest request = HttpRequest.httpRequestFromUrl(url);
-            HttpRequestResponse httpRequestResponse = BcryptMontoya.Api.http().sendRequest(request);
+            HttpRequestResponse httpRequestResponse = BcryptMontoya.http.sendRequest(request);
             PyObject pythonArguments = Py.java2py(httpRequestResponse);
             pyFunc.__call__( pythonArguments );
         });
     }
 
     public void shutdown() {
-        executor.shutdown();
+        executor.shutdownNow();
         try {
-            executor.awaitTermination(1, TimeUnit.SECONDS);
+            if (!executor.awaitTermination(1, TimeUnit.SECONDS)) {
+                BcryptMontoya.Api.logging().output().println("Some tasks were not terminated.");
+            }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            BcryptMontoya.Api.logging().logToError(e.getMessage());
         }
         BcryptMontoya.Api.logging().output().println("RequestPool shutdown");
     }

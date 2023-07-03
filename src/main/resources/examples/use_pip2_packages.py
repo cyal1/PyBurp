@@ -9,7 +9,7 @@ Note: Not all PyPI packages can run in Jython, especially those contain C code.
 Try to import the package you want to use in Jython shell and test its functions before going further.
 """
 
-PIP_PATH = ["/Users/test/.pyenv/versions/2.7.18/lib/python2.7", "/Users/test/.pyenv/versions/2.7.18/lib/python2.7/plat-darwin", "/Users/test/.pyenv/versions/2.7.18/lib/python2.7/plat-mac", "/Users/test/.pyenv/versions/2.7.18/lib/python2.7/site-packages"]
+PIP_PATH = ["/Library/Python/2.7/site-packages"]
 
 for path in PIP_PATH:
     if path not in sys.path:

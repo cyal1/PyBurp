@@ -27,7 +27,7 @@ public class ContentTypeContextMenu implements ContextMenuItemsProvider {
             MessageEditorHttpRequestResponse messageEditor = event.messageEditorRequestResponse().get();
             HttpRequest request = messageEditor.requestResponse().request();
             List<Component> menuItemList = new ArrayList<>();
-            if(request.body().length()!=0 && (request.contentType() == ContentType.JSON||request.contentType() == ContentType.URL_ENCODED||request.contentType() == ContentType.XML)){
+            if(request.contentType() == ContentType.JSON||request.contentType() == ContentType.URL_ENCODED||request.contentType() == ContentType.XML){
                     convert2json = new JMenuItem("Convert to JSON");
                     convert2xml = new JMenuItem("Convert to XML");
                     convert2querystring = new JMenuItem("Convert to QueryString");

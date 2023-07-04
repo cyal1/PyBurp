@@ -82,7 +82,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 List<Component> editRequestMenu = registerIterm(MenuType.EDIT_REQUEST, event);
                 menus.addAll(editRequestMenu);
 
-                if(caretMenu.size() + editRequestMenu.size() != 0){
+                if(caretMenu.size() + editRequestMenu.size() != 0 && messageEditor.selectionOffsets().isPresent()){
                     menus.add(new JSeparator(JSeparator.HORIZONTAL));
                 }
             }

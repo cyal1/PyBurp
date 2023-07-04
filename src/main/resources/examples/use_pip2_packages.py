@@ -17,5 +17,6 @@ for path in PIP_PATH:
 
 import requests
 
+# Using a third-party networking library (rather than Burp's) to perform the request, the Logger does not record.
 resp = requests.get("https://www.example.com/")
 print(resp.text)

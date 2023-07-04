@@ -4,8 +4,7 @@
 """
     # RequestPool
     pool = RequestPool(10)
-    pool.sendRequest(HttpRequest request)
-    pool.sendRequest(HttpRequest request, PyFunction callback) # Handling response through callback functions. callback(HttpRequestResponse httpRequestResponse).
+    pool.run(function, *args, **kwargs)
     pool.shutdown()
     
     # Grpc
@@ -66,7 +65,7 @@
     addIssue()
 
     # Create a list with the added markers. Used as the argument for withResponseMarkers and withRequestMarkers.
-    getResponseHighlights(HttpRequestResponse requestResponse, String highlightString)
+    getResponseHighlights(requestResponse: HttpRequestResponse, highlightString: str)
 
 
 """

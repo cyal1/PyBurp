@@ -28,5 +28,6 @@ exit_event = threading.Event()
 for url in open("/tmp/urls.txt"):
     executor.submit(send_request, url, exit_event)
 
+# If wait is set to True, the main thread's user interface (UI) gets blocked and wait for all tasks to be executed.
 executor.shutdown(wait=False)
 

@@ -92,7 +92,7 @@ def registerContextMenu(menus):
     menus.register("Unicode Escape", unicodeEscape, MenuType.SELECTED_TEXT)
     menus.register("JSON Unicode Escape", jsonUnicodeEscape, MenuType.SELECTED_TEXT)
 
-    menus.register("Log4shell", log4shell, MenuType.REQUEST)
+    menus.register("Log4Shell", log4shell, MenuType.REQUEST)
     menus.register("FUZZ Param perReq", fuzzParamPerRequest, MenuType.REQUEST)
     menus.register("FUZZ Param oneReq", fuzzParamsOneRequest, MenuType.REQUEST)
     menus.register("NoSQL Injection", noSqliScan, MenuType.REQUEST)

@@ -1,11 +1,11 @@
 package io.github.cyal1.bcryptmontoya;
 
+import burp.api.montoya.core.ToolType;
 import burp.api.montoya.http.message.ContentType;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.ui.contextmenu.ContextMenuEvent;
 import burp.api.montoya.ui.contextmenu.ContextMenuItemsProvider;
 import burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class ContentTypeContextMenu implements ContextMenuItemsProvider {
             MessageEditorHttpRequestResponse messageEditor = event.messageEditorRequestResponse().get();
             HttpRequest request = messageEditor.requestResponse().request();
             List<Component> menuItemList = new ArrayList<>();
-            if(request.contentType() == ContentType.JSON||request.contentType() == ContentType.URL_ENCODED||request.contentType() == ContentType.XML){
+            if(event.isFromTool(ToolType.REPEATER) && (request.contentType() == ContentType.JSON||request.contentType() == ContentType.URL_ENCODED||request.contentType() == ContentType.XML)){
                     convert2json = new JMenuItem("Convert to JSON");
                     convert2xml = new JMenuItem("Convert to XML");
                     convert2querystring = new JMenuItem("Convert to QueryString");

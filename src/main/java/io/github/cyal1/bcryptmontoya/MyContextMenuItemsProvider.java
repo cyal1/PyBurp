@@ -69,30 +69,28 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 menus.addAll(requestResponseMenu);
             }
 
+            if(menus.size()!=0){
+                menus.add(new JSeparator(JSeparator.HORIZONTAL));
+            }
+
             // todo caret
             if (event.isFromTool(ToolType.REPEATER) && messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST) {
                 List<Component> caretMenu = registerIterm(MenuType.CARET, event);
-
-                if(menus.size()!=0 && caretMenu.size()!=0){
-                    menus.add(new JSeparator(JSeparator.HORIZONTAL));
-                }
 
                 menus.addAll(caretMenu);
 
                 List<Component> editRequestMenu = registerIterm(MenuType.EDIT_REQUEST, event);
                 menus.addAll(editRequestMenu);
-
-                if(caretMenu.size() + editRequestMenu.size() != 0 && messageEditor.selectionOffsets().isPresent()){
-                    menus.add(new JSeparator(JSeparator.HORIZONTAL));
-                }
             }
 
             // selected text
             if (messageEditor.selectionOffsets().isPresent()) {
                 List<Component> selectTextMenu = registerIterm(MenuType.SELECTED_TEXT, event);
+                if(selectTextMenu.size()!=0){
+                    menus.add(new JSeparator(JSeparator.HORIZONTAL));
+                }
                 menus.addAll(selectTextMenu);
             }
-
             return menus;
         }
         return null;

@@ -1,6 +1,7 @@
-import json, copy
-import urllib2, ssl
-
+import copy
+import json
+import ssl
+import urllib2
 
 pool = RequestPool(10)
 

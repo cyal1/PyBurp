@@ -27,7 +27,7 @@ class RequestPool:
             if not self.executor.awaitTermination(timeout, TimeUnit.SECONDS):
                 print("pool was not terminated.")
         except Exception as e:
-            print(e.getMessage())
+            print(e)
         print("RequestPool shutdown")
 
 

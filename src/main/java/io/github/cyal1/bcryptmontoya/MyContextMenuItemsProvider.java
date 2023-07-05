@@ -12,7 +12,6 @@ import burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse;
 import org.python.core.Py;
 import org.python.core.PyFunction;
 import org.python.core.PyObject;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;

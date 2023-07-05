@@ -102,7 +102,7 @@ def registerContextMenu(menus):
 
     menus.register("Bypass 403", bypass403, MenuType.EDIT_REQUEST)
 
-    menus.register("Insert Log4j", insertAtCursor, MenuType.CARET)
+    menus.register("Insert XSS", insertAtCursor, MenuType.CARET)
 
 
 def finish():

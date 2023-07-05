@@ -118,6 +118,7 @@ public class BcryptMontoya implements BurpExtension
         codePanel.textEditor.setEnabled(true);
         codePanel.loadDirectoryButton.setEnabled(true);
         codePanel.codeCombo.setEnabled(true);
+        pyInterp.close();
         pyInterp = null;
         status = STATUS.STOP;
         codePanel.runButton.setText("Run");
@@ -192,7 +193,6 @@ public class BcryptMontoya implements BurpExtension
 
             start += match.length();
         }
-
         return highlights;
     }
 }

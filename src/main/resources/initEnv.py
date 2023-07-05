@@ -21,12 +21,12 @@ class RequestPool:
     def run(self, func, *args, **kwargs):
         self.executor.execute(lambda: func(*args, **kwargs))
 
-    def shutdown(self):
+    def shutdown(self, timeout=1):
         self.executor.shutdownNow()
         try:
-            if not self.executor.awaitTermination(1, TimeUnit.SECONDS):
-                print("Some tasks were not terminated.")
-        except InterruptedException as e:
+            if not self.executor.awaitTermination(timeout, TimeUnit.SECONDS):
+                print("pool was not terminated.")
+        except Exception as e:
             print(e.getMessage())
         print("RequestPool shutdown")
 

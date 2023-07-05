@@ -1,3 +1,5 @@
+# https://github.com/jython/book/tree/master/src/chapter19
+# https://github.com/jython/book/blob/master/src/chapter19/test_futures.py
 
 
 pool = RequestPool(10)

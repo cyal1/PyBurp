@@ -1,5 +1,5 @@
 import io.github.cyal1.bcryptmontoya.CallFuncClient as Grpc
-from io.github.cyal1.bcryptmontoya.BcryptMontoya import addIssue, getResponseHighlights, http
+from io.github.cyal1.bcryptmontoya.BcryptMontoya import addIssue, getResponseHighlights, http, proxy
 from io.github.cyal1.bcryptmontoya.MyContextMenuItemsProvider import MenuType
 from burp.api.montoya.http.message.requests import HttpRequest
 from burp.api.montoya.http import HttpMode
@@ -53,6 +53,10 @@ def sendRequest(*args):
     return http.sendRequest(*args)
 
 
+def history(*args):
+    return proxy.history(*args)
+
+
 def makeRequest(url):
     return HttpRequest.httpRequestFromUrl(url)
 
@@ -94,38 +98,3 @@ def bodyparameter(*args):
 def cookieparameter(*args):
     return HttpParameter.cookieParameter(*args)
 
-
-def urlPrefixAllowed(urls):
-    pass
-
-
-def handleRequest(request, annotations):
-    return request, annotations
-
-
-def handleProxyRequest(request, annotations):
-    return request, annotations
-
-
-def handleResponse(response, annotations):
-    return response, annotations
-
-
-def handleProxyResponse(response, annotations):
-    return response, annotations
-
-
-def registerContextMenu(menus):
-    pass
-
-
-def finish():
-    pass
-
-
-def passiveScan(baseRequestResponse):
-    pass
-
-
-def activeScan(baseRequestResponse, auditInsertionPoint):
-    pass

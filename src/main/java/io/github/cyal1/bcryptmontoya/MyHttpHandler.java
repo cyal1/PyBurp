@@ -17,11 +17,10 @@ import java.util.ArrayList;
 
 public class MyHttpHandler implements HttpHandler
 {
-
     @Override
     public RequestToBeSentAction handleHttpRequestToBeSent(HttpRequestToBeSent httpRequestToBeSent) {
 
-        if(BcryptMontoya.status == BcryptMontoya.STATUS.STOP){
+        if(BcryptMontoya.status == BcryptMontoya.STATUS.STOP || !BcryptMontoya.py_functions.containsKey("handleRequest")){
             return RequestToBeSentAction.continueWith(httpRequestToBeSent);
         }
 
@@ -36,7 +35,7 @@ public class MyHttpHandler implements HttpHandler
     @Override
     public ResponseReceivedAction handleHttpResponseReceived(HttpResponseReceived httpResponseReceived) {
 
-        if(BcryptMontoya.status == BcryptMontoya.STATUS.STOP){
+        if(BcryptMontoya.status == BcryptMontoya.STATUS.STOP || !BcryptMontoya.py_functions.containsKey("handleResponse")){
             return ResponseReceivedAction.continueWith(httpResponseReceived);
         }
 

@@ -50,13 +50,23 @@ def fuzzParamsOneRequest(request):
     sendRequest(modifyAllParamsValue(request, payload, [HttpParameterType.COOKIE]))
 
 
-def bypass403(editor, request):
+def bypass403(request):
     ip = "127.0.0.1"
-    editor.setRequest(request.withHeader("X-Forwarded-For", ip). \
+    MessageEditor.setRequest(request.withHeader("X-Forwarded-For", ip). \
                       withHeader("X-Originating-IP", ip).withHeader("X-Remote-IP", ip). \
                       withHeader("X-Remote-Addr", ip).withHeader("X-Real-IP", ip). \
                       withHeader("X-Forwarded-Host", ip).withHeader("X-Client-IP", ip).withHeader("X-Host", ip)
                       )
+
+
+def insert_to_reflect_params(request, response):
+    payload = "reflectplz'\">"
+    body = response.bodyToString()
+    for param in request.parameters():
+        if (param.type() == HttpParameterType.BODY or param.type() == HttpParameterType.URL) and (param.value() in body or urldecode(param.value()) in body):
+            request = request.withRemovedParameters(param).withParameter(parameter(param.name(), payload, param.type()))
+    MessageEditor.setRequest(request)
+
 
 @run_in_pool(pool)
 def no_sql_request(request):
@@ -70,6 +80,7 @@ def no_sql_request(request):
                      AuditIssueSeverity.HIGH, AuditIssueConfidence.CERTAIN, "String background",
                      "String remediationBackground", AuditIssueSeverity.MEDIUM, requestResponse.withResponseMarkers(getResponseHighlights(requestResponse, highlight)))
             break
+
 
 def noSqliScan(request):
     if request.body().length() > 5 and request.contentType() == ContentType.JSON:
@@ -96,7 +107,7 @@ def registerContextMenu(menus):
     """
     To register a custom context menu using the register method,
     three parameters need to be passed: the menu name, the menu function, and the menu type.
-    The menu types include CARET, SELECTED_TEXT, REQUEST, and EDIT_REQUEST.
+    The menu types include CARET, SELECTED_TEXT, REQUEST, and REQUEST_RESPONSE.
     """
     menus.register("Base64 Encode", base64Encode, MenuType.SELECTED_TEXT)
     menus.register("Unicode Escape", unicodeEscape, MenuType.SELECTED_TEXT)
@@ -108,14 +119,15 @@ def registerContextMenu(menus):
     menus.register("NoSQL Injection", noSqliScan, MenuType.REQUEST)
     menus.register("Send to Xray", sendRequestWithProxy, MenuType.REQUEST)
     menus.register("File Extension Cache Poison", cachePoison, MenuType.REQUEST)
+    menus.register("Bypass 403", bypass403, MenuType.REQUEST)
 
-    menus.register("Bypass 403", bypass403, MenuType.EDIT_REQUEST)
+    menus.register("Reflect Params", insert_to_reflect_params, MenuType.REQUEST_RESPONSE)
 
     menus.register("Insert XSS", insertAtCursor, MenuType.CARET)
 
 
 def finish():
-    pool.shutdown()
+    pool.shutdown(timeout=1)
 
 
 def cachePoison(request):

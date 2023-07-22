@@ -13,7 +13,7 @@ public class MyProxyRequestHandler implements ProxyRequestHandler {
     @Override
     public ProxyRequestReceivedAction handleRequestReceived(InterceptedRequest interceptedRequest) {
 
-        if(BcryptMontoya.status == BcryptMontoya.STATUS.STOP){
+        if(BcryptMontoya.status == BcryptMontoya.STATUS.STOP || !BcryptMontoya.py_functions.containsKey("handleProxyRequest")){
             return ProxyRequestReceivedAction.continueWith(interceptedRequest);
         }
 

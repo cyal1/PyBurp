@@ -12,41 +12,41 @@ import burp.api.montoya.BurpExtension;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.core.Annotations;
 import burp.api.montoya.core.Marker;
+import burp.api.montoya.core.Registration;
 import burp.api.montoya.http.Http;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
+import burp.api.montoya.proxy.Proxy;
 import burp.api.montoya.scanner.audit.issues.AuditIssue;
 import burp.api.montoya.ui.Theme;
-import org.python.core.Py;
-import org.python.core.PyFunction;
-import org.python.core.PyObject;
-import org.python.core.PyTuple;
+import org.python.core.*;
 import org.python.util.PythonInterpreter;
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class BcryptMontoya implements BurpExtension
 {
     public static MontoyaApi Api;
     public static Http http;
-    public static PythonInterpreter pyInterp;
+    public static Proxy proxy;
+    public static PythonInterpreter pyInterp  = new PythonInterpreter();
     private BcryptMontoyaUI codePanel;
     public static ArrayList<String> ALLOWED_URL_PREFIX;
     public static STATUS status = STATUS.STOP;
-    public MyContextMenuItemsProvider contextMenu;
+    private ArrayList<Registration> plugins;
+    public MyContextMenuItemsProvider myContextMenu;
 //    public Map<String, PyFunction> pyContextMenu;
+    public static HashMap<String, PyFunction> py_functions;
     public enum STATUS {
         RUNNING,
         STOP
     }
 
     @Override
-    public void initialize(MontoyaApi api)
-    {
+    public void initialize(MontoyaApi api) {
         BcryptMontoya.http = api.http();
+        BcryptMontoya.proxy = api.proxy();
         BcryptMontoya.Api = api;
         this.codePanel = new BcryptMontoyaUI();
         ALLOWED_URL_PREFIX = new ArrayList<>();
@@ -54,15 +54,10 @@ public class BcryptMontoya implements BurpExtension
         if(api.userInterface().currentTheme() == Theme.DARK){
             codePanel.setDarkTheme();
         }
-        contextMenu = new MyContextMenuItemsProvider();
+        myContextMenu = new MyContextMenuItemsProvider();
         api.extension().setName("BcryptMontoya");
         api.userInterface().registerSuiteTab("BcryptMontoya", codePanel);
-        api.http().registerHttpHandler(new MyHttpHandler());
-        api.proxy().registerRequestHandler(new MyProxyRequestHandler());
-        api.proxy().registerResponseHandler(new MyProxyResponseHandler());
-        api.scanner().registerScanCheck(new MyScanCheck());
         api.userInterface().registerContextMenuItemsProvider(new ContentTypeContextMenu());
-        api.userInterface().registerContextMenuItemsProvider(contextMenu);
         api.userInterface().registerHttpResponseEditorProvider(new MyHttpResponseEditorProvider());
         initPyEnv();
         codePanel.runButton.addActionListener(e -> {
@@ -75,8 +70,77 @@ public class BcryptMontoya implements BurpExtension
                 }
         });
     }
+    private void registerExtender(){
+
+        py_functions = getPyFunctions();
+        plugins = new ArrayList<>();
+        if(py_functions.containsKey("registerContextMenu")){
+            plugins.add(Api.userInterface().registerContextMenuItemsProvider(myContextMenu));
+        }
+
+        if(py_functions.containsKey("passiveScan") || py_functions.containsKey("activeScan")){
+            plugins.add(Api.scanner().registerScanCheck(new MyScanCheck()));
+        }
+
+        if(py_functions.containsKey("handleRequest")|| py_functions.containsKey("handleResponse")){
+            plugins.add(Api.http().registerHttpHandler(new MyHttpHandler()));
+        }
+
+        if(py_functions.containsKey("handleProxyRequest")){
+            plugins.add(Api.proxy().registerRequestHandler(new MyProxyRequestHandler()));
+        }
+
+        if(py_functions.containsKey("handleProxyResponse")){
+            plugins.add(Api.proxy().registerResponseHandler(new MyProxyResponseHandler()));
+        }
+        if(py_functions.containsKey("unloading")){
+            plugins.add(Api.extension().registerUnloadingHandler(() ->
+            {
+                try {
+                    py_functions.get("unloading").__call__();
+                } catch (Exception e){
+                    BcryptMontoya.Api.logging().logToError(e.getMessage());
+                }
+            }));
+        }
+    }
+
+    private HashMap<String,PyFunction> getPyFunctions(){
+        ArrayList<String> MontoyaPyFunctions = new ArrayList<>(Arrays.asList(
+                "registerContextMenu",
+                "passiveScan", "activeScan",
+                "handleRequest", "handleResponse",
+                "handleProxyRequest", "handleProxyResponse",
+                "urlPrefixAllowed",
+                "finish",
+                "unloading"
+        ));
+
+        HashMap<String,PyFunction> functionList = new HashMap<>();
+        String get_function_names_code = "[(name,obj) for name, obj in globals().items() if callable(obj) and not name.startswith('__')]";
+
+        // 执行Python代码，并获取函数列表
+        PyObject pyFunctionList = pyInterp.eval(get_function_names_code);
+            if (pyFunctionList instanceof PyList) {
+                for (Object pyTuple : (PyList)pyFunctionList) {
+                    if (pyTuple instanceof PyTuple) {
+                        String functionName = ((PyTuple) pyTuple).__getitem__(0).toString();
+                        PyObject functionObject = ((PyTuple) pyTuple).__getitem__(1);
+                        if (MontoyaPyFunctions.contains(functionName) && functionObject instanceof PyFunction pyFunction) {
+                            functionList.put(functionName, pyFunction);
+                        }
+//                        else if (functionObject instanceof PyJavaType) {
+//                            PyFunction pyFunction = (PyFunction) ((PyJavaType) functionObject).__call__();
+//                            String functionName = ((PyTuple) pyTuple).__getitem__(0).toString();
+//                            functionList.put(functionName, pyFunction);
+//                        }
+                    }
+                }
+            }
+        return functionList;
+    }
     private void initPyEnv(){
-        pyInterp = new PythonInterpreter();
+//        pyInterp = new PythonInterpreter();
         pyInterp.setOut(Api.logging().output());
         pyInterp.setErr(Api.logging().error());
         // https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/utilities/Utilities.html
@@ -86,13 +150,16 @@ public class BcryptMontoya implements BurpExtension
     private void runBtnClick(){
         try{
             pyInterp.exec(codePanel.getCode());
-            PyFunction registerContextMenu = (PyFunction) pyInterp.get("registerContextMenu");
-            PyObject pythonArguments = Py.java2py(contextMenu);
-            registerContextMenu.__call__(pythonArguments);
+            registerExtender(); // todo
+            PyObject pythonArguments = Py.java2py(myContextMenu);
+            if(py_functions.containsKey("registerContextMenu")){
+                py_functions.get("registerContextMenu").__call__(pythonArguments);
+            }
 
-            PyFunction urlPrefixAllowed = (PyFunction) pyInterp.get("urlPrefixAllowed");
             PyObject[] urls = Py.javas2pys(ALLOWED_URL_PREFIX);
-            urlPrefixAllowed.__call__(urls);
+            if(py_functions.containsKey("urlPrefixAllowed")){
+                py_functions.get("urlPrefixAllowed").__call__(urls);
+            }
         }catch (Exception ex){
             JOptionPane.showMessageDialog(null, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
             return;
@@ -107,29 +174,34 @@ public class BcryptMontoya implements BurpExtension
     }
     private void stopBtnClick(){
         try {
-            PyFunction finish = (PyFunction) pyInterp.get("finish");
-            finish.__call__();
+            if (py_functions.containsKey("finish")){
+                py_functions.get("finish").__call__();
+            }
         } catch (Exception e){
             BcryptMontoya.Api.logging().logToError(e.getMessage());
         }
-        contextMenu.MENUS.clear();
+        myContextMenu.MENUS.clear();
         ALLOWED_URL_PREFIX.clear();
+        py_functions.clear();
+        //        pyInterp.close();
+        pyInterp.cleanup();
+        pyInterp.exec("globals().clear()");
         codePanel.textEditor.setHighlightCurrentLine(true);
         codePanel.textEditor.setEnabled(true);
         codePanel.loadDirectoryButton.setEnabled(true);
         codePanel.codeCombo.setEnabled(true);
-        pyInterp.close();
-        pyInterp = null;
         status = STATUS.STOP;
         codePanel.runButton.setText("Run");
+        for(Registration plugin: plugins){
+            plugin.deregister();
+        }
         initPyEnv();
     }
     public static <T extends HttpRequest> ArrayList<Object> invokePyRequest(T httpRequest, Annotations annotations, String pyFuncName){
-        PyObject method = BcryptMontoya.pyInterp.get( pyFuncName );
         PyObject[] pythonArguments = new PyObject[2];
         pythonArguments[0] = Py.java2py(httpRequest);
         pythonArguments[1] = Py.java2py(annotations);
-        PyObject result = method.__call__(pythonArguments);
+        PyObject result = py_functions.get(pyFuncName).__call__(pythonArguments);
         HttpRequest newHttpRequest;
         if (result instanceof PyTuple tupleResult) {
             newHttpRequest = (HttpRequest) tupleResult.__getitem__(0).__tojava__(HttpRequest.class);
@@ -140,11 +212,10 @@ public class BcryptMontoya implements BurpExtension
         return new ArrayList<>(List.of(newHttpRequest, annotations));
     }
     public static <T extends HttpResponse> ArrayList<Object> invokePyResponse(T httpResponse, Annotations annotations, String pyFuncName){
-        PyObject method = BcryptMontoya.pyInterp.get( pyFuncName );
         PyObject[] pythonArguments = new PyObject[2];
         pythonArguments[0] = Py.java2py(httpResponse);
         pythonArguments[1] = Py.java2py(annotations);
-        PyObject result = method.__call__(pythonArguments);
+        PyObject result =  py_functions.get(pyFuncName).__call__(pythonArguments);
         HttpResponse newHttpResponse;
         if (result instanceof PyTuple tupleResult) {
             newHttpResponse = (HttpResponse) tupleResult.__getitem__(0).__tojava__(HttpResponse.class);

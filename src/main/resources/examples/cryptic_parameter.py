@@ -55,6 +55,3 @@ def handleResponse(response, annotations):
         print(e)
     return response, annotations
 
-
-def handleProxyResponse(response, annotations):
-    return response, annotations

@@ -26,7 +26,6 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
         SELECTED_TEXT, // md5 hex
         REQUEST, // sendtoxray nosqlinjectioin, fuzz param
         REQUEST_RESPONSE, // checkCachePoisoning
-        EDIT_REQUEST // set xff header
     }
 
     public MyContextMenuItemsProvider() {
@@ -35,13 +34,15 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
 
     @Override
     public List<Component> provideMenuItems(ContextMenuEvent event) {
+        if(event.isFromTool(ToolType.REPEATER)){
+            BcryptMontoya.pyInterp.set("MessageEditor", event.messageEditorRequestResponse().get());
+        }
 
         if (BcryptMontoya.status != BcryptMontoya.STATUS.RUNNING || MENUS.size() == 0) {
             return null;
         }
 
         if (event.selectedRequestResponses().size() != 0) {
-            // item todo requestResponse type
             List<Component> menus = registerIterm(MenuType.REQUEST, event);
             List<Component> requestResponseMenu = registerIterm(MenuType.REQUEST_RESPONSE, event);
             menus.addAll(requestResponseMenu);
@@ -63,8 +64,6 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
 
 
             if (response != null) {
-//            if (event.invocationType().containsHttpRequestResponses()) {
-                // todo request and response
                 List<Component> requestResponseMenu = registerIterm(MenuType.REQUEST_RESPONSE, event);
                 menus.addAll(requestResponseMenu);
             }
@@ -79,10 +78,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
 
                 menus.addAll(caretMenu);
 
-                List<Component> editRequestMenu = registerIterm(MenuType.EDIT_REQUEST, event);
-                menus.addAll(editRequestMenu);
-
-                if(caretMenu.size() + editRequestMenu.size() != 0 && messageEditor.selectionOffsets().isPresent()){
+                if(caretMenu.size() != 0 && messageEditor.selectionOffsets().isPresent()){
                     menus.add(new JSeparator(JSeparator.HORIZONTAL));
                 }
             }
@@ -107,7 +103,6 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 JMenuItem retrieveRequestItem = new JMenuItem(funcName);
                 switch (type) {
                     case CARET -> {
-
                         retrieveRequestItem.addActionListener(e -> handleCaret(event, func));
                         menuItemList.add(retrieveRequestItem);
                     }
@@ -121,10 +116,6 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                     }
                     case REQUEST_RESPONSE -> {
                         retrieveRequestItem.addActionListener(e -> handleRequestResponse(event, func));
-                        menuItemList.add(retrieveRequestItem);
-                    }
-                    case EDIT_REQUEST -> {
-                        retrieveRequestItem.addActionListener(e -> handleEditRequest(event, func));
                         menuItemList.add(retrieveRequestItem);
                     }
                     default -> throw new RuntimeException("new such Menu Type " + type);
@@ -152,13 +143,6 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
         }
     }
 
-    public void handleEditRequest(ContextMenuEvent event, PyFunction func) {
-        MessageEditorHttpRequestResponse editor = event.messageEditorRequestResponse().get();
-        PyObject[] pythonArguments = new PyObject[2];
-        pythonArguments[0] = Py.java2py(editor);
-        pythonArguments[1] = Py.java2py(editor.requestResponse().request());
-        func.__call__(pythonArguments);
-    }
 
     public void handleRequestResponse(ContextMenuEvent event, PyFunction func) {
         if (!event.selectedRequestResponses().isEmpty()) {

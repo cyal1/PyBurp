@@ -37,9 +37,5 @@ def handleProxyResponse(response, annotations):
     return response, annotations
 
 
-def registerContextMenu(menus):
-    pass
-
-
-def finish():
-    pass
+# def finish():
+#     pass

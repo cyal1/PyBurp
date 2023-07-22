@@ -36,6 +36,16 @@
     # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/utilities/Utilities.html
     Utilities Utils
 
+    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/MontoyaApi.html#http()
+    burp.api.montoya.http.Http http
+
+    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/MontoyaApi.html#proxy()
+    burp.api.montoya.proxy.Proxy proxy
+
+    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/ui/contextmenu/MessageEditorHttpRequestResponse.html
+    # Only provide for repeater context menu
+    MessageEditorHttpRequestResponse MessageEditor
+
 
 """
     FUNCTIONS
@@ -59,7 +69,9 @@
     urlparameter()
     bodyparameter()
     cookieparameter()
-
+    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/proxy/Proxy.html#history()
+    # get all items in the Proxy HTTP history.
+    history()
     # Create an issue. Same to auditIssue(*args)
     # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/scanner/audit/issues/AuditIssue.html
     addIssue()
@@ -176,3 +188,11 @@ def finish():
     """
     pass
 
+
+def uploading():
+    """
+    This method is invoked when the extension is unloaded.
+
+    :return:
+    """
+    pass

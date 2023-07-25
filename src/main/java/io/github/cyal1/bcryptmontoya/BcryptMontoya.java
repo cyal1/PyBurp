@@ -119,7 +119,6 @@ public class BcryptMontoya implements BurpExtension
         HashMap<String,PyFunction> functionList = new HashMap<>();
         String get_function_names_code = "[(name,obj) for name, obj in globals().items() if callable(obj) and not name.startswith('__')]";
 
-        // 执行Python代码，并获取函数列表
         PyObject pyFunctionList = pyInterp.eval(get_function_names_code);
             if (pyFunctionList instanceof PyList) {
                 for (Object pyTuple : (PyList)pyFunctionList) {
@@ -150,11 +149,7 @@ public class BcryptMontoya implements BurpExtension
     private void runBtnClick(){
         try{
             pyInterp.exec(codePanel.getCode());
-            registerExtender(); // todo
-            PyObject pythonArguments = Py.java2py(myContextMenu);
-            if(py_functions.containsKey("registerContextMenu")){
-                py_functions.get("registerContextMenu").__call__(pythonArguments);
-            }
+            registerExtender();
 
             PyObject[] urls = Py.javas2pys(ALLOWED_URL_PREFIX);
             if(py_functions.containsKey("urlPrefixAllowed")){

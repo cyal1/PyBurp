@@ -149,7 +149,7 @@ def registerContextMenu(menus):
     To register a custom context menu.
 
     :param menus: Using the `register(String menuItemName, PyFunction functionName, MenuType menuType)` method to register a custom context menu.
-                  The menu types include CARET, SELECTED_TEXT, REQUEST, and EDIT_REQUEST.
+                  The menu types include CARET, SELECTED_TEXT, REQUEST, and REQUEST_RESPONSE.
                   For example:  menus.register("Base64 Encode", base64Encode, MenuType.SELECTED_TEXT)
     :return:
     """

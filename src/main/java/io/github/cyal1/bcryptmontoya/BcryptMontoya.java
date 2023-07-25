@@ -150,6 +150,10 @@ public class BcryptMontoya implements BurpExtension
         try{
             pyInterp.exec(codePanel.getCode());
             registerExtender();
+            PyObject pythonArguments = Py.java2py(myContextMenu);
+            if(py_functions.containsKey("registerContextMenu")){
+                py_functions.get("registerContextMenu").__call__(pythonArguments);
+            }
 
             PyObject[] urls = Py.javas2pys(ALLOWED_URL_PREFIX);
             if(py_functions.containsKey("urlPrefixAllowed")){

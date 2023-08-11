@@ -11,8 +11,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'net.portswigger.burp.extensionsls:montoya-api:2023.6'
-//    compileOnly files('/Users/test/Downloads/montoya-api-2023.6.jar')
+    compileOnly 'net.portswigger.burp.extensions:montoya-api:2023.9'
+//    compileOnly files('/Users/test/Downloads/montoya-api-2023.9.jar')
     implementation 'org.mozilla:rhino:1.7.14'
     implementation 'org.json:json:20230227'
     implementation 'com.fifesoft:rsyntaxtextarea:3.3.3'

@@ -5,7 +5,7 @@ from org.sqlite import JDBC
 def save_to_sqlite():
     SAVE_DOMAIN_END_WITH = ["example.com", "google.com"]
     SQLITE_DB_PATH = "/tmp/database.db"
-
+    # sqlite3 /tmp/database.db "select * from burp_urls;"
     conn = DriverManager.getConnection("jdbc:sqlite:" + SQLITE_DB_PATH)
     conn.setAutoCommit(False)
     stmt = conn.createStatement()

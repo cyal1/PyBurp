@@ -51,7 +51,11 @@
     FUNCTIONS
 """
     makeRequest(url: str) -> HttpRequest
-    sendReqeust() # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/Http.html
+
+    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/Http.html
+    sendReqeust()
+    sendReqeusts()
+
     urlencode()
     urldecode()
     base64encode()

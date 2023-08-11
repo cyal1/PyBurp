@@ -53,6 +53,10 @@ def sendRequest(*args):
     return http.sendRequest(*args)
 
 
+def sendRequests(*args):
+    return http.sendRequests(*args)
+
+
 def history(*args):
     return proxy.history(*args)
 

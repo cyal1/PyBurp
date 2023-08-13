@@ -1,11 +1,15 @@
 request_list = []
 
-for i in range(30):
-    request_list.append(makeRequest("https://www.example.com/")
-                        .withMethod("POST")
-                        .withHeader("Cookie","a=b;")
-                        .withHeader("Content-Type","application/x-www-form-urlencoded")
-                        .withBody("a=admin%d@example.com" % i))
+raw_request = """GET / HTTP/1.1
+Host: www.example.com
+User-Agent: test
+
+"""
+
+request = makeRequest("https://www.example.com/", raw_request)
+
+for i in range(15):
+    request_list.append(request)
 
 
 @run_in_thread

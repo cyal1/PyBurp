@@ -50,7 +50,8 @@
 """
     FUNCTIONS
 """
-    makeRequest(url: str) -> HttpRequest
+    # Create a new instance of HttpRequest from url, if specify the raw_http, it will parse raw http to HttpRequest
+    makeRequest(url, raw_http=None, fix_content_length=True) -> HttpRequest
 
     # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/Http.html
     sendReqeust()

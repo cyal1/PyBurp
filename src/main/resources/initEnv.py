@@ -61,10 +61,6 @@ def history(*args):
     return proxy.history(*args)
 
 
-def makeRequest(url):
-    return HttpRequest.httpRequestFromUrl(url)
-
-
 def randomstring(length=8):
     characters = string.ascii_letters + string.digits
     random_string = ''.join(random.choice(characters) for _ in range(length))
@@ -102,3 +98,23 @@ def bodyparameter(*args):
 def cookieparameter(*args):
     return HttpParameter.cookieParameter(*args)
 
+
+def makeRequest(url, raw_http=None, fix_content_length=True):
+    request = HttpRequest.httpRequestFromUrl(url)
+    if raw_http is None:
+        return request
+    for header in request.headers():
+        request = request.withRemovedHeader(header)
+    header_raw, body = raw_http.replace("\r\n", "\n").split("\n\n", 1)
+    header_lines = header_raw.split("\n")
+    method_path = header_lines[0]
+    method, path, http_version = method_path.split(" ", 2)
+    request = request.withMethod(method).withPath(path).withBody(body)
+    for header_line in header_lines[1:]:
+        key, value = header_line.split(":", 1)
+        if key.lower() == "content-length" and fix_content_length is True:
+            request = request.withRemovedHeader("Content-Length")
+            request = request.withHeader(key, str(request.body().length()))
+            continue
+        request = request.withHeader(key, value.strip())
+    return request

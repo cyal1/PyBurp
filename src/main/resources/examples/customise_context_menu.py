@@ -52,11 +52,15 @@ def fuzzParamsOneRequest(request):
 
 def bypass403(request):
     ip = "127.0.0.1"
-    MessageEditor.setRequest(request.withHeader("X-Forwarded-For", ip). \
-                      withHeader("X-Originating-IP", ip).withHeader("X-Remote-IP", ip). \
-                      withHeader("X-Remote-Addr", ip).withHeader("X-Real-IP", ip). \
-                      withHeader("X-Forwarded-Host", ip).withHeader("X-Client-IP", ip).withHeader("X-Host", ip)
-                      )
+    MessageEditor.setRequest(request.withHeader("X-Forwarded-For", ip).withHeader("X-Originating-IP", ip).withHeader("X-Remote-IP", ip).withHeader("X-Remote-Addr", ip).withHeader("X-Real-IP", ip).withHeader("X-Forwarded-Host", ip).withHeader("X-Client-IP", ip).withHeader("X-Host", ip))
+
+
+def purify_header(request):
+    needless_headers = ["Upgrade-Insecure-Requests", "Cache-Control", "Accept", "User-Agent", "Accept-Encoding", "Accept-Language", "Connection"]
+    for header in request.headers():
+        if header.name().lower().startswith("sec-") or header.name() in needless_headers:
+            request = request.withRemovedHeader(header.name())
+    MessageEditor.setRequest(request)
 
 
 def insert_to_reflect_params(request, response):
@@ -120,6 +124,7 @@ def registerContextMenu(menus):
     menus.register("Send to Xray", sendRequestWithProxy, MenuType.REQUEST)
     menus.register("File Extension Cache Poison", cachePoison, MenuType.REQUEST)
     menus.register("Bypass 403", bypass403, MenuType.REQUEST)
+    menus.register("Purify Header", purify_header, MenuType.REQUEST)
 
     menus.register("Reflect Params", insert_to_reflect_params, MenuType.REQUEST_RESPONSE)
 

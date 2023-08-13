@@ -1,17 +1,27 @@
+# Class
 import io.github.cyal1.bcryptmontoya.CallFuncClient as Grpc
-from io.github.cyal1.bcryptmontoya.BcryptMontoya import addIssue, getResponseHighlights, http, proxy
-from io.github.cyal1.bcryptmontoya.MyContextMenuItemsProvider import MenuType
-from burp.api.montoya.http.message.requests import HttpRequest
-from burp.api.montoya.http import HttpMode
-from burp.api.montoya.http.message.params import HttpParameterType, HttpParameter
-from burp.api.montoya.http.message import ContentType
-import burp.api.montoya.core.ByteArray.byteArray as bytearray
-from burp.api.montoya.core import Annotations, HighlightColor
-from burp.api.montoya.scanner.audit.issues import AuditIssue, AuditIssueSeverity, AuditIssueConfidence
-from burp.api.montoya.scanner.audit.insertionpoint import AuditInsertionPoint
 from java.lang import Runnable, Thread
 from java.util.concurrent import Executors, TimeUnit
 import random, string
+
+# Enum Class
+from burp.api.montoya.http import HttpMode
+from io.github.cyal1.bcryptmontoya.MyContextMenuItemsProvider import MenuType
+from burp.api.montoya.http.message.params import HttpParameterType
+from burp.api.montoya.http.message import ContentType
+from burp.api.montoya.core import HighlightColor
+from burp.api.montoya.scanner.audit.issues import AuditIssueSeverity, AuditIssueConfidence
+
+# Static Method or Fields
+from io.github.cyal1.bcryptmontoya.BcryptMontoya import addIssue, getResponseHighlights, http, proxy, Utils
+from burp.api.montoya.http.HttpService import httpService
+from burp.api.montoya.http.message.requests.HttpRequest import httpRequestFromUrl, httpRequest
+from burp.api.montoya.http.message.params.HttpParameter import bodyParameter, cookieParameter, parameter, urlParameter
+import burp.api.montoya.core.ByteArray.byteArray as bytearray
+from burp.api.montoya.core.Annotations import annotations
+from burp.api.montoya.scanner.audit.issues.AuditIssue import auditIssue
+from burp.api.montoya.scanner.audit.insertionpoint.AuditInsertionPoint import auditInsertionPoint
+from io.github.cyal1.bcryptmontoya.MyContextMenuItemsProvider import getSelectedText, replaceSelectedText
 
 
 class RequestPool:
@@ -81,40 +91,3 @@ def base64encode(text):
 
 def base64decode(text):
     return Utils.base64Utils().decode(text).toString().encode()
-
-
-def parameter(*args):
-    return HttpParameter.parameter(*args)
-
-
-def urlparameter(*args):
-    return HttpParameter.urlParameter(*args)
-
-
-def bodyparameter(*args):
-    return HttpParameter.bodyParameter(*args)
-
-
-def cookieparameter(*args):
-    return HttpParameter.cookieParameter(*args)
-
-
-def makeRequest(url, raw_http=None, fix_content_length=True):
-    request = HttpRequest.httpRequestFromUrl(url)
-    if raw_http is None:
-        return request
-    for header in request.headers():
-        request = request.withRemovedHeader(header)
-    header_raw, body = raw_http.replace("\r\n", "\n").split("\n\n", 1)
-    header_lines = header_raw.split("\n")
-    method_path = header_lines[0]
-    method, path, http_version = method_path.split(" ", 2)
-    request = request.withMethod(method).withPath(path).withBody(body)
-    for header_line in header_lines[1:]:
-        key, value = header_line.split(":", 1)
-        if key.lower() == "content-length" and fix_content_length is True:
-            request = request.withRemovedHeader("Content-Length")
-            request = request.withHeader(key, str(request.body().length()))
-            continue
-        request = request.withHeader(key, value.strip())
-    return request

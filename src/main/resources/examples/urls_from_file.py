@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 def send_request(url, exit_event):
     if exit_event.is_set():
         return
-    sendRequest(makeRequest(url))
+    sendRequest(httpRequestFromUrl(url))
 
 
 def finish():

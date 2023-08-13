@@ -50,26 +50,30 @@ def fuzzParamsOneRequest(request):
     sendRequest(modifyAllParamsValue(request, payload, [HttpParameterType.COOKIE]))
 
 
-def bypass403(request):
+def bypass403(messageEditor):
     ip = "127.0.0.1"
-    MessageEditor.setRequest(request.withHeader("X-Forwarded-For", ip).withHeader("X-Originating-IP", ip).withHeader("X-Remote-IP", ip).withHeader("X-Remote-Addr", ip).withHeader("X-Real-IP", ip).withHeader("X-Forwarded-Host", ip).withHeader("X-Client-IP", ip).withHeader("X-Host", ip))
+    request = messageEditor.requestResponse().request()
+    messageEditor.setRequest(request.withHeader("X-Forwarded-For", ip).withHeader("X-Originating-IP", ip).withHeader("X-Remote-IP", ip).withHeader("X-Remote-Addr", ip).withHeader("X-Real-IP", ip).withHeader("X-Forwarded-Host", ip).withHeader("X-Client-IP", ip).withHeader("X-Host", ip))
 
 
-def purify_header(request):
+def purify_header(messageEditor):
+    request = messageEditor.requestResponse().request()
     needless_headers = ["Upgrade-Insecure-Requests", "Cache-Control", "Accept", "User-Agent", "Accept-Encoding", "Accept-Language", "Connection"]
     for header in request.headers():
         if header.name().lower().startswith("sec-") or header.name() in needless_headers:
             request = request.withRemovedHeader(header.name())
-    MessageEditor.setRequest(request)
+    messageEditor.setRequest(request)
 
 
-def insert_to_reflect_params(request, response):
+def insert_to_reflect_params(messageEditor):
     payload = "reflectplz'\">"
+    request = messageEditor.requestResponse().request()
+    response = messageEditor.requestResponse().response()
     body = response.bodyToString()
     for param in request.parameters():
         if (param.type() == HttpParameterType.BODY or param.type() == HttpParameterType.URL) and (param.value() in body or urldecode(param.value()) in body):
             request = request.withRemovedParameters(param).withParameter(parameter(param.name(), payload, param.type()))
-    MessageEditor.setRequest(request)
+    messageEditor.setRequest(request)
 
 
 @run_in_pool(pool)
@@ -80,9 +84,9 @@ def no_sql_request(request):
     body = requestResponse.response().bodyToString()
     for highlight in ["unknown operator", "MongoError", "83b3j45b", "cannot be applied to a field", "expression is invalid"]:
         if highlight in body:
-            addIssue("NoSQL Injection", "String detail", "String remediation", requestResponse.request().url(),
-                     AuditIssueSeverity.HIGH, AuditIssueConfidence.CERTAIN, "String background",
-                     "String remediationBackground", AuditIssueSeverity.MEDIUM, requestResponse.withResponseMarkers(getResponseHighlights(requestResponse, highlight)))
+            addIssue(auditIssue("NoSQL Injection", "String detail", "String remediation", requestResponse.request().url(),
+                                AuditIssueSeverity.HIGH, AuditIssueConfidence.CERTAIN, "String background",
+                                "String remediationBackground", AuditIssueSeverity.MEDIUM, requestResponse.withResponseMarkers(getResponseHighlights(requestResponse, highlight))))
             break
 
 
@@ -107,28 +111,34 @@ def insertAtCursor():
     return "'\"><img/src/onerror=alert(1)>"
 
 
+@run_in_thread
+def race_condition_10(request):
+    sendRequests([request] * 10)
+
+
 def registerContextMenu(menus):
     """
     To register a custom context menu using the register method,
     three parameters need to be passed: the menu name, the menu function, and the menu type.
-    The menu types include CARET, SELECTED_TEXT, REQUEST, and REQUEST_RESPONSE.
+    The menu types include CARET, SELECTED_TEXT, REQUEST, REQUEST_RESPONSE and MESSAGE_EDITOR.
     """
+    menus.register("Purify Header", purify_header, MenuType.MESSAGE_EDITOR)
+    menus.register("Bypass 403", bypass403, MenuType.MESSAGE_EDITOR)
+    menus.register("Find Reflect Params", insert_to_reflect_params, MenuType.MESSAGE_EDITOR)
+
     menus.register("Base64 Encode", base64Encode, MenuType.SELECTED_TEXT)
     menus.register("Unicode Escape", unicodeEscape, MenuType.SELECTED_TEXT)
     menus.register("JSON Unicode Escape", jsonUnicodeEscape, MenuType.SELECTED_TEXT)
 
+    menus.register("Race Condition x10", race_condition_10, MenuType.REQUEST)
     menus.register("Log4Shell", log4shell, MenuType.REQUEST)
     menus.register("FUZZ Param perReq", fuzzParamPerRequest, MenuType.REQUEST)
     menus.register("FUZZ Param oneReq", fuzzParamsOneRequest, MenuType.REQUEST)
     menus.register("NoSQL Injection", noSqliScan, MenuType.REQUEST)
     menus.register("Send to Xray", sendRequestWithProxy, MenuType.REQUEST)
     menus.register("File Extension Cache Poison", cachePoison, MenuType.REQUEST)
-    menus.register("Bypass 403", bypass403, MenuType.REQUEST)
-    menus.register("Purify Header", purify_header, MenuType.REQUEST)
 
-    menus.register("Reflect Params", insert_to_reflect_params, MenuType.REQUEST_RESPONSE)
-
-    menus.register("Insert XSS", insertAtCursor, MenuType.CARET)
+    menus.register("XSS At Cursor", insertAtCursor, MenuType.CARET)
 
 
 def finish():

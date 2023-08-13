@@ -25,13 +25,6 @@
     # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html
     HttpResponse response
 
-    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/Annotations.html
-    Annotations annotations
-
-    # Provide when registering a context menu of type EDIT_REQUEST.
-    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/ui/contextmenu/MessageEditorHttpRequestResponse.html
-    MessageEditorHttpRequestResponse  editor
-
     # Various data conversion and querying features.
     # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/utilities/Utilities.html
     Utilities Utils
@@ -43,19 +36,35 @@
     burp.api.montoya.proxy.Proxy proxy
 
     # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/ui/contextmenu/MessageEditorHttpRequestResponse.html
-    # Only provide for repeater context menu
+    # Only provide for message editor context menu.
     MessageEditorHttpRequestResponse MessageEditor
+
+
+    # Decorator
+    @run_in_pool(pool: RequestPool)
+    @run_in_thread
 
 
 """
     FUNCTIONS
 """
-    # Create a new instance of HttpRequest from url, if specify the raw_http, it will parse raw http to HttpRequest
-    makeRequest(url, raw_http=None, fix_content_length=True) -> HttpRequest
+    # Build HttpRequest from url or raw http
+    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/requests/HttpRequest.html
+    httpRequestFromUrl()
+    httpRequest()
 
+    # An HTTP service for the HttpRequest.
+    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/HttpService.html
+    httpService() -> HttpService
+
+    # Send HTTP requests
     # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/Http.html
     sendReqeust()
     sendReqeusts()
+
+    # Create annotations with requests and responses
+    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/Annotations.html
+    annotations()
 
     urlencode()
     urldecode()
@@ -64,7 +73,6 @@
     randomstring(length=8)
 
     # Create a new ByteArray from the provided.
-    # Same to the `ByteArray byteArray()`.
     # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/ByteArray.html#byteArray(byte...)
     bytearray()
 
@@ -74,15 +82,28 @@
     urlparameter()
     bodyparameter()
     cookieparameter()
+
+    # Get all items in the Proxy HTTP history.
     # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/proxy/Proxy.html#history()
-    # get all items in the Proxy HTTP history.
     history()
-    # Create an issue. Same to auditIssue(*args)
+
+    # Create an audit issue for a URL.
     # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/scanner/audit/issues/AuditIssue.html
-    addIssue()
+    auditIssue() -> AuditIssue
+
+    # Add issue to dashboard
+    addIssue(auditIssue: AuditIssue)
+
+    # Create an audit insertion point based on offsets.
+    # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/scanner/audit/insertionpoint/AuditInsertionPoint.html
+    auditInsertionPoint() -> AuditInsertionPoint
 
     # Create a list with the added markers. Used as the argument for withResponseMarkers and withRequestMarkers.
-    getResponseHighlights(requestResponse: HttpRequestResponse, highlightString: str)
+    getResponseHighlights(requestResponse: HttpRequestResponse, highlightString: str) -> List<Marker>
+
+    # Only work within message editor context menu. (MESSAGE_EDITOR menu type)
+    getSelectedText(MessageEditor: MessageEditorHttpRequestResponse) -> ByteArray
+    replaceSelectedText(MessageEditor: MessageEditorHttpRequestResponse, newText: str) -> HTTPRequest
 
 
 """
@@ -154,7 +175,7 @@ def registerContextMenu(menus):
     To register a custom context menu.
 
     :param menus: Using the `register(String menuItemName, PyFunction functionName, MenuType menuType)` method to register a custom context menu.
-                  The menu types include CARET, SELECTED_TEXT, REQUEST, and REQUEST_RESPONSE.
+                  The menu types include CARET, SELECTED_TEXT, REQUEST, REQUEST_RESPONSE and MESSAGE_EDITOR.
                   For example:  menus.register("Base64 Encode", base64Encode, MenuType.SELECTED_TEXT)
     :return:
     """

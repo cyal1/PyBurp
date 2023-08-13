@@ -20,6 +20,7 @@ import burp.api.montoya.http.message.responses.HttpResponse;
 import burp.api.montoya.proxy.Proxy;
 import burp.api.montoya.scanner.audit.issues.AuditIssue;
 import burp.api.montoya.ui.Theme;
+import burp.api.montoya.utilities.Utilities;
 import org.python.core.*;
 import org.python.util.PythonInterpreter;
 import javax.swing.*;
@@ -30,6 +31,7 @@ public class BcryptMontoya implements BurpExtension
     public static MontoyaApi Api;
     public static Http http;
     public static Proxy proxy;
+    public static Utilities Utils;
     public static PythonInterpreter pyInterp  = new PythonInterpreter();
     private BcryptMontoyaUI codePanel;
     public static ArrayList<String> ALLOWED_URL_PREFIX;
@@ -47,6 +49,8 @@ public class BcryptMontoya implements BurpExtension
     public void initialize(MontoyaApi api) {
         BcryptMontoya.http = api.http();
         BcryptMontoya.proxy = api.proxy();
+        // https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/utilities/Utilities.html
+        BcryptMontoya.Utils = api.utilities();
         BcryptMontoya.Api = api;
         this.codePanel = new BcryptMontoyaUI();
         ALLOWED_URL_PREFIX = new ArrayList<>();
@@ -142,8 +146,6 @@ public class BcryptMontoya implements BurpExtension
 //        pyInterp = new PythonInterpreter();
         pyInterp.setOut(Api.logging().output());
         pyInterp.setErr(Api.logging().error());
-        // https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/utilities/Utilities.html
-        pyInterp.set("Utils", Api.utilities());
         pyInterp.exec(BcryptMontoyaUI.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/initEnv.py")));
     }
     private void runBtnClick(){
@@ -236,12 +238,10 @@ public class BcryptMontoya implements BurpExtension
         return false;
     }
 
-    public static void addIssue(java.lang.String name, java.lang.String detail, java.lang.String remediation, java.lang.String baseUrl, burp.api.montoya.scanner.audit.issues.AuditIssueSeverity severity, burp.api.montoya.scanner.audit.issues.AuditIssueConfidence confidence, java.lang.String background, java.lang.String remediationBackground, burp.api.montoya.scanner.audit.issues.AuditIssueSeverity typicalSeverity, burp.api.montoya.http.message.HttpRequestResponse... requestResponses){
-        Api.siteMap().add(AuditIssue.auditIssue(name, detail,remediation,baseUrl, severity,confidence,background,remediationBackground,typicalSeverity,requestResponses));
+    public static void addIssue(AuditIssue auditIssue){
+        Api.siteMap().add(auditIssue);
     }
-    public static void addIssue(java.lang.String name, java.lang.String detail, java.lang.String remediation, java.lang.String baseUrl, burp.api.montoya.scanner.audit.issues.AuditIssueSeverity severity, burp.api.montoya.scanner.audit.issues.AuditIssueConfidence confidence, java.lang.String background, java.lang.String remediationBackground, burp.api.montoya.scanner.audit.issues.AuditIssueSeverity typicalSeverity, java.util.List<burp.api.montoya.http.message.HttpRequestResponse> requestResponses){
-        Api.siteMap().add(AuditIssue.auditIssue(name,detail,remediation,baseUrl,severity,confidence,background,remediationBackground,typicalSeverity,requestResponses));
-    }
+
     public static List<Marker> getResponseHighlights(HttpRequestResponse requestResponse, String match)
     {
         List<Marker> highlights = new LinkedList<>();

@@ -24,6 +24,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
     public enum MenuType {
         CARET, // insertAtCursor lo4j
         SELECTED_TEXT, // md5 hex
+        MESSAGE_EDITOR,
         REQUEST, // sendtoxray nosqlinjectioin, fuzz param
         REQUEST_RESPONSE, // checkCachePoisoning
     }
@@ -34,10 +35,6 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
 
     @Override
     public List<Component> provideMenuItems(ContextMenuEvent event) {
-        if(event.isFromTool(ToolType.REPEATER)){
-            BcryptMontoya.pyInterp.set("MessageEditor", event.messageEditorRequestResponse().get());
-        }
-
         if (BcryptMontoya.status != BcryptMontoya.STATUS.RUNNING || MENUS.size() == 0) {
             return null;
         }
@@ -58,10 +55,16 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 return null;
             }
 
+            List<Component> messageEditorMenu = registerIterm(MenuType.MESSAGE_EDITOR, event);
+            List<Component> menus = new ArrayList<>(messageEditorMenu);
+
+            if(messageEditorMenu.size()!=0){
+                menus.add(new JSeparator(JSeparator.HORIZONTAL));
+            }
+
             // request
             List<Component> requestMenu = registerIterm(MenuType.REQUEST, event);
-            List<Component> menus = new ArrayList<>(requestMenu);
-
+            menus.addAll(requestMenu);
 
             if (response != null) {
                 List<Component> requestResponseMenu = registerIterm(MenuType.REQUEST_RESPONSE, event);
@@ -108,6 +111,10 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                     }
                     case SELECTED_TEXT -> {
                         retrieveRequestItem.addActionListener(e -> handleSelectText(event, func));
+                        menuItemList.add(retrieveRequestItem);
+                    }
+                    case MESSAGE_EDITOR -> {
+                        retrieveRequestItem.addActionListener(e -> handleMessageEditor(event, func));
                         menuItemList.add(retrieveRequestItem);
                     }
                     case REQUEST -> {
@@ -187,33 +194,13 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
     public void handleSelectText(ContextMenuEvent event, PyFunction func) {
 
         MessageEditorHttpRequestResponse messageEditor = event.messageEditorRequestResponse().get();
-
-        Optional<Range> selectionRange = messageEditor.selectionOffsets();
-        int startIndex = selectionRange.get().startIndexInclusive();
-        int endIndex = selectionRange.get().endIndexExclusive();
-
+        ByteArray selectText = getSelectedText(messageEditor);
         if (event.isFromTool(ToolType.REPEATER) && messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST) {
-            HttpRequest request = messageEditor.requestResponse().request();
-            ByteArray httpMessage = request.toByteArray();
-            ByteArray firstSection = httpMessage.subArray(0, startIndex);
-            ByteArray selectText = request.toByteArray().subArray(selectionRange.get());
-            ByteArray lastSection;
-            if (endIndex != httpMessage.length()) {
-                lastSection = httpMessage.subArray(endIndex, httpMessage.length());
-            } else {
-                lastSection = ByteArray.byteArrayOfLength(0);
-            }
             PyObject pythonArguments = Py.java2py(selectText.toString());
             PyObject r = func.__call__(pythonArguments);
             String newText = (String) r.__tojava__(String.class);
-            messageEditor.setRequest(HttpRequest.httpRequest(firstSection.withAppended(newText).withAppended(lastSection)));
+            messageEditor.setRequest(replaceSelectedText(messageEditor, newText));
         } else {
-            ByteArray selectText;
-            if(MessageEditorHttpRequestResponse.SelectionContext.REQUEST == messageEditor.selectionContext()){
-                selectText = messageEditor.requestResponse().request().toByteArray().subArray(selectionRange.get());
-            }else{
-                selectText = messageEditor.requestResponse().response().toByteArray().subArray(selectionRange.get());
-            }
             PyObject pythonArguments = Py.java2py(selectText.toString());
             PyObject r = func.__call__(pythonArguments);
             String newText = (String) r.__tojava__(String.class);
@@ -231,4 +218,45 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
         }
     }
 
+    public void handleMessageEditor(ContextMenuEvent event, PyFunction func) {
+            PyObject pythonArguments = Py.java2py(event.messageEditorRequestResponse().get());
+            func.__call__(pythonArguments);
+    }
+
+    public static HttpRequest replaceSelectedText(MessageEditorHttpRequestResponse messageEditor, String newString){
+        HttpRequest request = messageEditor.requestResponse().request();
+        if (messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST && messageEditor.selectionOffsets().isPresent()) {
+            Optional<Range> selectionRange = messageEditor.selectionOffsets();
+            int startIndex = selectionRange.get().startIndexInclusive();
+            int endIndex = selectionRange.get().endIndexExclusive();
+            ByteArray httpMessage = request.toByteArray();
+            ByteArray firstSection = httpMessage.subArray(0, startIndex);
+            ByteArray lastSection;
+            if (endIndex != httpMessage.length()) {
+                lastSection = httpMessage.subArray(endIndex, httpMessage.length());
+            } else {
+                lastSection = ByteArray.byteArray();
+            }
+            request = HttpRequest.httpRequest(request.httpService(), firstSection.withAppended(newString).withAppended(lastSection));
+            if(request.body().length() != 0){
+                request = request.withHeader("Content-Length", String.valueOf(request.body().length()));
+            }
+            return request;
+        }
+        return request;
+    }
+
+    public static ByteArray getSelectedText(MessageEditorHttpRequestResponse messageEditor){
+        if (messageEditor.selectionOffsets().isPresent()) {
+            HttpRequest request = messageEditor.requestResponse().request();
+            HttpResponse response = messageEditor.requestResponse().response();
+            Optional<Range> selectionRange = messageEditor.selectionOffsets();
+            if (messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST){
+                return request.toByteArray().subArray(selectionRange.get());
+            }else{
+                return response.toByteArray().subArray(selectionRange.get());
+            }
+        }
+        return ByteArray.byteArray();
+    }
 }

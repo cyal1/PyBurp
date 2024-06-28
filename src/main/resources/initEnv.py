@@ -3,6 +3,7 @@ import io.github.cyal1.bcryptmontoya.CallFuncClient as Grpc
 from java.lang import Runnable, Thread
 from java.util.concurrent import Executors, TimeUnit
 import random, string
+from java.lang import System
 
 # Enum Class
 from burp.api.montoya.http import HttpMode
@@ -45,7 +46,9 @@ def run_in_pool(pool):
     def decorator(func):
         def wrapper(*args, **kwargs):
             return pool.run(func, *args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -54,8 +57,10 @@ def run_in_thread(func):  # todo stop thread while click stop
         class JavaRunnable(Runnable):
             def run(self):
                 func(*args, **kwargs)
+
         thread = Thread(JavaRunnable())
         thread.start()
+
     return wrapper
 
 
@@ -91,3 +96,7 @@ def base64encode(text):
 
 def base64decode(text):
     return Utils.base64Utils().decode(text).toString().encode()
+
+
+def ts():
+    return System.currentTimeMillis()

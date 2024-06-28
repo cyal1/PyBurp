@@ -71,6 +71,7 @@
     base64encode()
     base64decode()
     randomstring(length=8)
+    ts() # return current timestamp
 
     # Create a new ByteArray from the provided.
     # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/ByteArray.html#byteArray(byte...)

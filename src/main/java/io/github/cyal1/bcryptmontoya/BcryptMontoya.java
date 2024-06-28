@@ -143,7 +143,7 @@ public class BcryptMontoya implements BurpExtension
         return functionList;
     }
     private void initPyEnv(){
-//        pyInterp = new PythonInterpreter();
+        pyInterp = new PythonInterpreter();
         pyInterp.setOut(Api.logging().output());
         pyInterp.setErr(Api.logging().error());
         pyInterp.exec(BcryptMontoyaUI.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/initEnv.py")));
@@ -184,9 +184,9 @@ public class BcryptMontoya implements BurpExtension
         myContextMenu.MENUS.clear();
         ALLOWED_URL_PREFIX.clear();
         py_functions.clear();
-        //        pyInterp.close();
-        pyInterp.cleanup();
-        pyInterp.exec("globals().clear()");
+        pyInterp.close();
+//        pyInterp.cleanup();
+//        pyInterp.exec("globals().clear()");
         codePanel.textEditor.setHighlightCurrentLine(true);
         codePanel.textEditor.setEnabled(true);
         codePanel.loadDirectoryButton.setEnabled(true);

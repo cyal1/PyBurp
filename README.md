@@ -7,7 +7,8 @@ BcryptMontoya draws inspiration from the popular [Turbo Intruder](https://github
 **Note: Developed using the New Burp Suite API - [Montoya](https://portswigger.net/blog/new-burp-suite-api-we-want-your-feedback), it is recommended to use BurpSuite v2023.5.4 or later.**
 
 ## Features
-### You can watch the video [here](https://youtu.be/zfvNqd5VmY0).
+### working with frida [here](https://youtu.be/zfvNqd5VmY0).
+### working with chrome [here](https://youtu.be/zIyB4YSaA0U)
 
 ## Snapshot
 

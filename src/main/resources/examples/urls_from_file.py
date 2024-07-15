@@ -8,17 +8,17 @@ for path in PIP_PATH:
     if path not in sys.path:
         sys.path.append(path)
 
-# pip install futures
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor # pip install futures
 
 
 def send_request(url, exit_event):
     if exit_event.is_set():
         return
-    sendRequest(httpRequestFromUrl(url))
+    print(sendRequest(httpRequestFromUrl(url)).response().statusCode())
 
 
 def finish():
+    print("exit")
     exit_event.set()
 
 
@@ -30,4 +30,7 @@ for url in open("/tmp/urls.txt"):
 
 # If wait is set to True, the main thread's user interface (UI) gets blocked and wait for all tasks to be executed.
 executor.shutdown(wait=False)
+
+# https://github.com/jython/book/tree/master/src/chapter19
+# https://github.com/jython/book/blob/master/src/chapter19/test_futures.py
 

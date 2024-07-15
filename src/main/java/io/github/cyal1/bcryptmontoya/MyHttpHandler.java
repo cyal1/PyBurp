@@ -17,34 +17,40 @@ import java.util.ArrayList;
 
 public class MyHttpHandler implements HttpHandler
 {
+    BcryptMontoyaTab bcryptMontoyaTab;
+
+    public MyHttpHandler(BcryptMontoyaTab bcryptMontoyaTab) {
+        this.bcryptMontoyaTab = bcryptMontoyaTab;
+    }
+
     @Override
     public RequestToBeSentAction handleHttpRequestToBeSent(HttpRequestToBeSent httpRequestToBeSent) {
 
-        if(BcryptMontoya.status == BcryptMontoya.STATUS.STOP || !BcryptMontoya.py_functions.containsKey("handleRequest")){
+        if(bcryptMontoyaTab.getStatus() == BcryptMontoyaTab.STATUS.STOP || !bcryptMontoyaTab.py_functions.containsKey("handleRequest")){
             return RequestToBeSentAction.continueWith(httpRequestToBeSent);
         }
 
         // url prefix allowed
-        if(!BcryptMontoya.isPrefixAllowed(httpRequestToBeSent.url())){
+        if(!bcryptMontoyaTab.isPrefixAllowed(httpRequestToBeSent.url())){
             return RequestToBeSentAction.continueWith(httpRequestToBeSent);
         }
 
-        ArrayList<Object> array = BcryptMontoya.invokePyRequest(httpRequestToBeSent, httpRequestToBeSent.annotations(), "handleRequest");
+        ArrayList<Object> array = bcryptMontoyaTab.invokePyRequest(httpRequestToBeSent, httpRequestToBeSent.annotations(), "handleRequest");
         return RequestToBeSentAction.continueWith((HttpRequest) array.get(0), (Annotations) array.get(1));
     }
     @Override
     public ResponseReceivedAction handleHttpResponseReceived(HttpResponseReceived httpResponseReceived) {
 
-        if(BcryptMontoya.status == BcryptMontoya.STATUS.STOP || !BcryptMontoya.py_functions.containsKey("handleResponse")){
+        if(bcryptMontoyaTab.getStatus() == BcryptMontoyaTab.STATUS.STOP || !bcryptMontoyaTab.py_functions.containsKey("handleResponse")){
             return ResponseReceivedAction.continueWith(httpResponseReceived);
         }
 
         // url prefix allowed
-        if(!BcryptMontoya.isPrefixAllowed(httpResponseReceived.initiatingRequest().url())){
+        if(!bcryptMontoyaTab.isPrefixAllowed(httpResponseReceived.initiatingRequest().url())){
             return ResponseReceivedAction.continueWith(httpResponseReceived);
         }
 
-        ArrayList<Object> array = BcryptMontoya.invokePyResponse(httpResponseReceived, httpResponseReceived.annotations(), "handleResponse");
+        ArrayList<Object> array = bcryptMontoyaTab.invokePyResponse(httpResponseReceived, httpResponseReceived.annotations(), "handleResponse");
         return ResponseReceivedAction.continueWith((HttpResponse) array.get(0), (Annotations) array.get(1));
     }
 }

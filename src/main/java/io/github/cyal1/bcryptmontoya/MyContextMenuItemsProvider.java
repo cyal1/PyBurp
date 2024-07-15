@@ -20,6 +20,7 @@ import java.util.*;
 // https://javadoc.io/doc/org.python/jython/2.7-b3/org/python/core/util/StringUtil.html
 public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
     public EnumMap<MenuType, Map<String, PyFunction>> MENUS;
+    BcryptMontoyaTab bcryptMontoyaTab;
 
     public enum MenuType {
         CARET, // insertAtCursor lo4j
@@ -29,13 +30,14 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
         REQUEST_RESPONSE, // checkCachePoisoning
     }
 
-    public MyContextMenuItemsProvider() {
+    public MyContextMenuItemsProvider(BcryptMontoyaTab tab) {
         MENUS = new EnumMap<>(MenuType.class);
+        this.bcryptMontoyaTab = tab;
     }
 
     @Override
     public List<Component> provideMenuItems(ContextMenuEvent event) {
-        if (BcryptMontoya.status != BcryptMontoya.STATUS.RUNNING || MENUS.size() == 0) {
+        if (bcryptMontoyaTab.getStatus() != BcryptMontoyaTab.STATUS.RUNNING || MENUS.size() == 0) {
             return null;
         }
 

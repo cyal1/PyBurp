@@ -3,8 +3,10 @@ from base64 import b64decode, b64encode
 
 # need run `git clone https://github.com/csm/jycrypto.git` command on `/tmp/` directory
 pycryptoLib = "/tmp/jycrypto/lib"
+
 if pycryptoLib not in sys.path:
     sys.path.append(pycryptoLib)
+
 from Crypto.Cipher import AES
 
 def aes_decrypt_ecb(data, key):
@@ -33,21 +35,34 @@ def aes_decrypt_cbc(data, key, iv):
     return plaintext
 
 
-def urlPrefixAllowed(urls):
-    urls.add("https://www.example.com/api/")
+key, iv = "aaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaa"
 
+
+def urlPrefixAllowed(urls):
+    urls.add("https://httpbin.org/base64/")
+
+# curl -XGET -x http://127.0.0.1:8080 -d 'rny6gpOl+IVUoGM/4ej44g==' 'https://httpbin.org/base64/Z05JK1hhcVdHMXVRcUlGWXM1aWVvMFRqQ0oyYUxSay9FN0t0eUlTQXZWbz0='
 
 def handleRequest(request, annotations):
-    return request, annotations
+    print("handleRequest", request.bodyToString())
+    result = aes_encrypt_cbc(request.bodyToString().replace("world", "bcryptmontoya"), key, iv)
+    return request.withBody(result), annotations
 
 
 def handleProxyRequest(request, annotations):
-    return request, annotations
+    print("handleProxyRequest", request.bodyToString())
+    result = aes_decrypt_cbc(request.bodyToString(), key, iv)
+    return request.withBody(result), annotations
+
 
 def handleResponse(response, annotations):
-    body = aes_decrypt_cbc("V275hhZ6+Ix3fg7ERcM5Jw==", "aaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaa")
-    return response.withBody(body), annotations
+    print("handleResponse", response.bodyToString())
+    result = aes_decrypt_cbc(response.bodyToString(), key, iv)
+    return response.withBody(result), annotations
 
 
 def handleProxyResponse(response, annotations):
-    return response, annotations
+    print("handleProxyResponse", response.bodyToString())
+    result = aes_encrypt_cbc(response.bodyToString(), key, iv)
+    return response.withBody(result), annotations
+

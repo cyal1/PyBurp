@@ -25,10 +25,9 @@ public class ContentTypeConverter {
     public ContentTypeConverter() {
         context = Context.enter();
         scope = context.initStandardObjects();
-        String jsCode = BcryptMontoyaUI.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/qs.js"));
+        String jsCode = Tools.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/qs.js"));
         context.evaluateString(scope, jsCode, "JavaScript", 1, null);
     }
-
     public String queryString2JSON(String qs){
         String functionName = "convert2JSON";
         Object[] functionArgs = {qs};
@@ -47,6 +46,7 @@ public class ContentTypeConverter {
     }
     public String json2XML(String jsonString) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         StringBuilder xml = new StringBuilder();
         xml.append("<root>");
         Object item = new JSONTokener(jsonString).nextValue();

@@ -1274,11 +1274,13 @@ var qs = cachedModules[3902].exports;
 convert2qs = function(t) {
     return qs.stringify(t, {
         encodeValuesOnly: !0,
-        strictNullHandling: !0
+        strictNullHandling: !0,
+        charset: 'utf-8'
     })
 }, convert2JSON = function(t) {
     return JSON.stringify(qs.parse(t, {
-        strictNullHandling: !0
+        strictNullHandling: !0,
+        charset: 'utf-8'
     }))
 };
 

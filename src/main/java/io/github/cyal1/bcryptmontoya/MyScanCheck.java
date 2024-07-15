@@ -11,33 +11,39 @@ import org.python.core.PyFunction;
 import org.python.core.PyObject;
 
 class MyScanCheck implements ScanCheck {
-    private final PyFunction activeScan = BcryptMontoya.py_functions.get("activeScan");
-    private final PyFunction passiveScan = BcryptMontoya.py_functions.get("passiveScan");
+    public BcryptMontoyaTab bcryptMontoyaTab;
+
+    public MyScanCheck(BcryptMontoyaTab bcryptMontoyaTab) {
+        this.bcryptMontoyaTab = bcryptMontoyaTab;
+    }
+
     @Override
     public AuditResult activeAudit(HttpRequestResponse baseRequestResponse, AuditInsertionPoint auditInsertionPoint) {
-        if (BcryptMontoya.status != BcryptMontoya.STATUS.RUNNING || activeScan == null) {
+        PyFunction activeAudit = bcryptMontoyaTab.py_functions.get("activeAudit");
+        if (bcryptMontoyaTab.getStatus() != BcryptMontoyaTab.STATUS.RUNNING || activeAudit == null) {
             return AuditResult.auditResult();
         }
         PyObject[] pythonArguments = new PyObject[2];
         pythonArguments[0] = Py.java2py(baseRequestResponse);
         pythonArguments[1] = Py.java2py(auditInsertionPoint);
-        AuditIssue r = (AuditIssue) activeScan.__call__(pythonArguments).__tojava__(AuditIssue.class);
+        AuditResult r = (AuditResult) activeAudit.__call__(pythonArguments).__tojava__(AuditResult.class);
         if (r != null) {
-            return AuditResult.auditResult(r);
+            return r;
         }
         return AuditResult.auditResult();
     }
 
     @Override
     public AuditResult passiveAudit(HttpRequestResponse baseRequestResponse) {
-        if (BcryptMontoya.status != BcryptMontoya.STATUS.RUNNING || passiveScan == null) {
+        PyFunction passiveAudit = bcryptMontoyaTab.py_functions.get("passiveAudit");
+        if (bcryptMontoyaTab.getStatus() != BcryptMontoyaTab.STATUS.RUNNING || passiveAudit == null) {
             return AuditResult.auditResult();
         }
 
         PyObject pythonArguments = Py.java2py(baseRequestResponse);
-        AuditIssue r = (AuditIssue) passiveScan.__call__(pythonArguments).__tojava__(AuditIssue.class);
+        AuditResult r = (AuditResult) passiveAudit.__call__(pythonArguments).__tojava__(AuditResult.class);
         if (r != null) {
-            return AuditResult.auditResult(r);
+            return r;
         }
         return AuditResult.auditResult();
     }

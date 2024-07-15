@@ -1,0 +1,421 @@
+package io.github.cyal1.bcryptmontoya;
+
+import burp.api.montoya.core.Annotations;
+import burp.api.montoya.core.Registration;
+import burp.api.montoya.http.message.requests.HttpRequest;
+import burp.api.montoya.http.message.responses.HttpResponse;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.Theme;
+import org.fife.ui.rtextarea.RTextScrollPane;
+import org.python.core.*;
+import org.python.util.PythonInterpreter;
+
+import javax.swing.*;
+import javax.swing.text.DefaultCaret;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+
+public class BcryptMontoyaTab extends JPanel {
+    public enum STATUS {
+        RUNNING,
+        STOP
+    }
+    public static ArrayList<String> ALLOWED_URL_PREFIX;
+    private STATUS status = STATUS.STOP;
+    public MyContextMenuItemsProvider myContextMenu;
+    public HashMap<String, PyFunction> py_functions;
+    public ArrayList<Registration> plugins;
+    PythonInterpreter pyInterp;
+    JButton saveButton = new JButton("Save");
+    JButton runButton = new JButton("Run");
+    JButton clearLogButton = new JButton("Clear logs");
+    JComboBox<Object> codeCombo = new JComboBox<>();
+    JButton loadDirectoryButton = new JButton("Choose scripts dir");
+    JButton closeTab = new JButton("Close");
+    RSyntaxTextArea codeEditor = new RSyntaxTextArea();
+    JSplitPane jSplitPane;
+    JTextArea logTextArea;
+
+    public BcryptMontoyaTab(){
+        javax.swing.text.JTextComponent.removeKeymap("RTextAreaKeymap");
+        javax.swing.UIManager.put("RTextAreaUI.inputMap", null);
+        javax.swing.UIManager.put("RTextAreaUI.actionMap", null);
+        javax.swing.UIManager.put("RSyntaxTextAreaUI.inputMap", null);
+        javax.swing.UIManager.put("RSyntaxTextAreaUI.actionMap", null);
+        codeEditor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PYTHON);
+        codeEditor.setAntiAliasingEnabled(true);
+        codeEditor.setAutoIndentEnabled(true);
+        codeEditor.setPaintTabLines(true);
+        codeEditor.setTabSize(4);
+        codeEditor.setFont(codeEditor.getFont().deriveFont(14.0F));
+        codeEditor.setCodeFoldingEnabled(true);
+        codeEditor.setTabsEmulated(true);
+        codeEditor.setLineWrap(true);
+        codeEditor.setWrapStyleWord(true);
+        codeEditor.setHighlightCurrentLine(true);
+////        textEditor.setWhitespaceVisible(true);
+        RTextScrollPane scrollableTextEditor = new RTextScrollPane( codeEditor );
+        JPanel toolBar = new JPanel();
+        codeCombo.setRenderer(new ComboBoxRenderer(6));
+        codeCombo.setPreferredSize(new Dimension(400, 24));
+        readScriptDirectories();
+        toolBar.add(loadDirectoryButton);
+        toolBar.add(codeCombo);
+        saveButton.setEnabled(false);
+        toolBar.add(saveButton);
+        toolBar.add(runButton);
+        toolBar.add(clearLogButton);
+        toolBar.add(closeTab);
+
+        jSplitPane = new JSplitPane();
+        jSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
+        logTextArea = new JTextArea(0,0);
+        logTextArea.setLineWrap(true);
+        logTextArea.setWrapStyleWord(true);
+        DefaultCaret caret = (DefaultCaret) logTextArea.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+
+        JScrollPane bottomScrollPane= new JScrollPane(logTextArea);
+        JPanel topPane = new JPanel(new BorderLayout());
+        topPane.add(toolBar, BorderLayout.NORTH);
+        topPane.add(scrollableTextEditor, BorderLayout.CENTER);
+        bottomScrollPane.setBorder(null);
+        jSplitPane.setTopComponent(topPane);
+        bottomScrollPane.setMinimumSize(new Dimension(0,0));
+        jSplitPane.setBottomComponent(bottomScrollPane);
+        jSplitPane.setResizeWeight(1.0);
+        jSplitPane.setDividerLocation(1.0);
+        this.setLayout(new BorderLayout());
+        this.add(jSplitPane, BorderLayout.CENTER);
+
+        codeEditor.setText(getDefaultScript());
+        if(BcryptMontoya.Api.userInterface().currentTheme() == burp.api.montoya.ui.Theme.DARK){
+            setDarkTheme();
+        }
+        ALLOWED_URL_PREFIX = new ArrayList<>();
+        myContextMenu = new MyContextMenuItemsProvider(this);
+
+        initPyEnv();
+
+
+        runButton.addActionListener(e -> {
+            if(status == STATUS.STOP){
+                // do start things on STOP status while button clicked
+                runBtnClick();
+            }else{
+                // do stop things on RUNNING status while button clicked
+                stopBtnClick();
+            }
+        });
+
+        clearLogButton.addActionListener(e -> {
+            logTextArea.setText("");
+        });
+
+        closeTab.addActionListener(e -> {
+            if (getStatus() == STATUS.RUNNING){
+                stopBtnClick();
+            }
+            BcryptMontoyaTabs.closeTab();
+        });
+
+        loadDirectoryButton.addActionListener(e -> {
+            JFileChooser directoryChooser = new JFileChooser();
+            directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int option = directoryChooser.showOpenDialog(this);
+            if (option == JFileChooser.APPROVE_OPTION) {
+                File file = directoryChooser.getSelectedFile();
+                BcryptMontoya.Api.persistence().preferences().setString("scriptsPath", file.getAbsolutePath());
+//                readScriptDirectories();
+            }
+        });
+
+        saveButton.addActionListener(e -> {
+            String comboItem = (String) codeCombo.getSelectedItem();
+            assert comboItem != null;
+            try {
+                Files.write( Paths.get(comboItem), getCode().getBytes());
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        codeCombo.addActionListener(e -> {
+            if (codeCombo.getSelectedIndex() == 0) {
+                saveButton.setEnabled(false);
+                codeEditor.setText(getDefaultScript());
+                readScriptDirectories();
+                return;
+            }
+            String fileName = Objects.requireNonNull(codeCombo.getSelectedItem()).toString();
+            if (fileName.toLowerCase().endsWith(".md")){
+                codeEditor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
+            }else{
+                codeEditor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PYTHON);
+            }
+            if (fileName.startsWith("examples/")) {
+                codeEditor.setText(Tools.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/"+fileName)));
+                saveButton.setEnabled(false);
+            } else {
+                saveButton.setEnabled(true);
+                try {
+                    codeEditor.setText(new String(Files.readAllBytes(Paths.get(fileName))).replace("\r\n","\n"));
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            codeEditor.setCaretPosition(0);
+        });
+    }
+
+    private void runBtnClick(){
+        try{
+//            initPyEnv();
+            pyInterp.exec(getCode());
+            py_functions = getPyFunctions();
+            BcryptMontoyaTabs.registerTabExtender(this);
+            PyObject pythonArguments = Py.java2py(myContextMenu);
+            if(py_functions.containsKey("registerContextMenu")){
+                py_functions.get("registerContextMenu").__call__(pythonArguments);
+            }
+
+            PyObject[] urls = Py.javas2pys(ALLOWED_URL_PREFIX);
+            if(py_functions.containsKey("urlPrefixAllowed")){
+                py_functions.get("urlPrefixAllowed").__call__(urls);
+            }
+        }catch (Exception ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        codeEditor.setHighlightCurrentLine(false);
+        codeEditor.setEnabled(false);
+        loadDirectoryButton.setEnabled(false);
+        codeCombo.setEnabled(false);
+        status = STATUS.RUNNING;
+        runButton.setText("Stop");
+        BcryptMontoya.Api.persistence().preferences().setString("defaultScript", getCode().replace("\r\n","\n"));
+        if (jSplitPane.getResizeWeight() > 0.9) {
+            jSplitPane.setResizeWeight(0.7);
+            jSplitPane.setDividerLocation(0.7);
+        }
+        BcryptMontoyaTabs.setTabColor(Color.decode("#ec6033"));
+        logTextArea.append("start script\n");
+    }
+
+    public void stopBtnClick(){
+        try {
+            if (py_functions.containsKey("finish")){
+                py_functions.get("finish").__call__();
+            }
+        } catch (Exception e){
+            BcryptMontoya.Api.logging().logToError(e.getMessage());
+        }
+        myContextMenu.MENUS.clear();
+        ALLOWED_URL_PREFIX.clear();
+        py_functions.clear();
+        pyInterp.close();
+        codeEditor.setHighlightCurrentLine(true);
+        codeEditor.setEnabled(true);
+        loadDirectoryButton.setEnabled(true);
+        codeCombo.setEnabled(true);
+        status = STATUS.STOP;
+        runButton.setText("Run");
+        for(Registration plugin: plugins){
+            plugin.deregister();
+        }
+        BcryptMontoyaTabs.setTabColor(Color.black);
+        initPyEnv();
+        logTextArea.append("stopped script\n");
+    }
+
+    private void initPyEnv(){
+        pyInterp = new PythonInterpreter();
+        PrintStream printStream = new PrintStream(new OutputStream() {
+            final int MAX_LINES = 10000;
+            @Override
+            public void write(int b) {
+                logTextArea.append(String.valueOf((char) b));
+                if (logTextArea.getLineCount() > MAX_LINES) {
+                    removeLines(logTextArea, logTextArea.getLineCount() - MAX_LINES);
+                }
+            }
+        });
+//        System.setOut(printStream);
+//        System.setErr(printStream);
+        pyInterp.setOut(printStream);
+        pyInterp.setErr(printStream);
+        pyInterp.exec(Tools.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/initEnv.py")));
+    }
+
+    private static void removeLines(JTextArea textArea, int linesToRemove) {
+        try {
+            int endPos = textArea.getLineEndOffset(linesToRemove - 1);
+            int startPos = textArea.getLineStartOffset(0);
+            textArea.replaceRange("", startPos, endPos);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public String getCode(){
+        return codeEditor.getText().replace("\r\n", "\n").replace("\n", "\r\n");
+    }
+
+    private ArrayList<String> getExamplesFiles(){
+        ArrayList<String> fileNames = new ArrayList<>();
+        final File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
+        final JarFile jar;
+        try {
+            jar = new JarFile(jarFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        final Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
+        while(entries.hasMoreElements()) {
+            final String name = entries.nextElement().getName();
+            if (name.startsWith("examples/")) {
+                fileNames.add(name);
+            }
+        }
+        try {
+            jar.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return fileNames;
+    }
+
+    private void readScriptDirectories(){
+        codeCombo.removeAllItems();
+        codeCombo.addItem("Last code used");
+        String scriptsPath = BcryptMontoya.Api.persistence().preferences().getString("scriptsPath");
+        if(scriptsPath != null && !scriptsPath.isEmpty()){
+            File folder = new File(scriptsPath);
+            if (folder.isDirectory()) {
+                File[] folderList = folder.listFiles();
+                assert folderList != null;
+                Arrays.sort(folderList);
+                for (File file : folderList) {
+                    if (!file.getName().startsWith(".")) {
+                        codeCombo.addItem(folder.getAbsolutePath() + "/" + file.getName());
+                    }
+                }
+            }
+        }
+        codeCombo.addItem(new JSeparator(JSeparator.HORIZONTAL));
+        ArrayList<String> files = getExamplesFiles();
+        Collections.sort(files);
+        for (String fileName : files) {
+            codeCombo.addItem(fileName);
+        }
+    }
+    public String getDefaultScript(){
+        String defaultScript = BcryptMontoya.Api.persistence().preferences().getString ("defaultScript");
+        return Objects.requireNonNullElseGet(defaultScript, () -> Tools.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/examples/default.py")));
+    }
+
+    public void setDarkTheme(){
+        try {
+//            dark,default-alt,default,druid,eclipse,idea,monokai,vs
+            Theme theme = Theme.load(getClass().getResourceAsStream("/org/fife/ui/rsyntaxtextarea/themes/dark.xml"));
+            theme.apply(codeEditor);
+            codeEditor.setFont(codeEditor.getFont().deriveFont(14.0F));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean isPrefixAllowed(String url){
+        if (ALLOWED_URL_PREFIX.size() == 0){
+            return true;
+        }
+        for(String u: ALLOWED_URL_PREFIX){
+            if(url.startsWith(u)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public HashMap<String, PyFunction> getPyFunctions(){
+        ArrayList<String> MontoyaPyFunctions = new ArrayList<>(Arrays.asList(
+                "registerContextMenu",
+                "passiveAudit","activeAudit",
+                "handleRequest", "handleResponse",
+                "handleProxyRequest", "handleProxyResponse",
+                "urlPrefixAllowed",
+                "finish"
+        ));
+
+        HashMap<String,PyFunction> functionList = new HashMap<>();
+        String get_function_names_code = "[(name,obj) for name, obj in globals().items() if callable(obj) and not name.startswith('__')]";
+
+        PyObject pyFunctionList = pyInterp.eval(get_function_names_code);
+        if (pyFunctionList instanceof PyList) {
+            for (Object pyTuple : (PyList)pyFunctionList) {
+                if (pyTuple instanceof PyTuple) {
+                    String functionName = ((PyTuple) pyTuple).__getitem__(0).toString();
+                    PyObject functionObject = ((PyTuple) pyTuple).__getitem__(1);
+                    if (MontoyaPyFunctions.contains(functionName) && functionObject instanceof PyFunction pyFunction) {
+                        functionList.put(functionName, pyFunction);
+                    }
+//                        else if (functionObject instanceof PyJavaType) {
+//                            PyFunction pyFunction = (PyFunction) ((PyJavaType) functionObject).__call__();
+//                            String functionName = ((PyTuple) pyTuple).__getitem__(0).toString();
+//                            functionList.put(functionName, pyFunction);
+//                        }
+                }
+            }
+        }
+        return functionList;
+    }
+
+    public <T extends HttpRequest> ArrayList<Object> invokePyRequest(T httpRequest, Annotations annotations, String pyFuncName){
+        PyObject[] pythonArguments = new PyObject[2];
+        pythonArguments[0] = Py.java2py(httpRequest);
+        pythonArguments[1] = Py.java2py(annotations);
+        PyObject result = py_functions.get(pyFuncName).__call__(pythonArguments);
+        HttpRequest newHttpRequest;
+        if (result instanceof PyTuple tupleResult) {
+            if(tupleResult.__len__() != 2){
+                return new ArrayList<>(List.of(httpRequest, annotations));
+            }
+            newHttpRequest = (HttpRequest) tupleResult.__getitem__(0).__tojava__(HttpRequest.class);
+            annotations = (Annotations) tupleResult.__getitem__(1).__tojava__(Annotations.class);
+            return new ArrayList<>(List.of(newHttpRequest, annotations));
+        }
+        return new ArrayList<>(List.of(httpRequest, annotations));
+    }
+
+    public <T extends HttpResponse> ArrayList<Object> invokePyResponse (T httpResponse, Annotations annotations, String pyFuncName){
+        PyObject[] pythonArguments = new PyObject[2];
+        pythonArguments[0] = Py.java2py(httpResponse);
+        pythonArguments[1] = Py.java2py(annotations);
+        PyObject result =  py_functions.get(pyFuncName).__call__(pythonArguments);
+        HttpResponse newHttpResponse;
+        // jython need to return response and annotations
+        if (result instanceof PyTuple tupleResult) {
+            if (tupleResult.__len__() != 2){
+                return new ArrayList<>(List.of(httpResponse, annotations));
+            }
+            newHttpResponse = (HttpResponse) tupleResult.__getitem__(0).__tojava__(HttpResponse.class);
+            annotations = (Annotations) tupleResult.__getitem__(1).__tojava__(Annotations.class);
+            return new ArrayList<>(List.of(newHttpResponse, annotations));
+        }
+        return new ArrayList<>(List.of(httpResponse, annotations));
+    }
+
+    public STATUS getStatus(){
+        return this.status;
+    }
+}

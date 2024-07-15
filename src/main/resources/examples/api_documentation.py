@@ -215,11 +215,3 @@ def finish():
     """
     pass
 
-
-def uploading():
-    """
-    This method is invoked when the extension is unloaded.
-
-    :return:
-    """
-    pass

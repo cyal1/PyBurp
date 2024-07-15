@@ -1,4 +1,5 @@
-# Class
+# -*- coding: utf-8 -*-
+
 import io.github.cyal1.bcryptmontoya.CallFuncClient as Grpc
 from java.lang import Runnable, Thread
 from java.util.concurrent import Executors, TimeUnit
@@ -12,9 +13,10 @@ from burp.api.montoya.http.message.params import HttpParameterType
 from burp.api.montoya.http.message import ContentType
 from burp.api.montoya.core import HighlightColor
 from burp.api.montoya.scanner.audit.issues import AuditIssueSeverity, AuditIssueConfidence
+from burp.api.montoya.http.message.HttpRequestResponse import httpRequestResponse
 
 # Static Method or Fields
-from io.github.cyal1.bcryptmontoya.BcryptMontoya import addIssue, getResponseHighlights, http, proxy, Utils
+from io.github.cyal1.bcryptmontoya.BcryptMontoya import addIssue, getResponseHighlights, http, proxy, Utils, organizer
 from burp.api.montoya.http.HttpService import httpService
 from burp.api.montoya.http.message.requests.HttpRequest import httpRequestFromUrl, httpRequest
 from burp.api.montoya.http.message.params.HttpParameter import bodyParameter, cookieParameter, parameter, urlParameter
@@ -24,6 +26,11 @@ from burp.api.montoya.scanner.audit.issues.AuditIssue import auditIssue
 from burp.api.montoya.scanner.audit.insertionpoint.AuditInsertionPoint import auditInsertionPoint
 from io.github.cyal1.bcryptmontoya.MyContextMenuItemsProvider import getSelectedText, replaceSelectedText
 
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf8')
+# print(sys.getdefaultencoding())
 
 class RequestPool:
     def __init__(self, nThreads):
@@ -72,6 +79,10 @@ def sendRequests(*args):
     return http.sendRequests(*args)
 
 
+def sendToOrganizer(*args):
+    return organizer.sendToOrganizer(*args)
+
+
 def history(*args):
     return proxy.history(*args)
 
@@ -100,3 +111,4 @@ def base64decode(text):
 
 def ts():
     return System.currentTimeMillis()
+

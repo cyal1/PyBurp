@@ -1,5 +1,5 @@
 # Server code
-# https://github.com/cyal1/BcryptRpcServer/tree/main/python
+# Server https://github.com/cyal1/BcryptRpcServer/tree/main/python
 # https://protobuf.dev/reference/java/api-docs/com/google/protobuf/ByteString
 server = Grpc("localhost", 30051)
 

@@ -4,38 +4,37 @@
       client   -----------------------> BurpSuit proxy ----------------------->  server
      (browser) <-----------------------                <-----------------------
                   handleProxyResponse                        handleResponse
+
+Github: https://github.com/cyal1/BcryptMontoya
+Cooperation with Frida: https://youtu.be/zfvNqd5VmY0
+Cooperation with Chrome: https://youtu.be/zIyB4YSaA0U
+
 """
+
 
 def urlPrefixAllowed(urls):
     urls.add("https://www.example.com/api/")
+    urls.add("http")  # for all url
 
 
-def handleRequest(request, annotations):
-    return request, annotations
+# request  https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/requests/HttpRequest.html
+# response  https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html
+# annotations  https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/Annotations.html
 
 
 def handleProxyRequest(request, annotations):
-    for param in request.parameters():
-        if param.value().startswith("http"):
-            annotations.setHighlightColor(HighlightColor.RED)
-            annotations.setNotes("maybe ssrf")
-            break
-    return request, annotations
+    return request.withParameter(urlParameter("motoya","brower2burp")), annotations
+
+
+# You can view the actual requests to the server in the Logger.
+def handleRequest(request, annotations):
+    return request.withParameter(urlParameter("motoya","burp2server")), annotations
 
 
 def handleResponse(response, annotations):
-    return response.withAddedHeader("BcryptMontoya","https://github.com/cyal1/BcryptMontoya"), annotations
-
-
-def secret_disclosure_annotations(annotations):
-    return annotations.withHighlightColor(HighlightColor.BLUE).withNotes("secret")
+    return response.withAddedHeader("BcryptMontoya", "https://github.com/cyal1/BcryptMontoya"), annotations
 
 
 def handleProxyResponse(response, annotations):
-    if "secretKey" in response.bodyToString():
-        annotations = secret_disclosure_annotations(annotations)
-    return response, annotations
+    return response.withRemovedHeader("BcryptMontoya"), annotations
 
-
-# def finish():
-#     pass

@@ -9,20 +9,25 @@ import burp.api.montoya.proxy.http.ProxyRequestToBeSentAction;
 import java.util.ArrayList;
 
 public class MyProxyRequestHandler implements ProxyRequestHandler {
+    BcryptMontoyaTab bcryptMontoyaTab;
+
+    public MyProxyRequestHandler(BcryptMontoyaTab bcryptMontoyaTab) {
+        this.bcryptMontoyaTab = bcryptMontoyaTab;
+    }
 
     @Override
     public ProxyRequestReceivedAction handleRequestReceived(InterceptedRequest interceptedRequest) {
 
-        if(BcryptMontoya.status == BcryptMontoya.STATUS.STOP || !BcryptMontoya.py_functions.containsKey("handleProxyRequest")){
+        if(bcryptMontoyaTab.getStatus() == BcryptMontoyaTab.STATUS.STOP || !bcryptMontoyaTab.py_functions.containsKey("handleProxyRequest")){
             return ProxyRequestReceivedAction.continueWith(interceptedRequest);
         }
 
         // url prefix allowed
-        if(!BcryptMontoya.isPrefixAllowed(interceptedRequest.url())){
+        if(!bcryptMontoyaTab.isPrefixAllowed(interceptedRequest.url())){
             return ProxyRequestReceivedAction.continueWith(interceptedRequest);
         }
         // todo drop
-        ArrayList<Object> array = BcryptMontoya.invokePyRequest(interceptedRequest, interceptedRequest.annotations(), "handleProxyRequest");
+        ArrayList<Object> array = bcryptMontoyaTab.invokePyRequest(interceptedRequest, interceptedRequest.annotations(), "handleProxyRequest");
         return ProxyRequestReceivedAction.continueWith((HttpRequest) array.get(0), (Annotations) array.get(1));
     }
     // after intercept

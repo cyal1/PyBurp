@@ -42,12 +42,6 @@ def save_to_file():
     file.close()
 
 
-# def unloading():
-#     # Save data when the extension is unloaded or exit burp suite.
-#     save_to_file()
-#     save_to_sqlite()
-
-
 print(history().size())
 # Save on Clicking Run
 save_to_sqlite()

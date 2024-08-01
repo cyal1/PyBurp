@@ -143,37 +143,45 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
     }
 
     public void handleRequest(ContextMenuEvent event, PyFunction func) {
-        if (!event.selectedRequestResponses().isEmpty()) {
-            for (HttpRequestResponse httpRequestResponse : event.selectedRequestResponses()) {
-                HttpRequest req = httpRequestResponse.request();
-                PyObject pythonArguments = Py.java2py(req);
+        try{
+            if (!event.selectedRequestResponses().isEmpty()) {
+                for (HttpRequestResponse httpRequestResponse : event.selectedRequestResponses()) {
+                    HttpRequest req = httpRequestResponse.request();
+                    PyObject pythonArguments = Py.java2py(req);
+                    func.__call__(pythonArguments);
+                }
+            } else {
+                PyObject pythonArguments = Py.java2py(event.messageEditorRequestResponse().get().requestResponse().request());
                 func.__call__(pythonArguments);
             }
-        } else {
-            PyObject pythonArguments = Py.java2py(event.messageEditorRequestResponse().get().requestResponse().request());
-            func.__call__(pythonArguments);
+        }catch (Exception e){
+            bcryptMontoyaTab.logTextArea.append(e.getMessage());
         }
     }
 
 
     public void handleRequestResponse(ContextMenuEvent event, PyFunction func) {
-        if (!event.selectedRequestResponses().isEmpty()) {
-            for (HttpRequestResponse httpRequestResponse : event.selectedRequestResponses()) {
-                HttpRequest req = httpRequestResponse.request();
-                HttpResponse resp = httpRequestResponse.response();
-                if (resp != null) {
-                    PyObject[] pythonArguments = new PyObject[2];
-                    pythonArguments[0] = Py.java2py(req);
-                    pythonArguments[1] = Py.java2py(resp);
-                    func.__call__(pythonArguments);
+        try {
+            if (!event.selectedRequestResponses().isEmpty()) {
+                for (HttpRequestResponse httpRequestResponse : event.selectedRequestResponses()) {
+                    HttpRequest req = httpRequestResponse.request();
+                    HttpResponse resp = httpRequestResponse.response();
+                    if (resp != null) {
+                        PyObject[] pythonArguments = new PyObject[2];
+                        pythonArguments[0] = Py.java2py(req);
+                        pythonArguments[1] = Py.java2py(resp);
+                        func.__call__(pythonArguments);
+                    }
                 }
+            } else {
+                HttpRequestResponse requestResponse = event.messageEditorRequestResponse().get().requestResponse();
+                PyObject[] pythonArguments = new PyObject[2];
+                pythonArguments[0] = Py.java2py(requestResponse.request());
+                pythonArguments[1] = Py.java2py(requestResponse.response());
+                func.__call__(pythonArguments);
             }
-        } else {
-            HttpRequestResponse requestResponse = event.messageEditorRequestResponse().get().requestResponse();
-            PyObject[] pythonArguments = new PyObject[2];
-            pythonArguments[0] = Py.java2py(requestResponse.request());
-            pythonArguments[1] = Py.java2py(requestResponse.response());
-            func.__call__(pythonArguments);
+        }catch (Exception e){
+            bcryptMontoyaTab.logTextArea.append(e.getMessage());
         }
     }
 
@@ -191,41 +199,53 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
         } else {
             lastSection = ByteArray.byteArrayOfLength(0);
         }
-        PyObject r = func.__call__();
-        String newText = (String) r.__tojava__(String.class);
-        messageEditor.setRequest(HttpRequest.httpRequest(firstSection.withAppended(newText).withAppended(lastSection)));
+        try{
+            PyObject r = func.__call__();
+            String newText = (String) r.__tojava__(String.class);
+            messageEditor.setRequest(HttpRequest.httpRequest(firstSection.withAppended(newText).withAppended(lastSection)));
+        }catch (Exception e){
+            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+        }
     }
 
     public void handleSelectText(ContextMenuEvent event, PyFunction func) {
-
-        MessageEditorHttpRequestResponse messageEditor = event.messageEditorRequestResponse().get();
-        ByteArray selectText = getSelectedText(messageEditor);
-        if (event.isFromTool(ToolType.REPEATER) && messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST) {
-            PyObject pythonArguments = Py.java2py(selectText.toString());
-            PyObject r = func.__call__(pythonArguments);
-            String newText = (String) r.__tojava__(String.class);
-            messageEditor.setRequest(replaceSelectedText(messageEditor, newText));
-        } else {
-            PyObject pythonArguments = Py.java2py(selectText.toString());
-            PyObject r = func.__call__(pythonArguments);
-            String newText = (String) r.__tojava__(String.class);
-            JFrame parentFrame = new JFrame();
-            JDialog dialog = new JDialog(parentFrame, "Editable Message Box", true);
-            JTextArea textArea = new JTextArea();
-            textArea.setLineWrap(true);
-            textArea.setText(newText);
-            JScrollPane scrollPane = new JScrollPane(textArea);
-            dialog.getContentPane().add(scrollPane);
-            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-            dialog.setSize(500, 200);
-            dialog.setLocationRelativeTo(parentFrame);
-            dialog.setVisible(true);
+        try {
+            MessageEditorHttpRequestResponse messageEditor = event.messageEditorRequestResponse().get();
+            ByteArray selectText = getSelectedText(messageEditor);
+            if (event.isFromTool(ToolType.REPEATER) && messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST) {
+                PyObject pythonArguments = Py.java2py(selectText.toString());
+                PyObject r = func.__call__(pythonArguments);
+                String newText = (String) r.__tojava__(String.class);
+                messageEditor.setRequest(replaceSelectedText(messageEditor, newText));
+            } else {
+                PyObject pythonArguments = Py.java2py(selectText.toString());
+                PyObject r = func.__call__(pythonArguments);
+                String newText = (String) r.__tojava__(String.class);
+                JFrame parentFrame = new JFrame();
+                JDialog dialog = new JDialog(parentFrame, "Editable Message Box", true);
+                JTextArea textArea = new JTextArea();
+                textArea.setLineWrap(true);
+                textArea.setText(newText);
+                JScrollPane scrollPane = new JScrollPane(textArea);
+                dialog.getContentPane().add(scrollPane);
+                dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+                dialog.setSize(500, 200);
+                dialog.setLocationRelativeTo(parentFrame);
+                dialog.setVisible(true);
+            }
+        }catch (Exception e){
+            bcryptMontoyaTab.logTextArea.append(e.getMessage());
         }
     }
 
     public void handleMessageEditor(ContextMenuEvent event, PyFunction func) {
+        try {
             PyObject pythonArguments = Py.java2py(event.messageEditorRequestResponse().get());
             func.__call__(pythonArguments);
+        }catch (Exception e){
+            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+        }
+
     }
 
     public static HttpRequest replaceSelectedText(MessageEditorHttpRequestResponse messageEditor, String newString){

@@ -1,12 +1,14 @@
 # Server code
 # Server https://github.com/cyal1/BcryptRpcServer/tree/main/python
 # https://protobuf.dev/reference/java/api-docs/com/google/protobuf/ByteString
+# https://youtu.be/g8cT4YJwGM4
 import json
 
 
 server = Grpc("localhost", 30051)
 
 print(server.callFunc('encrypt', "1234"))
+
 
 def urlPrefixAllowed(urls):
     urls.add("https://www.example.com/api/")

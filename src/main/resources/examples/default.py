@@ -7,7 +7,7 @@
 
 Github: https://github.com/cyal1/BcryptMontoya
 Cooperation with Frida: https://youtu.be/zfvNqd5VmY0
-Cooperation with Chrome: https://youtu.be/zIyB4YSaA0U
+Cooperation with Chrome: https://youtu.be/g8cT4YJwGM4
 
 """
 

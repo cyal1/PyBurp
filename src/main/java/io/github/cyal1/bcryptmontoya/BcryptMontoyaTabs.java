@@ -1,14 +1,18 @@
 package io.github.cyal1.bcryptmontoya;
 
+import burp.api.montoya.collaborator.CollaboratorClient;
+import burp.api.montoya.collaborator.SecretKey;
+
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.util.ArrayList;
 
 public class BcryptMontoyaTabs extends JPanel {
     public static int sequence = 2;
     private static JTabbedPane tabbedPane;
+
+    public static CollaboratorClient collaboratorClient = createCollaboratorClient();
 
     public BcryptMontoyaTabs() {
         tabbedPane = new JTabbedPane();
@@ -43,34 +47,6 @@ public class BcryptMontoyaTabs extends JPanel {
         });
     }
 
-    public static void registerTabExtender(BcryptMontoyaTab tab){
-        int tabId = tabbedPane.getSelectedIndex() + 1;
-        tab.plugins = new ArrayList<>();
-        if(tab.py_functions.containsKey("registerContextMenu")){
-            BcryptMontoya.Api.logging().logToOutput("registerContextMenuItemsProvider tab:" + tabId);
-            tab.plugins.add(BcryptMontoya.Api.userInterface().registerContextMenuItemsProvider(tab.myContextMenu));
-        }
-
-        if(tab.py_functions.containsKey("passiveAudit") || tab.py_functions.containsKey("activeAudit")){
-            BcryptMontoya.Api.logging().logToOutput("registerScanCheck tab:" + tabId);
-            tab.plugins.add(BcryptMontoya.Api.scanner().registerScanCheck(new MyScanCheck(tab)));
-        }
-
-        if(tab.py_functions.containsKey("handleRequest")|| tab.py_functions.containsKey("handleResponse")){
-            BcryptMontoya.Api.logging().logToOutput("registerHttpHandler tab:" + tabId);
-            tab.plugins.add(BcryptMontoya.Api.http().registerHttpHandler(new MyHttpHandler(tab)));
-        }
-
-        if(tab.py_functions.containsKey("handleProxyRequest")){
-            BcryptMontoya.Api.logging().logToOutput("registerRequestHandler tab:" + tabId);
-            tab.plugins.add(BcryptMontoya.Api.proxy().registerRequestHandler(new MyProxyRequestHandler(tab)));
-        }
-
-        if(tab.py_functions.containsKey("handleProxyResponse")){
-            BcryptMontoya.Api.logging().logToOutput("registerResponseHandler tab:" + tabId);
-            tab.plugins.add(BcryptMontoya.Api.proxy().registerResponseHandler(new MyProxyResponseHandler(tab)));
-        }
-    }
 
     public static void closeTab(){
         int selected = tabbedPane.getSelectedIndex();
@@ -85,5 +61,33 @@ public class BcryptMontoyaTabs extends JPanel {
 
     public static void setTabColor(Color color){
         tabbedPane.setForegroundAt(tabbedPane.getSelectedIndex(), color);
+    }
+
+    private static CollaboratorClient createCollaboratorClient()
+    {
+        CollaboratorClient collaboratorClient;
+
+        String existingCollaboratorKey = BcryptMontoya.Api.persistence().extensionData().getString("persisted_collaborator");
+
+        if (existingCollaboratorKey != null)
+        {
+            BcryptMontoya.Api.logging().logToOutput("Creating Collaborator client from key.");
+            collaboratorClient = BcryptMontoya.Api.collaborator().restoreClient(SecretKey.secretKey(existingCollaboratorKey));
+        }
+        else
+        {
+            BcryptMontoya.Api.logging().logToOutput("No previously found Collaborator client. Creating new client...");
+            collaboratorClient = BcryptMontoya.Api.collaborator().createClient();
+
+            // Save the secret key of the CollaboratorClient so that you can retrieve it later.
+            BcryptMontoya.Api.logging().logToOutput("Saving Collaborator secret key.");
+            BcryptMontoya.Api.persistence().extensionData().setString("persisted_collaborator", collaboratorClient.getSecretKey().toString());
+        }
+
+        return collaboratorClient;
+    }
+
+    public static String getOOBUrl(){
+        return collaboratorClient.generatePayload().toString();
     }
 }

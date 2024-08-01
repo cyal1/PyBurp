@@ -4,6 +4,7 @@ import burp.api.montoya.core.Annotations;
 import burp.api.montoya.core.Registration;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
+import io.github.cyal1.bcryptmontoya.poller.Poller;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
@@ -20,6 +21,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.List;
 import java.util.*;
 import java.util.jar.JarEntry;
@@ -184,7 +186,8 @@ public class BcryptMontoyaTab extends JPanel {
             initPyEnv();
             pyInterp.exec(getCode());
             py_functions = getPyFunctions();
-            BcryptMontoyaTabs.registerTabExtender(this);
+//            BcryptMontoyaTabs.registerTabExtender(this);
+            registerTabExtender();
             PyObject pythonArguments = Py.java2py(myContextMenu);
             if(py_functions.containsKey("registerContextMenu")){
                 py_functions.get("registerContextMenu").__call__(pythonArguments);
@@ -357,6 +360,7 @@ public class BcryptMontoyaTab extends JPanel {
                 "handleRequest", "handleResponse",
                 "handleProxyRequest", "handleProxyResponse",
                 "urlPrefixAllowed",
+                "handleInteraction",
                 "finish"
         ));
 
@@ -416,5 +420,35 @@ public class BcryptMontoyaTab extends JPanel {
 
     public STATUS getStatus(){
         return this.status;
+    }
+
+    public void registerTabExtender(){
+        plugins = new ArrayList<>();
+        if(py_functions.containsKey("registerContextMenu")){
+            plugins.add(BcryptMontoya.Api.userInterface().registerContextMenuItemsProvider(myContextMenu));
+        }
+
+        if(py_functions.containsKey("passiveAudit") || py_functions.containsKey("activeAudit")){
+            plugins.add(BcryptMontoya.Api.scanner().registerScanCheck(new MyScanCheck(this)));
+        }
+
+        if(py_functions.containsKey("handleRequest") || py_functions.containsKey("handleResponse")){
+            plugins.add(BcryptMontoya.Api.http().registerHttpHandler(new MyHttpHandler(this)));
+        }
+
+        if(py_functions.containsKey("handleProxyRequest")){
+            plugins.add(BcryptMontoya.Api.proxy().registerRequestHandler(new MyProxyRequestHandler(this)));
+        }
+
+        if(py_functions.containsKey("handleProxyResponse")){
+            plugins.add(BcryptMontoya.Api.proxy().registerResponseHandler(new MyProxyResponseHandler(this)));
+        }
+
+        if(py_functions.containsKey("handleInteraction")){
+            Poller collaboratorPoller = new Poller(BcryptMontoyaTabs.collaboratorClient, Duration.ofSeconds(10));
+            collaboratorPoller.registerInteractionHandler(new MyInteractionHandler(this));
+            collaboratorPoller.start();
+            plugins.add(collaboratorPoller);
+        }
     }
 }

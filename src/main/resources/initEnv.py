@@ -25,6 +25,7 @@ from burp.api.montoya.core.Annotations import annotations
 from burp.api.montoya.scanner.audit.issues.AuditIssue import auditIssue
 from burp.api.montoya.scanner.audit.insertionpoint.AuditInsertionPoint import auditInsertionPoint
 from io.github.cyal1.bcryptmontoya.MyContextMenuItemsProvider import getSelectedText, replaceSelectedText
+from io.github.cyal1.bcryptmontoya.BcryptMontoyaTabs import getOOBUrl
 
 import sys
 

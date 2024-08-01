@@ -8,7 +8,7 @@ BcryptMontoya draws inspiration from the popular [Turbo Intruder](https://github
 
 ## Features
 ### working with frida [here](https://youtu.be/zfvNqd5VmY0).
-### working with chrome [here](https://youtu.be/zIyB4YSaA0U)
+### working with chrome [here](https://youtu.be/g8cT4YJwGM4)
 
 ## Snapshot
 

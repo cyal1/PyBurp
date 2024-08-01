@@ -3,7 +3,6 @@ package io.github.cyal1.bcryptmontoya;
 import com.google.protobuf.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.StatusRuntimeException;
 
 public class CallFuncClient {
     private final ManagedChannel channel;
@@ -55,12 +54,11 @@ public class CallFuncClient {
             }else if(result.is(BytesValue.class)){
                 return result.unpack(BytesValue.class).getValue();
             }else{
-                throw new RuntimeException("unexcept type returned");
+                throw new RuntimeException("unexcept type returned, only allowed StringValue,Int64Value,DoubleValue,BoolValue,BytesValue");
             }
-        } catch (StatusRuntimeException e) {
-            throw new RuntimeException("RPC failed: " + e.getStatus());
-        } catch (InvalidProtocolBufferException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e){
+            BcryptMontoya.Api.logging().logToError(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 

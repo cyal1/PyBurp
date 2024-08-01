@@ -34,9 +34,13 @@ public class MyHttpHandler implements HttpHandler
         if(!bcryptMontoyaTab.isPrefixAllowed(httpRequestToBeSent.url())){
             return RequestToBeSentAction.continueWith(httpRequestToBeSent, httpRequestToBeSent.annotations());
         }
-
-        ArrayList<Object> array = bcryptMontoyaTab.invokePyRequest(httpRequestToBeSent, httpRequestToBeSent.annotations(), "handleRequest");
-        return RequestToBeSentAction.continueWith((HttpRequest) array.get(0), (Annotations) array.get(1));
+        try{
+            ArrayList<Object> array = bcryptMontoyaTab.invokePyRequest(httpRequestToBeSent, httpRequestToBeSent.annotations(), "handleRequest");
+            return RequestToBeSentAction.continueWith((HttpRequest) array.get(0), (Annotations) array.get(1));
+        }catch (Exception e){
+            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+        }
+        return RequestToBeSentAction.continueWith(httpRequestToBeSent, httpRequestToBeSent.annotations());
     }
     @Override
     public ResponseReceivedAction handleHttpResponseReceived(HttpResponseReceived httpResponseReceived) {
@@ -50,7 +54,12 @@ public class MyHttpHandler implements HttpHandler
             return ResponseReceivedAction.continueWith(httpResponseReceived, httpResponseReceived.annotations());
         }
 
-        ArrayList<Object> array = bcryptMontoyaTab.invokePyResponse(httpResponseReceived, httpResponseReceived.annotations(), "handleResponse");
-        return ResponseReceivedAction.continueWith((HttpResponse) array.get(0), (Annotations) array.get(1));
+        try{
+            ArrayList<Object> array = bcryptMontoyaTab.invokePyResponse(httpResponseReceived, httpResponseReceived.annotations(), "handleResponse");
+            return ResponseReceivedAction.continueWith((HttpResponse) array.get(0), (Annotations) array.get(1));
+        }catch (Exception e){
+            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+        }
+        return ResponseReceivedAction.continueWith(httpResponseReceived, httpResponseReceived.annotations());
     }
 }

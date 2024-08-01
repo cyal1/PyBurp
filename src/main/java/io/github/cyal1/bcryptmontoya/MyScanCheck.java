@@ -20,9 +20,9 @@ class MyScanCheck implements ScanCheck {
     @Override
     public AuditResult activeAudit(HttpRequestResponse baseRequestResponse, AuditInsertionPoint auditInsertionPoint) {
         PyFunction activeAudit = bcryptMontoyaTab.py_functions.get("activeAudit");
-        if (activeAudit == null) {
-            return AuditResult.auditResult();
-        }
+//        if (activeAudit == null) {
+//            return AuditResult.auditResult();
+//        }
         PyObject[] pythonArguments = new PyObject[2];
         pythonArguments[0] = Py.java2py(baseRequestResponse);
         pythonArguments[1] = Py.java2py(auditInsertionPoint);
@@ -36,9 +36,9 @@ class MyScanCheck implements ScanCheck {
     @Override
     public AuditResult passiveAudit(HttpRequestResponse baseRequestResponse) {
         PyFunction passiveAudit = bcryptMontoyaTab.py_functions.get("passiveAudit");
-        if (passiveAudit == null) {
-            return AuditResult.auditResult();
-        }
+//        if (passiveAudit == null) {
+//            return AuditResult.auditResult();
+//        }
 
         PyObject pythonArguments = Py.java2py(baseRequestResponse);
         AuditResult r = (AuditResult) passiveAudit.__call__(pythonArguments).__tojava__(AuditResult.class);;

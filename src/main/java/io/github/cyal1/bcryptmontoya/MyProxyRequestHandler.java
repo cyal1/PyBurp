@@ -32,7 +32,7 @@ public class MyProxyRequestHandler implements ProxyRequestHandler {
             ArrayList<Object> array = bcryptMontoyaTab.invokePyRequest(interceptedRequest, interceptedRequest.annotations(), "handleProxyRequest");
             return ProxyRequestReceivedAction.continueWith((HttpRequest) array.get(0), (Annotations) array.get(1));
         }catch (Exception e){
-            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+            BcryptMontoyaTabs.logTextArea.append(e.getMessage());
         }
         return ProxyRequestReceivedAction.continueWith(interceptedRequest, interceptedRequest.annotations());
     }

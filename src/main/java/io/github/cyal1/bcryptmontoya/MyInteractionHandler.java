@@ -15,7 +15,7 @@ public class MyInteractionHandler implements InteractionHandler {
         try {
             bcryptMontoyaTab.py_functions.get("handleInteraction").__call__(Py.java2py(interaction));
         }catch (Exception e){
-            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+            BcryptMontoyaTabs.logTextArea.append(e.getMessage());
         }
     }
 }

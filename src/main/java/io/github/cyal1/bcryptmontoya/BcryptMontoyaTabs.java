@@ -6,20 +6,36 @@ import burp.api.montoya.collaborator.SecretKey;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 
 public class BcryptMontoyaTabs extends JPanel {
     public static int sequence = 2;
     private static JTabbedPane tabbedPane;
-
+    public static JTextArea logTextArea;
+    private static JSplitPane jSplitPane;
     public static CollaboratorClient collaboratorClient = createCollaboratorClient();
 
     public BcryptMontoyaTabs() {
         tabbedPane = new JTabbedPane();
         tabbedPane.add(" 1 ", new BcryptMontoyaTab());
         tabbedPane.add("+", null);
+        jSplitPane = new JSplitPane();
+        jSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
+        logTextArea = new JTextArea(0,0);
+        logTextArea.setLineWrap(true);
+        logTextArea.setWrapStyleWord(true);
+        DefaultCaret caret = (DefaultCaret) logTextArea.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        JScrollPane bottomScrollPane= new JScrollPane(logTextArea);
+        bottomScrollPane.setBorder(null);
+        jSplitPane.setTopComponent(tabbedPane);
+        bottomScrollPane.setMinimumSize(new Dimension(0,0));
+        jSplitPane.setBottomComponent(bottomScrollPane);
+        jSplitPane.setResizeWeight(1.0);
+        jSplitPane.setDividerLocation(1.0);
         this.setLayout(new BorderLayout());
-        this.add(tabbedPane, BorderLayout.CENTER);
+        this.add(jSplitPane, BorderLayout.CENTER);
 
         tabbedPane.getModel().addChangeListener(new ChangeListener() {
             private boolean ignore = false;
@@ -89,5 +105,16 @@ public class BcryptMontoyaTabs extends JPanel {
 
     public static String getOOBUrl(){
         return collaboratorClient.generatePayload().toString();
+    }
+
+    public static void showLogConsole(){
+        if (jSplitPane.getResizeWeight() > 0.9) {
+            jSplitPane.setResizeWeight(0.8);
+            jSplitPane.setDividerLocation(0.8);
+        }
+    }
+
+    public static String getCurrentTabId(){
+        return  tabbedPane.getTitleAt(tabbedPane.getSelectedIndex());
     }
 }

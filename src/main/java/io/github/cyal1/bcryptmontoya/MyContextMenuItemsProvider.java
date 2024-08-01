@@ -128,7 +128,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                         menuItemList.add(retrieveRequestItem);
                     }
                     default -> {
-                        bcryptMontoyaTab.logTextArea.append("No Such Menu Type, Menu Type must be CARET, SELECTED_TEXT, MESSAGE_EDITOR, REQUEST, REQUEST_RESPONSE");
+                        BcryptMontoyaTabs.logTextArea.append("No Such Menu Type, Menu Type must be CARET, SELECTED_TEXT, MESSAGE_EDITOR, REQUEST, REQUEST_RESPONSE");
                         throw new RuntimeException("no such Menu Type " + type);
                     }
                 }
@@ -155,7 +155,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 func.__call__(pythonArguments);
             }
         }catch (Exception e){
-            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+            BcryptMontoyaTabs.logTextArea.append(e.getMessage());
         }
     }
 
@@ -181,7 +181,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 func.__call__(pythonArguments);
             }
         }catch (Exception e){
-            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+            BcryptMontoyaTabs.logTextArea.append(e.getMessage());
         }
     }
 
@@ -204,7 +204,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
             String newText = (String) r.__tojava__(String.class);
             messageEditor.setRequest(HttpRequest.httpRequest(firstSection.withAppended(newText).withAppended(lastSection)));
         }catch (Exception e){
-            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+            BcryptMontoyaTabs.logTextArea.append(e.getMessage());
         }
     }
 
@@ -234,7 +234,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 dialog.setVisible(true);
             }
         }catch (Exception e){
-            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+            BcryptMontoyaTabs.logTextArea.append(e.getMessage());
         }
     }
 
@@ -243,7 +243,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
             PyObject pythonArguments = Py.java2py(event.messageEditorRequestResponse().get());
             func.__call__(pythonArguments);
         }catch (Exception e){
-            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+            BcryptMontoyaTabs.logTextArea.append(e.getMessage());
         }
 
     }

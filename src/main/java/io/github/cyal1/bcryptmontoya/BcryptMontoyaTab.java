@@ -11,9 +11,7 @@ import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.python.core.*;
 import org.python.util.PythonInterpreter;
-
 import javax.swing.*;
-import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +24,9 @@ import java.util.List;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
+import static io.github.cyal1.bcryptmontoya.BcryptMontoyaTabs.collaboratorClient;
+import static io.github.cyal1.bcryptmontoya.BcryptMontoyaTabs.logTextArea;
 
 public class BcryptMontoyaTab extends JPanel {
     public enum STATUS {
@@ -45,8 +46,8 @@ public class BcryptMontoyaTab extends JPanel {
     JButton loadDirectoryButton = new JButton("Choose scripts dir");
     JButton closeTab = new JButton("Close");
     RSyntaxTextArea codeEditor = new RSyntaxTextArea();
-    JSplitPane jSplitPane;
-    JTextArea logTextArea;
+//    JSplitPane jSplitPane;
+//    JTextArea logTextArea;
 
     public BcryptMontoyaTab(){
         javax.swing.text.JTextComponent.removeKeymap("RTextAreaKeymap");
@@ -78,27 +79,11 @@ public class BcryptMontoyaTab extends JPanel {
         toolBar.add(runButton);
         toolBar.add(clearLogButton);
         toolBar.add(closeTab);
-
-        jSplitPane = new JSplitPane();
-        jSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-        logTextArea = new JTextArea(0,0);
-        logTextArea.setLineWrap(true);
-        logTextArea.setWrapStyleWord(true);
-        DefaultCaret caret = (DefaultCaret) logTextArea.getCaret();
-        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-
-        JScrollPane bottomScrollPane= new JScrollPane(logTextArea);
         JPanel topPane = new JPanel(new BorderLayout());
         topPane.add(toolBar, BorderLayout.NORTH);
         topPane.add(scrollableTextEditor, BorderLayout.CENTER);
-        bottomScrollPane.setBorder(null);
-        jSplitPane.setTopComponent(topPane);
-        bottomScrollPane.setMinimumSize(new Dimension(0,0));
-        jSplitPane.setBottomComponent(bottomScrollPane);
-        jSplitPane.setResizeWeight(1.0);
-        jSplitPane.setDividerLocation(1.0);
         this.setLayout(new BorderLayout());
-        this.add(jSplitPane, BorderLayout.CENTER);
+        this.add(topPane, BorderLayout.CENTER);
 
         codeEditor.setText(getDefaultScript());
         if(BcryptMontoya.Api.userInterface().currentTheme() == burp.api.montoya.ui.Theme.DARK){
@@ -182,11 +167,12 @@ public class BcryptMontoyaTab extends JPanel {
     }
 
     private void runBtnClick(){
+        BcryptMontoyaTabs.showLogConsole();
+        logTextArea.append("Tab " + BcryptMontoyaTabs.getCurrentTabId() + " is running\n");
         try{
             initPyEnv();
             pyInterp.exec(getCode());
             py_functions = getPyFunctions();
-//            BcryptMontoyaTabs.registerTabExtender(this);
             registerTabExtender();
             PyObject pythonArguments = Py.java2py(myContextMenu);
             if(py_functions.containsKey("registerContextMenu")){
@@ -209,12 +195,7 @@ public class BcryptMontoyaTab extends JPanel {
         status = STATUS.RUNNING;
         runButton.setText("Stop");
         BcryptMontoya.Api.persistence().preferences().setString("defaultScript", getCode().replace("\r\n","\n"));
-        if (jSplitPane.getResizeWeight() > 0.9) {
-            jSplitPane.setResizeWeight(0.7);
-            jSplitPane.setDividerLocation(0.7);
-        }
         BcryptMontoyaTabs.setTabColor(Color.decode("#ec6033"));
-        logTextArea.append("start script\n");
     }
 
     public void stopBtnClick(){
@@ -241,7 +222,7 @@ public class BcryptMontoyaTab extends JPanel {
         }
         BcryptMontoyaTabs.setTabColor(Color.black);
 //        initPyEnv();
-        logTextArea.append("stopped script\n");
+        logTextArea.append("Tab " + BcryptMontoyaTabs.getCurrentTabId() + " is stopped\n");
     }
 
     private void initPyEnv(){
@@ -394,7 +375,7 @@ public class BcryptMontoyaTab extends JPanel {
         PyTuple result = (PyTuple) py_functions.get(pyFuncName).__call__(pythonArguments);
         HttpRequest newHttpRequest;
         if(result.__len__() != 2){
-            this.logTextArea.append(pyFuncName+ " return type error");
+            logTextArea.append(pyFuncName+ " return type error");
             return new ArrayList<>(List.of(httpRequest, annotations));
         }
         newHttpRequest = (HttpRequest) result.get(0);
@@ -410,7 +391,7 @@ public class BcryptMontoyaTab extends JPanel {
         HttpResponse newHttpResponse;
         // jython need to return response and annotations
         if (result.__len__() != 2){
-            this.logTextArea.append(pyFuncName+ " return type error");
+            logTextArea.append(pyFuncName+ " return type error");
             return new ArrayList<>(List.of(httpResponse, annotations));
         }
         newHttpResponse = (HttpResponse) result.get(0);
@@ -445,7 +426,7 @@ public class BcryptMontoyaTab extends JPanel {
         }
 
         if(py_functions.containsKey("handleInteraction")){
-            Poller collaboratorPoller = new Poller(BcryptMontoyaTabs.collaboratorClient, Duration.ofSeconds(10));
+            Poller collaboratorPoller = new Poller(collaboratorClient, Duration.ofSeconds(10));
             collaboratorPoller.registerInteractionHandler(new MyInteractionHandler(this));
             collaboratorPoller.start();
             plugins.add(collaboratorPoller);

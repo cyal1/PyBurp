@@ -26,13 +26,13 @@ public class MyHttpHandler implements HttpHandler
     @Override
     public RequestToBeSentAction handleHttpRequestToBeSent(HttpRequestToBeSent httpRequestToBeSent) {
 
-        if(bcryptMontoyaTab.getStatus() == BcryptMontoyaTab.STATUS.STOP || !bcryptMontoyaTab.py_functions.containsKey("handleRequest")){
-            return RequestToBeSentAction.continueWith(httpRequestToBeSent);
+        if(!bcryptMontoyaTab.py_functions.containsKey("handleRequest")){
+            return RequestToBeSentAction.continueWith(httpRequestToBeSent, httpRequestToBeSent.annotations());
         }
 
         // url prefix allowed
         if(!bcryptMontoyaTab.isPrefixAllowed(httpRequestToBeSent.url())){
-            return RequestToBeSentAction.continueWith(httpRequestToBeSent);
+            return RequestToBeSentAction.continueWith(httpRequestToBeSent, httpRequestToBeSent.annotations());
         }
 
         ArrayList<Object> array = bcryptMontoyaTab.invokePyRequest(httpRequestToBeSent, httpRequestToBeSent.annotations(), "handleRequest");
@@ -41,13 +41,13 @@ public class MyHttpHandler implements HttpHandler
     @Override
     public ResponseReceivedAction handleHttpResponseReceived(HttpResponseReceived httpResponseReceived) {
 
-        if(bcryptMontoyaTab.getStatus() == BcryptMontoyaTab.STATUS.STOP || !bcryptMontoyaTab.py_functions.containsKey("handleResponse")){
-            return ResponseReceivedAction.continueWith(httpResponseReceived);
+        if(!bcryptMontoyaTab.py_functions.containsKey("handleResponse")){
+            return ResponseReceivedAction.continueWith(httpResponseReceived, httpResponseReceived.annotations());
         }
 
         // url prefix allowed
         if(!bcryptMontoyaTab.isPrefixAllowed(httpResponseReceived.initiatingRequest().url())){
-            return ResponseReceivedAction.continueWith(httpResponseReceived);
+            return ResponseReceivedAction.continueWith(httpResponseReceived, httpResponseReceived.annotations());
         }
 
         ArrayList<Object> array = bcryptMontoyaTab.invokePyResponse(httpResponseReceived, httpResponseReceived.annotations(), "handleResponse");

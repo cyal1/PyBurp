@@ -1,6 +1,7 @@
 
 # grpc example server
-# https://github.com/cyal1/BcryptRpcServer/tree/main/python
+# https://github.com/cyal1/BcryptRpcServer/blob/main/examples/server_frida.py
+# https://youtu.be/zfvNqd5VmY0
 
 
 server = Grpc("localhost",30051)

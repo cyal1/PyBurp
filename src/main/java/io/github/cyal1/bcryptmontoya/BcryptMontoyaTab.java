@@ -30,12 +30,12 @@ public class BcryptMontoyaTab extends JPanel {
         RUNNING,
         STOP
     }
-    public static ArrayList<String> ALLOWED_URL_PREFIX;
+    public ArrayList<String> ALLOWED_URL_PREFIX;
     private STATUS status = STATUS.STOP;
     public MyContextMenuItemsProvider myContextMenu;
     public HashMap<String, PyFunction> py_functions;
     public ArrayList<Registration> plugins;
-    PythonInterpreter pyInterp;
+    private PythonInterpreter pyInterp;
     JButton saveButton = new JButton("Save");
     JButton runButton = new JButton("Run");
     JButton clearLogButton = new JButton("Clear logs");
@@ -63,7 +63,7 @@ public class BcryptMontoyaTab extends JPanel {
         codeEditor.setLineWrap(true);
         codeEditor.setWrapStyleWord(true);
         codeEditor.setHighlightCurrentLine(true);
-////        textEditor.setWhitespaceVisible(true);
+//        textEditor.setWhitespaceVisible(true);
         RTextScrollPane scrollableTextEditor = new RTextScrollPane( codeEditor );
         JPanel toolBar = new JPanel();
         codeCombo.setRenderer(new ComboBoxRenderer(6));
@@ -126,6 +126,7 @@ public class BcryptMontoyaTab extends JPanel {
             if (getStatus() == STATUS.RUNNING){
                 stopBtnClick();
             }
+            logTextArea.setText("");
             BcryptMontoyaTabs.closeTab();
         });
 
@@ -180,7 +181,7 @@ public class BcryptMontoyaTab extends JPanel {
 
     private void runBtnClick(){
         try{
-//            initPyEnv();
+            initPyEnv();
             pyInterp.exec(getCode());
             py_functions = getPyFunctions();
             BcryptMontoyaTabs.registerTabExtender(this);
@@ -194,7 +195,8 @@ public class BcryptMontoyaTab extends JPanel {
                 py_functions.get("urlPrefixAllowed").__call__(urls);
             }
         }catch (Exception ex){
-            JOptionPane.showMessageDialog(null, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
+            logTextArea.append(ex.getMessage());
+//            JOptionPane.showMessageDialog(null, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         codeEditor.setHighlightCurrentLine(false);
@@ -218,11 +220,12 @@ public class BcryptMontoyaTab extends JPanel {
                 py_functions.get("finish").__call__();
             }
         } catch (Exception e){
-            BcryptMontoya.Api.logging().logToError(e.getMessage());
+            logTextArea.append(e.getMessage());
         }
         myContextMenu.MENUS.clear();
         ALLOWED_URL_PREFIX.clear();
         py_functions.clear();
+        pyInterp.cleanup();
         pyInterp.close();
         codeEditor.setHighlightCurrentLine(true);
         codeEditor.setEnabled(true);
@@ -234,7 +237,7 @@ public class BcryptMontoyaTab extends JPanel {
             plugin.deregister();
         }
         BcryptMontoyaTabs.setTabColor(Color.black);
-        initPyEnv();
+//        initPyEnv();
         logTextArea.append("stopped script\n");
     }
 
@@ -380,39 +383,35 @@ public class BcryptMontoyaTab extends JPanel {
         return functionList;
     }
 
-    public <T extends HttpRequest> ArrayList<Object> invokePyRequest(T httpRequest, Annotations annotations, String pyFuncName){
+    public ArrayList<Object> invokePyRequest(HttpRequest httpRequest, Annotations annotations, String pyFuncName){
         PyObject[] pythonArguments = new PyObject[2];
         pythonArguments[0] = Py.java2py(httpRequest);
         pythonArguments[1] = Py.java2py(annotations);
-        PyObject result = py_functions.get(pyFuncName).__call__(pythonArguments);
+        PyTuple result = (PyTuple) py_functions.get(pyFuncName).__call__(pythonArguments);
         HttpRequest newHttpRequest;
-        if (result instanceof PyTuple tupleResult) {
-            if(tupleResult.__len__() != 2){
-                return new ArrayList<>(List.of(httpRequest, annotations));
-            }
-            newHttpRequest = (HttpRequest) tupleResult.__getitem__(0).__tojava__(HttpRequest.class);
-            annotations = (Annotations) tupleResult.__getitem__(1).__tojava__(Annotations.class);
-            return new ArrayList<>(List.of(newHttpRequest, annotations));
+        if(result.__len__() != 2){
+            this.logTextArea.append(pyFuncName+ " return type error");
+            return new ArrayList<>(List.of(httpRequest, annotations));
         }
-        return new ArrayList<>(List.of(httpRequest, annotations));
+        newHttpRequest = (HttpRequest) result.get(0);
+        annotations = (Annotations) result.get(1);
+        return new ArrayList<>(List.of(newHttpRequest, annotations));
     }
 
-    public <T extends HttpResponse> ArrayList<Object> invokePyResponse (T httpResponse, Annotations annotations, String pyFuncName){
+    public ArrayList<Object> invokePyResponse (HttpResponse httpResponse, Annotations annotations, String pyFuncName){
         PyObject[] pythonArguments = new PyObject[2];
         pythonArguments[0] = Py.java2py(httpResponse);
         pythonArguments[1] = Py.java2py(annotations);
-        PyObject result =  py_functions.get(pyFuncName).__call__(pythonArguments);
+        PyTuple result = (PyTuple) py_functions.get(pyFuncName).__call__(pythonArguments);
         HttpResponse newHttpResponse;
         // jython need to return response and annotations
-        if (result instanceof PyTuple tupleResult) {
-            if (tupleResult.__len__() != 2){
-                return new ArrayList<>(List.of(httpResponse, annotations));
-            }
-            newHttpResponse = (HttpResponse) tupleResult.__getitem__(0).__tojava__(HttpResponse.class);
-            annotations = (Annotations) tupleResult.__getitem__(1).__tojava__(Annotations.class);
-            return new ArrayList<>(List.of(newHttpResponse, annotations));
+        if (result.__len__() != 2){
+            this.logTextArea.append(pyFuncName+ " return type error");
+            return new ArrayList<>(List.of(httpResponse, annotations));
         }
-        return new ArrayList<>(List.of(httpResponse, annotations));
+        newHttpResponse = (HttpResponse) result.get(0);
+        annotations = (Annotations) result.get(1);
+        return new ArrayList<>(List.of(newHttpResponse, annotations));
     }
 
     public STATUS getStatus(){

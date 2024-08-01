@@ -1,7 +1,7 @@
 """
 
                   handleProxyRequest                         handleRequest
-      client   -----------------------> BurpSuit proxy ----------------------->  server
+      client   ----------------------->    BurpSuit    ----------------------->  server
      (browser) <-----------------------                <-----------------------
                   handleProxyResponse                        handleResponse
 

@@ -37,7 +37,7 @@ def log4shell(request):
 # When performing network I/O or other time-consuming operations, the main thread's user interface (UI) gets blocked
 # until these operations are completed. By delegating time-consuming network I/O operations to threads(@run_in_thread),
 # the main thread can continue executing other tasks without being blocked.
-@run_in_pool(pool)
+@run_in_thread
 def race_condition_10(request):
     print("race condition requests:", request.url())
     sendRequests([request] * 10)
@@ -184,7 +184,7 @@ def process_path_list(path, nest_level):
         pocs.extend(middle_bypass_poc(path1, path2))
     return pocs
 
-@run_in_pool(pool)
+@run_in_thread
 def router_bypass(request, response):
     print("send spring bypass requests:", request.url())
     origin_status_code = response.statusCode()
@@ -204,6 +204,7 @@ def router_bypass(request, response):
                                 AuditIssueSeverity.HIGH, AuditIssueConfidence.CERTAIN, "String background",
                                 "String remediationBackground", AuditIssueSeverity.MEDIUM, requestResponse))
 
+@run_in_thread
 def sendRequestWithProxy(request):
     proxy = "127.0.0.1:9999"
     method = request.method().encode()
@@ -215,7 +216,7 @@ def sendRequestWithProxy(request):
     body = request.bodyToString().encode("utf-8")
     send_request_with_proxy(url, method, headers, body, proxy)
 
-@run_in_pool(pool)
+
 def send_request_with_proxy(url, method, headers, body, proxy):
     # Set the proxy information
     proxy_handler = urllib2.ProxyHandler({'http': proxy, 'https': proxy})

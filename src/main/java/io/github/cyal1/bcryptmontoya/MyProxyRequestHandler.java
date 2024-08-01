@@ -18,13 +18,13 @@ public class MyProxyRequestHandler implements ProxyRequestHandler {
     @Override
     public ProxyRequestReceivedAction handleRequestReceived(InterceptedRequest interceptedRequest) {
 
-        if(bcryptMontoyaTab.getStatus() == BcryptMontoyaTab.STATUS.STOP || !bcryptMontoyaTab.py_functions.containsKey("handleProxyRequest")){
-            return ProxyRequestReceivedAction.continueWith(interceptedRequest);
+        if(!bcryptMontoyaTab.py_functions.containsKey("handleProxyRequest")){
+            return ProxyRequestReceivedAction.continueWith(interceptedRequest, interceptedRequest.annotations());
         }
 
         // url prefix allowed
         if(!bcryptMontoyaTab.isPrefixAllowed(interceptedRequest.url())){
-            return ProxyRequestReceivedAction.continueWith(interceptedRequest);
+            return ProxyRequestReceivedAction.continueWith(interceptedRequest, interceptedRequest.annotations());
         }
         // todo drop
         ArrayList<Object> array = bcryptMontoyaTab.invokePyRequest(interceptedRequest, interceptedRequest.annotations(), "handleProxyRequest");
@@ -33,6 +33,6 @@ public class MyProxyRequestHandler implements ProxyRequestHandler {
     // after intercept
     @Override
     public ProxyRequestToBeSentAction handleRequestToBeSent(InterceptedRequest interceptedRequest) {
-        return ProxyRequestToBeSentAction.continueWith(interceptedRequest);
+        return ProxyRequestToBeSentAction.continueWith(interceptedRequest, interceptedRequest.annotations());
     }
 }

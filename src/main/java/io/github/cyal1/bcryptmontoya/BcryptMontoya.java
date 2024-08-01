@@ -40,8 +40,6 @@ public class BcryptMontoya implements BurpExtension
         api.extension().setName("BcryptMontoya");
         api.userInterface().registerSuiteTab("BcryptMontoya", new BcryptMontoyaTabs());
         api.userInterface().registerContextMenuItemsProvider(new ContentTypeContextMenu());
-        // it can implement in script, just json.dumps(json.loads(j), ensure_ascii=False)
-//        api.userInterface().registerHttpResponseEditorProvider(new MyHttpResponseEditorProvider());
     }
 
     public static void addIssue(AuditIssue auditIssue){

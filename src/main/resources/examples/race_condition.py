@@ -11,8 +11,8 @@ if request.body().length() != 0:
     request = request.withHeader("Content-Length", str(request.body().length()))
 
 
-
 pool = RequestPool(10)
+
 @run_in_pool(pool)
 def race_condition():
     """

@@ -46,8 +46,7 @@ public class BcryptMontoyaTab extends JPanel {
     JButton loadDirectoryButton = new JButton("Choose scripts dir");
     JButton closeTab = new JButton("Close");
     RSyntaxTextArea codeEditor = new RSyntaxTextArea();
-//    JSplitPane jSplitPane;
-//    JTextArea logTextArea;
+
 
     public BcryptMontoyaTab(){
         javax.swing.text.JTextComponent.removeKeymap("RTextAreaKeymap");
@@ -170,6 +169,7 @@ public class BcryptMontoyaTab extends JPanel {
         BcryptMontoyaTabs.showLogConsole();
         logTextArea.append("Tab " + BcryptMontoyaTabs.getCurrentTabId() + " is running\n");
         try{
+            new Thread(() -> {
             initPyEnv();
             pyInterp.exec(getCode());
             py_functions = getPyFunctions();
@@ -183,6 +183,7 @@ public class BcryptMontoyaTab extends JPanel {
             if(py_functions.containsKey("urlPrefixAllowed")){
                 py_functions.get("urlPrefixAllowed").__call__(urls);
             }
+            }).start();
         }catch (Exception ex){
             logTextArea.append(ex.getMessage());
 //            JOptionPane.showMessageDialog(null, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
@@ -231,10 +232,12 @@ public class BcryptMontoyaTab extends JPanel {
             final int MAX_LINES = 10000;
             @Override
             public void write(int b) {
-                logTextArea.append(String.valueOf((char) b));
-                if (logTextArea.getLineCount() > MAX_LINES) {
-                    removeLines(logTextArea, logTextArea.getLineCount() - MAX_LINES);
-                }
+                SwingUtilities.invokeLater(() -> {
+                    logTextArea.append(String.valueOf((char) b));
+                    if (logTextArea.getLineCount() > MAX_LINES) {
+                        removeLines(logTextArea, logTextArea.getLineCount() - MAX_LINES);
+                    }
+                });
             }
         });
 //        System.setOut(printStream);

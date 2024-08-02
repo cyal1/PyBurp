@@ -9,12 +9,13 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
 
-public class BcryptMontoyaTabs extends JPanel {
+public class BcryptMontoyaTabs extends JFrame {
     public static int sequence = 2;
     private static JTabbedPane tabbedPane;
     public static JTextArea logTextArea;
     private static JSplitPane jSplitPane;
     public static CollaboratorClient collaboratorClient = createCollaboratorClient();
+    public JMenu show;
 
     public BcryptMontoyaTabs() {
         tabbedPane = new JTabbedPane();
@@ -34,8 +35,17 @@ public class BcryptMontoyaTabs extends JPanel {
         jSplitPane.setBottomComponent(bottomScrollPane);
         jSplitPane.setResizeWeight(1.0);
         jSplitPane.setDividerLocation(1.0);
+        this.setVisible(true);
+        this.setSize(900,500);
+        this.setTitle("BcyrptMontoya");
+        this.setDefaultCloseOperation(HIDE_ON_CLOSE);
         this.setLayout(new BorderLayout());
         this.add(jSplitPane, BorderLayout.CENTER);
+
+        show = new JMenu("BcryptMontoya");
+        JMenuItem showItem = new JMenuItem("Show");
+        show.add(showItem);
+        showItem.addActionListener(e -> this.setVisible(true));
 
         tabbedPane.getModel().addChangeListener(new ChangeListener() {
             private boolean ignore = false;

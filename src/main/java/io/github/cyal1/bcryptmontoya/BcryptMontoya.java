@@ -18,8 +18,11 @@ import burp.api.montoya.proxy.Proxy;
 import burp.api.montoya.scanner.audit.issues.AuditIssue;
 import burp.api.montoya.utilities.Utilities;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class BcryptMontoya implements BurpExtension
 {
@@ -38,8 +41,21 @@ public class BcryptMontoya implements BurpExtension
         // https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/utilities/Utilities.html
         BcryptMontoya.Utils = api.utilities();
         api.extension().setName("BcryptMontoya");
-        api.userInterface().registerSuiteTab("BcryptMontoya", new BcryptMontoyaTabs());
+        BcryptMontoyaTabs bcryptMontoyaTabs = new BcryptMontoyaTabs();
         api.userInterface().registerContextMenuItemsProvider(new ContentTypeContextMenu());
+
+        JMenuBar burpMenuBar = Objects.requireNonNull(getBurpFrame()).getJMenuBar();
+        burpMenuBar.add(bcryptMontoyaTabs.show);
+        burpMenuBar.repaint();
+        api.extension().registerUnloadingHandler(() -> {
+            bcryptMontoyaTabs.dispose();
+            try {
+                burpMenuBar.remove(bcryptMontoyaTabs.show);
+                burpMenuBar.repaint();
+            } catch (NullPointerException ignored) {
+
+            }
+        });
     }
 
     public static void addIssue(AuditIssue auditIssue){
@@ -68,5 +84,16 @@ public class BcryptMontoya implements BurpExtension
             start += match.length();
         }
         return highlights;
+    }
+    public static JFrame getBurpFrame()
+    {
+        for(Frame f : Frame.getFrames())
+        {
+            if(f.isVisible() && f.getTitle().startsWith(("Burp Suite")))
+            {
+                return (JFrame) f;
+            }
+        }
+        return null;
     }
 }

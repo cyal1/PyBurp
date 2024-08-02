@@ -54,7 +54,8 @@ public class Poller implements Registration {
     public boolean isRegistered() {
         return true;
     }
-
+    
+    @Override
     public void deregister(){
         schedule.cancel(true);
         scheduledThreadPoolExecutor.shutdown();

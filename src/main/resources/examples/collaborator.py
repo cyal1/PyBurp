@@ -6,7 +6,16 @@ from burp.api.montoya.scanner.audit.issues.AuditIssue import auditIssue
 def handleInteraction(interaction):
     t = interaction.type()
     oob_id = interaction.id().toString()
-    print("Received: ", t, oob_id)
+    clientIp = interaction.clientIp()
+    clientPort = interaction.clientPort()
+    print(clientIp, clientPort, t, oob_id)
+
+    dnsDetails = interaction.dnsDetails()
+    httpDetails = interaction.httpDetails()
+    if dnsDetails.isPresent():
+        print(dnsDetails.get().query().toString())
+    if httpDetails.isPresent():
+        print(httpDetails.get().requestResponse().request())
 
     proxyHttpRequestResponseList = history(lambda rr: oob_id in rr.finalRequest().toString())
     for item in proxyHttpRequestResponseList:

@@ -166,10 +166,8 @@ public class BcryptMontoyaTab extends JPanel {
     }
 
     private void runBtnClick(){
-        BcryptMontoyaTabs.showLogConsole();
-        logTextArea.append("Tab " + BcryptMontoyaTabs.getCurrentTabId() + " is running\n");
+        new Thread(() -> {
         try{
-            new Thread(() -> {
             initPyEnv();
             pyInterp.exec(getCode());
             py_functions = getPyFunctions();
@@ -183,20 +181,27 @@ public class BcryptMontoyaTab extends JPanel {
             if(py_functions.containsKey("urlPrefixAllowed")){
                 py_functions.get("urlPrefixAllowed").__call__(urls);
             }
-            }).start();
         }catch (Exception ex){
-            logTextArea.append(ex.getMessage());
+            SwingUtilities.invokeLater(() -> {
+                BcryptMontoyaTabs.showLogConsole();
+                logTextArea.append(ex.getMessage() + "\n");
+            });
 //            JOptionPane.showMessageDialog(null, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        codeEditor.setHighlightCurrentLine(false);
-        codeEditor.setEnabled(false);
-        loadDirectoryButton.setEnabled(false);
-        codeCombo.setEnabled(false);
-        status = STATUS.RUNNING;
-        runButton.setText("Stop");
-        BcryptMontoya.Api.persistence().preferences().setString("defaultScript", getCode().replace("\r\n","\n"));
-        BcryptMontoyaTabs.setTabColor(Color.decode("#ec6033"));
+            SwingUtilities.invokeLater(() -> {
+                BcryptMontoyaTabs.showLogConsole();
+                logTextArea.append("Tab " + BcryptMontoyaTabs.getCurrentTabId() + " is running\n");
+                codeEditor.setHighlightCurrentLine(false);
+                codeEditor.setEnabled(false);
+                loadDirectoryButton.setEnabled(false);
+                codeCombo.setEnabled(false);
+                status = STATUS.RUNNING;
+                runButton.setText("Stop");
+                BcryptMontoya.Api.persistence().preferences().setString("defaultScript", getCode().replace("\r\n", "\n"));
+                BcryptMontoyaTabs.setTabColor(Color.decode("#ec6033"));
+            });
+        }).start();
     }
 
     public void stopBtnClick(){
@@ -205,7 +210,7 @@ public class BcryptMontoyaTab extends JPanel {
                 py_functions.get("finish").__call__();
             }
         } catch (Exception e){
-            logTextArea.append(e.getMessage());
+            logTextArea.append(e.getMessage() + "\n");
         }
         myContextMenu.MENUS.clear();
         ALLOWED_URL_PREFIX.clear();
@@ -378,7 +383,7 @@ public class BcryptMontoyaTab extends JPanel {
         PyTuple result = (PyTuple) py_functions.get(pyFuncName).__call__(pythonArguments);
         HttpRequest newHttpRequest;
         if(result.__len__() != 2){
-            logTextArea.append(pyFuncName+ " return type error");
+            logTextArea.append(pyFuncName+ " return type error\n");
             return new ArrayList<>(List.of(httpRequest, annotations));
         }
         newHttpRequest = (HttpRequest) result.get(0);
@@ -394,7 +399,7 @@ public class BcryptMontoyaTab extends JPanel {
         HttpResponse newHttpResponse;
         // jython need to return response and annotations
         if (result.__len__() != 2){
-            logTextArea.append(pyFuncName+ " return type error");
+            logTextArea.append(pyFuncName+ " return type error\n");
             return new ArrayList<>(List.of(httpResponse, annotations));
         }
         newHttpResponse = (HttpResponse) result.get(0);

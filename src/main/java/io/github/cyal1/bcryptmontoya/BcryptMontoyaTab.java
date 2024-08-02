@@ -183,25 +183,25 @@ public class BcryptMontoyaTab extends JPanel {
             }
         }catch (Exception ex){
             SwingUtilities.invokeLater(() -> {
-                BcryptMontoyaTabs.showLogConsole();
                 logTextArea.append(ex.getMessage() + "\n");
+                stopBtnClick();
             });
 //            JOptionPane.showMessageDialog(null, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
-            return;
+//            return;
         }
-            SwingUtilities.invokeLater(() -> {
-                BcryptMontoyaTabs.showLogConsole();
-                logTextArea.append("Tab " + BcryptMontoyaTabs.getCurrentTabId() + " is running\n");
-                codeEditor.setHighlightCurrentLine(false);
-                codeEditor.setEnabled(false);
-                loadDirectoryButton.setEnabled(false);
-                codeCombo.setEnabled(false);
-                status = STATUS.RUNNING;
-                runButton.setText("Stop");
-                BcryptMontoya.Api.persistence().preferences().setString("defaultScript", getCode().replace("\r\n", "\n"));
-                BcryptMontoyaTabs.setTabColor(Color.decode("#ec6033"));
-            });
         }).start();
+        SwingUtilities.invokeLater(() -> {
+            BcryptMontoyaTabs.showLogConsole();
+            logTextArea.append("Tab " + BcryptMontoyaTabs.getCurrentTabId() + " is running\n");
+            codeEditor.setHighlightCurrentLine(false);
+            codeEditor.setEnabled(false);
+            loadDirectoryButton.setEnabled(false);
+            codeCombo.setEnabled(false);
+            status = STATUS.RUNNING;
+            runButton.setText("Stop");
+            BcryptMontoya.Api.persistence().preferences().setString("defaultScript", getCode().replace("\r\n", "\n"));
+            BcryptMontoyaTabs.setTabColor(Color.decode("#ec6033"));
+        });
     }
 
     public void stopBtnClick(){

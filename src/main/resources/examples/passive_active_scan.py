@@ -1,5 +1,3 @@
-from burp.api.montoya.scanner.AuditResult import auditResult
-from burp.api.montoya.scanner.audit.issues.AuditIssue import auditIssue
 
 # https://github.com/PortSwigger/burp-extensions-montoya-api-examples/blob/main/customscanchecks/src/main/java/example/customscanchecks/MyScanCheck.java
 # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/HttpRequestResponse.html

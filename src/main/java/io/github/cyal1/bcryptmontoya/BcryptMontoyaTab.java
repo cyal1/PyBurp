@@ -85,7 +85,7 @@ public class BcryptMontoyaTab extends JPanel {
         this.add(topPane, BorderLayout.CENTER);
 
         codeEditor.setText(getDefaultScript());
-        if(BcryptMontoya.Api.userInterface().currentTheme() == burp.api.montoya.ui.Theme.DARK){
+        if(BcryptMontoya.api.userInterface().currentTheme() == burp.api.montoya.ui.Theme.DARK){
             setDarkTheme();
         }
         ALLOWED_URL_PREFIX = new ArrayList<>();
@@ -122,7 +122,7 @@ public class BcryptMontoyaTab extends JPanel {
             int option = directoryChooser.showOpenDialog(this);
             if (option == JFileChooser.APPROVE_OPTION) {
                 File file = directoryChooser.getSelectedFile();
-                BcryptMontoya.Api.persistence().preferences().setString("scriptsPath", file.getAbsolutePath());
+                BcryptMontoya.api.persistence().preferences().setString("scriptsPath", file.getAbsolutePath());
 //                readScriptDirectories();
             }
         });
@@ -197,7 +197,7 @@ public class BcryptMontoyaTab extends JPanel {
             codeCombo.setEnabled(false);
             status = STATUS.RUNNING;
             runButton.setText("Stop");
-            BcryptMontoya.Api.persistence().preferences().setString("defaultScript", getCode().replace("\r\n", "\n"));
+            BcryptMontoya.api.persistence().preferences().setString("defaultScript", getCode().replace("\r\n", "\n"));
             BcryptMontoyaTabs.setTabColor(Color.decode("#ec6033"));
         }catch (Exception e){
             logTextArea.append(e.getMessage() + "\n");
@@ -206,6 +206,7 @@ public class BcryptMontoyaTab extends JPanel {
 
     public void stopBtnClick(){
         try {
+            pyInterp.set("EXIT_FLAG", true);
             if (py_functions.containsKey("finish")){
                 try {
                     logTextArea.append("Calling the finish function...\n");
@@ -253,7 +254,7 @@ public class BcryptMontoyaTab extends JPanel {
 //        System.setErr(printStream);
         pyInterp.setOut(printStream);
         pyInterp.setErr(printStream);
-        pyInterp.exec(Tools.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/initEnv.py")));
+        pyInterp.exec(Tools.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/examples/env_init.py")));
     }
 
     private static void removeLines(JTextArea textArea, int linesToRemove) {
@@ -297,7 +298,7 @@ public class BcryptMontoyaTab extends JPanel {
     private void readScriptDirectories(){
         codeCombo.removeAllItems();
         codeCombo.addItem("Last code used");
-        String scriptsPath = BcryptMontoya.Api.persistence().preferences().getString("scriptsPath");
+        String scriptsPath = BcryptMontoya.api.persistence().preferences().getString("scriptsPath");
         if(scriptsPath != null && !scriptsPath.isEmpty()){
             File folder = new File(scriptsPath);
             if (folder.isDirectory()) {
@@ -319,7 +320,7 @@ public class BcryptMontoyaTab extends JPanel {
         }
     }
     public String getDefaultScript(){
-        String defaultScript = BcryptMontoya.Api.persistence().preferences().getString ("defaultScript");
+        String defaultScript = BcryptMontoya.api.persistence().preferences().getString ("defaultScript");
         return Objects.requireNonNullElseGet(defaultScript, () -> Tools.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/examples/default.py")));
     }
 
@@ -417,23 +418,23 @@ public class BcryptMontoyaTab extends JPanel {
 
     public void registerTabExtender(){
         if(py_functions.containsKey("registerContextMenu")){
-            plugins.add(BcryptMontoya.Api.userInterface().registerContextMenuItemsProvider(myContextMenu));
+            plugins.add(BcryptMontoya.api.userInterface().registerContextMenuItemsProvider(myContextMenu));
         }
 
         if(py_functions.containsKey("passiveAudit") || py_functions.containsKey("activeAudit")){
-            plugins.add(BcryptMontoya.Api.scanner().registerScanCheck(new MyScanCheck(this)));
+            plugins.add(BcryptMontoya.api.scanner().registerScanCheck(new MyScanCheck(this)));
         }
 
         if(py_functions.containsKey("handleRequest") || py_functions.containsKey("handleResponse")){
-            plugins.add(BcryptMontoya.Api.http().registerHttpHandler(new MyHttpHandler(this)));
+            plugins.add(BcryptMontoya.api.http().registerHttpHandler(new MyHttpHandler(this)));
         }
 
         if(py_functions.containsKey("handleProxyRequest")){
-            plugins.add(BcryptMontoya.Api.proxy().registerRequestHandler(new MyProxyRequestHandler(this)));
+            plugins.add(BcryptMontoya.api.proxy().registerRequestHandler(new MyProxyRequestHandler(this)));
         }
 
         if(py_functions.containsKey("handleProxyResponse")){
-            plugins.add(BcryptMontoya.Api.proxy().registerResponseHandler(new MyProxyResponseHandler(this)));
+            plugins.add(BcryptMontoya.api.proxy().registerResponseHandler(new MyProxyResponseHandler(this)));
         }
 
         if(py_functions.containsKey("handleInteraction")){

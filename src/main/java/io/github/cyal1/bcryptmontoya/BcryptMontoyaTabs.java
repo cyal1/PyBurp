@@ -93,29 +93,26 @@ public class BcryptMontoyaTabs extends JFrame {
     {
         CollaboratorClient collaboratorClient;
 
-        String existingCollaboratorKey = BcryptMontoya.Api.persistence().extensionData().getString("persisted_collaborator");
+        String existingCollaboratorKey = BcryptMontoya.api.persistence().extensionData().getString("persisted_collaborator");
 
         if (existingCollaboratorKey != null)
         {
-            BcryptMontoya.Api.logging().logToOutput("Creating Collaborator client from key.");
-            collaboratorClient = BcryptMontoya.Api.collaborator().restoreClient(SecretKey.secretKey(existingCollaboratorKey));
+            BcryptMontoya.api.logging().logToOutput("Creating Collaborator client from key.");
+            collaboratorClient = BcryptMontoya.api.collaborator().restoreClient(SecretKey.secretKey(existingCollaboratorKey));
         }
         else
         {
-            BcryptMontoya.Api.logging().logToOutput("No previously found Collaborator client. Creating new client...");
-            collaboratorClient = BcryptMontoya.Api.collaborator().createClient();
+            BcryptMontoya.api.logging().logToOutput("No previously found Collaborator client. Creating new client...");
+            collaboratorClient = BcryptMontoya.api.collaborator().createClient();
 
             // Save the secret key of the CollaboratorClient so that you can retrieve it later.
-            BcryptMontoya.Api.logging().logToOutput("Saving Collaborator secret key.");
-            BcryptMontoya.Api.persistence().extensionData().setString("persisted_collaborator", collaboratorClient.getSecretKey().toString());
+            BcryptMontoya.api.logging().logToOutput("Saving Collaborator secret key.");
+            BcryptMontoya.api.persistence().extensionData().setString("persisted_collaborator", collaboratorClient.getSecretKey().toString());
         }
 
         return collaboratorClient;
     }
 
-    public static String getOOBUrl(){
-        return collaboratorClient.generatePayload().toString();
-    }
 
     public static void showLogConsole(){
         if (jSplitPane.getResizeWeight() > 0.9) {

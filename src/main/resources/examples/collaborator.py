@@ -1,5 +1,3 @@
-from burp.api.montoya.scanner.AuditResult import auditResult
-from burp.api.montoya.scanner.audit.issues.AuditIssue import auditIssue
 
 # https://github.com/PortSwigger/burp-extensions-montoya-api-examples/tree/main/collaborator/src/main/java/example/collaborator
 # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/collaborator/Interaction.html
@@ -33,11 +31,12 @@ def handleInteraction(interaction):
             httpRequestResponse(item.finalRequest(), item.originalResponse())
         ))
 
+
 def urlPrefixAllowed(urls):
     urls.add("https://portswigger-labs.net/ssrf-dns.php")
 
 
 # curl -x http://127.0.0.1:8080/ "https://portswigger-labs.net/ssrf-dns.php?host=www.google.com"
 def handleProxyRequest(request, annotations):
-    return request.withUpdatedParameters(urlParameter("host", getOOBUrl())), annotations
+    return request.withUpdatedParameters(urlParameter("host", getOOBCanary())), annotations
 

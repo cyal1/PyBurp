@@ -57,7 +57,7 @@ public class CallFuncClient {
                 throw new RuntimeException("unexcept type returned, only allowed StringValue,Int64Value,DoubleValue,BoolValue,BytesValue");
             }
         } catch (Exception e){
-            BcryptMontoya.Api.logging().logToError(e.getMessage());
+            BcryptMontoya.api.logging().logToError(e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
     }

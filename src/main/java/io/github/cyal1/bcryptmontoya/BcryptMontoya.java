@@ -10,41 +10,35 @@ package io.github.cyal1.bcryptmontoya;
 
 import burp.api.montoya.BurpExtension;
 import burp.api.montoya.MontoyaApi;
-import burp.api.montoya.core.Marker;
 import burp.api.montoya.http.Http;
-import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.organizer.Organizer;
 import burp.api.montoya.proxy.Proxy;
-import burp.api.montoya.scanner.audit.issues.AuditIssue;
 import burp.api.montoya.utilities.Utilities;
 
 import javax.swing.*;
-import java.awt.*;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 
 public class BcryptMontoya implements BurpExtension
 {
-    public static MontoyaApi Api;
+    public static MontoyaApi api;
     public static Http http;
     public static Proxy proxy;
-    public static Utilities Utils;
+    public static Utilities utils;
     public static Organizer organizer;
 
     @Override
     public void initialize(MontoyaApi api) {
-        BcryptMontoya.Api = api;
+        BcryptMontoya.api = api;
         BcryptMontoya.http = api.http();
         BcryptMontoya.proxy = api.proxy();
         BcryptMontoya.organizer = api.organizer();
         // https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/utilities/Utilities.html
-        BcryptMontoya.Utils = api.utilities();
+        BcryptMontoya.utils = api.utilities();
         api.extension().setName("BcryptMontoya");
         BcryptMontoyaTabs bcryptMontoyaTabs = new BcryptMontoyaTabs();
         api.userInterface().registerContextMenuItemsProvider(new ContentTypeContextMenu());
 
-        JMenuBar burpMenuBar = Objects.requireNonNull(getBurpFrame()).getJMenuBar();
+        JMenuBar burpMenuBar = Objects.requireNonNull(Tools.getBurpFrame()).getJMenuBar();
         burpMenuBar.add(bcryptMontoyaTabs.show);
         burpMenuBar.repaint();
         api.extension().registerUnloadingHandler(() -> {
@@ -58,42 +52,4 @@ public class BcryptMontoya implements BurpExtension
         });
     }
 
-    public static void addIssue(AuditIssue auditIssue){
-        Api.siteMap().add(auditIssue);
-    }
-
-    public static List<Marker> getResponseHighlights(HttpRequestResponse requestResponse, String match)
-    {
-        List<Marker> highlights = new LinkedList<>();
-        String response = requestResponse.response().toString();
-
-        int start = 0;
-
-        while (start < response.length())
-        {
-            start = response.indexOf(match, start);
-
-            if (start == -1)
-            {
-                break;
-            }
-
-            Marker marker = Marker.marker(start, start+match.length());
-            highlights.add(marker);
-
-            start += match.length();
-        }
-        return highlights;
-    }
-    public static JFrame getBurpFrame()
-    {
-        for(Frame f : Frame.getFrames())
-        {
-            if(f.isVisible() && f.getTitle().startsWith(("Burp Suite")))
-            {
-                return (JFrame) f;
-            }
-        }
-        return null;
-    }
 }

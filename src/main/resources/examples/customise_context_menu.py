@@ -124,7 +124,7 @@ def registerContextMenu(menus):
 
 
 def finish():
-    pool.shutdown(timeout=0)
+    pool.shutdown()
 
 
 def middle_bypass_poc(path1 ,path2):

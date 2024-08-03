@@ -40,7 +40,7 @@ class RequestPool:
     def run(self, func, *args, **kwargs):
         self.executor.execute(lambda: func(*args, **kwargs))
 
-    def shutdown(self, timeout=1):
+    def shutdown(self, timeout=0):
         self.executor.shutdownNow()
         try:
             if not self.executor.awaitTermination(timeout, TimeUnit.SECONDS):

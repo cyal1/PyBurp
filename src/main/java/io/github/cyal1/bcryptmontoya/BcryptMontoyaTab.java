@@ -36,8 +36,8 @@ public class BcryptMontoyaTab extends JPanel {
     public ArrayList<String> ALLOWED_URL_PREFIX;
     private STATUS status = STATUS.STOP;
     public MyContextMenuItemsProvider myContextMenu;
-    public HashMap<String, PyFunction> py_functions;
-    public ArrayList<Registration> plugins;
+    public HashMap<String, PyFunction> py_functions = new HashMap<>();
+    public ArrayList<Registration> plugins = new ArrayList<>();
     private PythonInterpreter pyInterp;
     JButton saveButton = new JButton("Save");
     JButton runButton = new JButton("Run");
@@ -166,33 +166,31 @@ public class BcryptMontoyaTab extends JPanel {
     }
 
     private void runBtnClick(){
-        new Thread(() -> {
-        try{
-            initPyEnv();
-            pyInterp.exec(getCode());
-            py_functions = getPyFunctions();
-            registerTabExtender();
-            PyObject pythonArguments = Py.java2py(myContextMenu);
-            if(py_functions.containsKey("registerContextMenu")){
-                py_functions.get("registerContextMenu").__call__(pythonArguments);
-            }
+        BcryptMontoyaTabs.showLogConsole();
+        logTextArea.append("Tab " + BcryptMontoyaTabs.getCurrentTabId() + " is running\n");
+        try {
+            new Thread(() -> {
+                try {
+                    initPyEnv();
+                    pyInterp.exec(getCode());
+                    py_functions = getPyFunctions();
+                    registerTabExtender();
+                    PyObject pythonArguments = Py.java2py(myContextMenu);
+                    if (py_functions.containsKey("registerContextMenu")) {
+                        py_functions.get("registerContextMenu").__call__(pythonArguments);
+                    }
 
-            PyObject[] urls = Py.javas2pys(ALLOWED_URL_PREFIX);
-            if(py_functions.containsKey("urlPrefixAllowed")){
-                py_functions.get("urlPrefixAllowed").__call__(urls);
-            }
-        }catch (Exception ex){
-            SwingUtilities.invokeLater(() -> {
-                logTextArea.append(ex.getMessage() + "\n");
-                stopBtnClick();
-            });
-//            JOptionPane.showMessageDialog(null, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
-//            return;
-        }
-        }).start();
-        SwingUtilities.invokeLater(() -> {
-            BcryptMontoyaTabs.showLogConsole();
-            logTextArea.append("Tab " + BcryptMontoyaTabs.getCurrentTabId() + " is running\n");
+                    PyObject[] urls = Py.javas2pys(ALLOWED_URL_PREFIX);
+                    if (py_functions.containsKey("urlPrefixAllowed")) {
+                        py_functions.get("urlPrefixAllowed").__call__(urls);
+                    }
+                } catch (Exception ex) {
+                    SwingUtilities.invokeLater(() -> {
+                        logTextArea.append(ex.getMessage() + "\n");
+                        stopBtnClick();
+                    });
+                }
+            }).start();
             codeEditor.setHighlightCurrentLine(false);
             codeEditor.setEnabled(false);
             loadDirectoryButton.setEnabled(false);
@@ -201,33 +199,39 @@ public class BcryptMontoyaTab extends JPanel {
             runButton.setText("Stop");
             BcryptMontoya.Api.persistence().preferences().setString("defaultScript", getCode().replace("\r\n", "\n"));
             BcryptMontoyaTabs.setTabColor(Color.decode("#ec6033"));
-        });
+        }catch (Exception e){
+            logTextArea.append(e.getMessage() + "\n");
+        }
     }
 
     public void stopBtnClick(){
         try {
             if (py_functions.containsKey("finish")){
-                py_functions.get("finish").__call__();
+                try {
+                    logTextArea.append("Calling the finish function...\n");
+                    py_functions.get("finish").__call__();
+                }catch (Exception e){
+                    logTextArea.append("finish(): " + e.getMessage() + "\n");
+                }
             }
+            myContextMenu.MENUS.clear();
+            ALLOWED_URL_PREFIX.clear();
+            py_functions.clear();
+            pyInterp.cleanup();
+            pyInterp.close();
+            codeEditor.setHighlightCurrentLine(true);
+            codeEditor.setEnabled(true);
+            loadDirectoryButton.setEnabled(true);
+            codeCombo.setEnabled(true);
+            status = STATUS.STOP;
+            runButton.setText("Run");
+            for(Registration plugin: plugins){
+                plugin.deregister();
+            }
+            BcryptMontoyaTabs.setTabColor(Color.black);
         } catch (Exception e){
             logTextArea.append(e.getMessage() + "\n");
         }
-        myContextMenu.MENUS.clear();
-        ALLOWED_URL_PREFIX.clear();
-        py_functions.clear();
-        pyInterp.cleanup();
-        pyInterp.close();
-        codeEditor.setHighlightCurrentLine(true);
-        codeEditor.setEnabled(true);
-        loadDirectoryButton.setEnabled(true);
-        codeCombo.setEnabled(true);
-        status = STATUS.STOP;
-        runButton.setText("Run");
-        for(Registration plugin: plugins){
-            plugin.deregister();
-        }
-        BcryptMontoyaTabs.setTabColor(Color.black);
-//        initPyEnv();
         logTextArea.append("Tab " + BcryptMontoyaTabs.getCurrentTabId() + " is stopped\n");
     }
 
@@ -412,7 +416,6 @@ public class BcryptMontoyaTab extends JPanel {
     }
 
     public void registerTabExtender(){
-        plugins = new ArrayList<>();
         if(py_functions.containsKey("registerContextMenu")){
             plugins.add(BcryptMontoya.Api.userInterface().registerContextMenuItemsProvider(myContextMenu));
         }

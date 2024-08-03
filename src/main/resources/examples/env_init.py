@@ -10,7 +10,7 @@
 
 import random, string, sys
 import burp.api.montoya.core.ByteArray.byteArray as bytearray
-import io.github.cyal1.bcryptmontoya.CallFuncClient as Grpc # see encryptedJsonParamGrpc.py, grpc_debug.py
+import io.github.cyal1.turboburp.CallFuncClient as Grpc # see encryptedJsonParamGrpc.py, grpc_debug.py
 from java.lang import Runnable, Thread
 from java.util.concurrent import Executors, TimeUnit
 
@@ -20,14 +20,14 @@ from burp.api.montoya.core import HighlightColor
 from burp.api.montoya.http.message import ContentType
 from burp.api.montoya.http.message.params import HttpParameterType
 from burp.api.montoya.scanner.audit.issues import AuditIssueSeverity, AuditIssueConfidence
-from io.github.cyal1.bcryptmontoya.MyContextMenuItemsProvider import MenuType
+from io.github.cyal1.turboburp.MyContextMenuItemsProvider import MenuType
 
 # Import some commonly used methods
 from burp.api.montoya.core.Annotations import annotations
 from burp.api.montoya.http.HttpService import httpService
-from io.github.cyal1.bcryptmontoya.Tools import addIssue, getResponseHighlights, getOOBCanary, getSelectedText, replaceSelectedText
+from io.github.cyal1.turboburp.Tools import addIssue, getResponseHighlights, getOOBCanary, getSelectedText, replaceSelectedText
 from burp.api.montoya.scanner.AuditResult import auditResult
-from io.github.cyal1.bcryptmontoya.BcryptMontoya import http, proxy, utils, organizer
+from io.github.cyal1.turboburp.TurboBurp import http, proxy, utils, organizer
 from burp.api.montoya.scanner.audit.issues.AuditIssue import auditIssue
 from burp.api.montoya.http.message.HttpRequestResponse import httpRequestResponse
 from burp.api.montoya.http.message.requests.HttpRequest import httpRequestFromUrl, httpRequest
@@ -101,17 +101,17 @@ def randomstring(length=8):
 
 
 def urlencode(text):
-    return Utils.urlUtils().encode(text).encode()
+    return utils.urlUtils().encode(text).encode()
 
 
 def urldecode(text):
-    return Utils.urlUtils().decode(text).encode()
+    return utils.urlUtils().decode(text).encode()
 
 
 def base64encode(text):
-    return Utils.base64Utils().encodeToString(text).encode()
+    return utils.base64Utils().encodeToString(text).encode()
 
 
 def base64decode(text):
-    return Utils.base64Utils().decode(text).toString().encode()
+    return utils.base64Utils().decode(text).toString().encode()
 

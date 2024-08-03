@@ -1,4 +1,4 @@
-package io.github.cyal1.bcryptmontoya;
+package io.github.cyal1.turboburp;
 
 import burp.api.montoya.core.Annotations;
 import burp.api.montoya.http.message.responses.HttpResponse;
@@ -9,28 +9,28 @@ import burp.api.montoya.proxy.http.ProxyResponseToBeSentAction;
 import java.util.ArrayList;
 
 public class MyProxyResponseHandler implements ProxyResponseHandler {
-    BcryptMontoyaTab bcryptMontoyaTab;
+    TurboBurpTab turboBurpTab;
 
-    public MyProxyResponseHandler(BcryptMontoyaTab bcryptMontoyaTab) {
-        this.bcryptMontoyaTab = bcryptMontoyaTab;
+    public MyProxyResponseHandler(TurboBurpTab turboBurpTab) {
+        this.turboBurpTab = turboBurpTab;
     }
 
     @Override
     public ProxyResponseReceivedAction handleResponseReceived(InterceptedResponse interceptedResponse) {
 
-//        if(!bcryptMontoyaTab.py_functions.containsKey("handleProxyResponse")){
+//        if(!turboBurpTab.py_functions.containsKey("handleProxyResponse")){
 //            return ProxyResponseReceivedAction.continueWith(interceptedResponse, interceptedResponse.annotations());
 //        }
 
         // url prefix allowed
-        if(!bcryptMontoyaTab.isPrefixAllowed(interceptedResponse.initiatingRequest().url())){
+        if(!turboBurpTab.isPrefixAllowed(interceptedResponse.initiatingRequest().url())){
             return ProxyResponseReceivedAction.continueWith(interceptedResponse, interceptedResponse.annotations());
         }
         try {
-            ArrayList<Object> array = bcryptMontoyaTab.invokePyResponse(interceptedResponse, interceptedResponse.annotations(), "handleProxyResponse");
+            ArrayList<Object> array = turboBurpTab.invokePyResponse(interceptedResponse, interceptedResponse.annotations(), "handleProxyResponse");
             return ProxyResponseReceivedAction.continueWith((HttpResponse) array.get(0), (Annotations) array.get(1));
         }catch (Exception e){
-            BcryptMontoyaTabs.logTextArea.append(e.getMessage());
+            TurboBurpTabs.logTextArea.append(e.getMessage());
         }
         return ProxyResponseReceivedAction.continueWith(interceptedResponse, interceptedResponse.annotations());
     }

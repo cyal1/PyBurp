@@ -1,10 +1,10 @@
-package io.github.cyal1.bcryptmontoya;
+package io.github.cyal1.turboburp;
 
 import burp.api.montoya.core.Annotations;
 import burp.api.montoya.core.Registration;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
-import io.github.cyal1.bcryptmontoya.poller.Poller;
+import io.github.cyal1.turboburp.poller.Poller;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
@@ -25,10 +25,10 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import static io.github.cyal1.bcryptmontoya.BcryptMontoyaTabs.collaboratorClient;
-import static io.github.cyal1.bcryptmontoya.BcryptMontoyaTabs.logTextArea;
+import static io.github.cyal1.turboburp.TurboBurpTabs.collaboratorClient;
+import static io.github.cyal1.turboburp.TurboBurpTabs.logTextArea;
 
-public class BcryptMontoyaTab extends JPanel {
+public class TurboBurpTab extends JPanel {
     public enum STATUS {
         RUNNING,
         STOP
@@ -48,7 +48,7 @@ public class BcryptMontoyaTab extends JPanel {
     RSyntaxTextArea codeEditor = new RSyntaxTextArea();
 
 
-    public BcryptMontoyaTab(){
+    public TurboBurpTab(){
         javax.swing.text.JTextComponent.removeKeymap("RTextAreaKeymap");
         javax.swing.UIManager.put("RTextAreaUI.inputMap", null);
         javax.swing.UIManager.put("RTextAreaUI.actionMap", null);
@@ -85,7 +85,7 @@ public class BcryptMontoyaTab extends JPanel {
         this.add(topPane, BorderLayout.CENTER);
 
         codeEditor.setText(getDefaultScript());
-        if(BcryptMontoya.api.userInterface().currentTheme() == burp.api.montoya.ui.Theme.DARK){
+        if(TurboBurp.api.userInterface().currentTheme() == burp.api.montoya.ui.Theme.DARK){
             setDarkTheme();
         }
         ALLOWED_URL_PREFIX = new ArrayList<>();
@@ -113,7 +113,7 @@ public class BcryptMontoyaTab extends JPanel {
                 stopBtnClick();
             }
             logTextArea.setText("");
-            BcryptMontoyaTabs.closeTab();
+            TurboBurpTabs.closeTab();
         });
 
         loadDirectoryButton.addActionListener(e -> {
@@ -122,7 +122,7 @@ public class BcryptMontoyaTab extends JPanel {
             int option = directoryChooser.showOpenDialog(this);
             if (option == JFileChooser.APPROVE_OPTION) {
                 File file = directoryChooser.getSelectedFile();
-                BcryptMontoya.api.persistence().preferences().setString("scriptsPath", file.getAbsolutePath());
+                TurboBurp.api.persistence().preferences().setString("scriptsPath", file.getAbsolutePath());
 //                readScriptDirectories();
             }
         });
@@ -151,7 +151,7 @@ public class BcryptMontoyaTab extends JPanel {
                 codeEditor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PYTHON);
             }
             if (fileName.startsWith("examples/")) {
-                codeEditor.setText(Tools.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/"+fileName)));
+                codeEditor.setText(Tools.readFromInputStream(TurboBurp.class.getResourceAsStream("/"+fileName)));
                 saveButton.setEnabled(false);
             } else {
                 saveButton.setEnabled(true);
@@ -166,8 +166,8 @@ public class BcryptMontoyaTab extends JPanel {
     }
 
     private void runBtnClick(){
-        BcryptMontoyaTabs.showLogConsole();
-        logTextArea.append("Tab " + BcryptMontoyaTabs.getCurrentTabId() + " is running\n");
+        TurboBurpTabs.showLogConsole();
+        logTextArea.append("Tab " + TurboBurpTabs.getCurrentTabId() + " is running\n");
         try {
             new Thread(() -> {
                 try {
@@ -197,8 +197,8 @@ public class BcryptMontoyaTab extends JPanel {
             codeCombo.setEnabled(false);
             status = STATUS.RUNNING;
             runButton.setText("Stop");
-            BcryptMontoya.api.persistence().preferences().setString("defaultScript", getCode().replace("\r\n", "\n"));
-            BcryptMontoyaTabs.setTabColor(Color.decode("#ec6033"));
+            TurboBurp.api.persistence().preferences().setString("defaultScript", getCode().replace("\r\n", "\n"));
+            TurboBurpTabs.setTabColor(Color.decode("#ec6033"));
         }catch (Exception e){
             logTextArea.append(e.getMessage() + "\n");
         }
@@ -229,11 +229,11 @@ public class BcryptMontoyaTab extends JPanel {
             for(Registration plugin: plugins){
                 plugin.deregister();
             }
-            BcryptMontoyaTabs.setTabColor(Color.black);
+            TurboBurpTabs.setTabColor(Color.black);
         } catch (Exception e){
             logTextArea.append(e.getMessage() + "\n");
         }
-        logTextArea.append("Tab " + BcryptMontoyaTabs.getCurrentTabId() + " is stopped\n");
+        logTextArea.append("Tab " + TurboBurpTabs.getCurrentTabId() + " is stopped\n");
     }
 
     private void initPyEnv(){
@@ -254,7 +254,7 @@ public class BcryptMontoyaTab extends JPanel {
 //        System.setErr(printStream);
         pyInterp.setOut(printStream);
         pyInterp.setErr(printStream);
-        pyInterp.exec(Tools.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/examples/env_init.py")));
+        pyInterp.exec(Tools.readFromInputStream(TurboBurp.class.getResourceAsStream("/examples/env_init.py")));
     }
 
     private static void removeLines(JTextArea textArea, int linesToRemove) {
@@ -298,7 +298,7 @@ public class BcryptMontoyaTab extends JPanel {
     private void readScriptDirectories(){
         codeCombo.removeAllItems();
         codeCombo.addItem("Last code used");
-        String scriptsPath = BcryptMontoya.api.persistence().preferences().getString("scriptsPath");
+        String scriptsPath = TurboBurp.api.persistence().preferences().getString("scriptsPath");
         if(scriptsPath != null && !scriptsPath.isEmpty()){
             File folder = new File(scriptsPath);
             if (folder.isDirectory()) {
@@ -320,8 +320,8 @@ public class BcryptMontoyaTab extends JPanel {
         }
     }
     public String getDefaultScript(){
-        String defaultScript = BcryptMontoya.api.persistence().preferences().getString ("defaultScript");
-        return Objects.requireNonNullElseGet(defaultScript, () -> Tools.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/examples/default.py")));
+        String defaultScript = TurboBurp.api.persistence().preferences().getString ("defaultScript");
+        return Objects.requireNonNullElseGet(defaultScript, () -> Tools.readFromInputStream(TurboBurp.class.getResourceAsStream("/examples/default.py")));
     }
 
     public void setDarkTheme(){
@@ -418,23 +418,23 @@ public class BcryptMontoyaTab extends JPanel {
 
     public void registerTabExtender(){
         if(py_functions.containsKey("registerContextMenu")){
-            plugins.add(BcryptMontoya.api.userInterface().registerContextMenuItemsProvider(myContextMenu));
+            plugins.add(TurboBurp.api.userInterface().registerContextMenuItemsProvider(myContextMenu));
         }
 
         if(py_functions.containsKey("passiveAudit") || py_functions.containsKey("activeAudit")){
-            plugins.add(BcryptMontoya.api.scanner().registerScanCheck(new MyScanCheck(this)));
+            plugins.add(TurboBurp.api.scanner().registerScanCheck(new MyScanCheck(this)));
         }
 
         if(py_functions.containsKey("handleRequest") || py_functions.containsKey("handleResponse")){
-            plugins.add(BcryptMontoya.api.http().registerHttpHandler(new MyHttpHandler(this)));
+            plugins.add(TurboBurp.api.http().registerHttpHandler(new MyHttpHandler(this)));
         }
 
         if(py_functions.containsKey("handleProxyRequest")){
-            plugins.add(BcryptMontoya.api.proxy().registerRequestHandler(new MyProxyRequestHandler(this)));
+            plugins.add(TurboBurp.api.proxy().registerRequestHandler(new MyProxyRequestHandler(this)));
         }
 
         if(py_functions.containsKey("handleProxyResponse")){
-            plugins.add(BcryptMontoya.api.proxy().registerResponseHandler(new MyProxyResponseHandler(this)));
+            plugins.add(TurboBurp.api.proxy().registerResponseHandler(new MyProxyResponseHandler(this)));
         }
 
         if(py_functions.containsKey("handleInteraction")){

@@ -1,4 +1,4 @@
-package io.github.cyal1.bcryptmontoya;
+package io.github.cyal1.turboburp;
 
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.scanner.AuditResult;
@@ -11,15 +11,15 @@ import org.python.core.PyFunction;
 import org.python.core.PyObject;
 
 class MyScanCheck implements ScanCheck {
-    public BcryptMontoyaTab bcryptMontoyaTab;
+    public TurboBurpTab turboBurpTab;
 
-    public MyScanCheck(BcryptMontoyaTab bcryptMontoyaTab) {
-        this.bcryptMontoyaTab = bcryptMontoyaTab;
+    public MyScanCheck(TurboBurpTab turboBurpTab) {
+        this.turboBurpTab = turboBurpTab;
     }
 
     @Override
     public AuditResult activeAudit(HttpRequestResponse baseRequestResponse, AuditInsertionPoint auditInsertionPoint) {
-        PyFunction activeAudit = bcryptMontoyaTab.py_functions.get("activeAudit");
+        PyFunction activeAudit = turboBurpTab.py_functions.get("activeAudit");
         if (activeAudit == null) {
             return AuditResult.auditResult();
         }
@@ -35,7 +35,7 @@ class MyScanCheck implements ScanCheck {
 
     @Override
     public AuditResult passiveAudit(HttpRequestResponse baseRequestResponse) {
-        PyFunction passiveAudit = bcryptMontoyaTab.py_functions.get("passiveAudit");
+        PyFunction passiveAudit = turboBurpTab.py_functions.get("passiveAudit");
         if (passiveAudit == null) {
             return AuditResult.auditResult();
         }

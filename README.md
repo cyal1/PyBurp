@@ -1,8 +1,8 @@
-# BcryptMontoya
+# Turbo Burp
 
-BcryptMontoya is a powerful plugin for Burp Suite that allows you to effortlessly modify HTTP requests and responses passing through the Burp Suite proxy using Jython code or gRPC, especially when dealing with encrypted requests.
-In addition, BcryptMontoya provides the capability to register your own context menus, it provides some menus such as Content-Type conversions (supporting nested parameter conversions), NoSQL scanning, and forward selected requests to a specified proxy and so on.
-BcryptMontoya draws inspiration from the popular [Turbo Intruder](https://github.com/PortSwigger/turbo-intruder/) tool and incorporates some of its code.
+Turbo Burp is a powerful plugin for Burp Suite that allows you to effortlessly modify HTTP requests and responses passing through the Burp Suite proxy using Jython code or gRPC, especially when dealing with encrypted requests.
+In addition, Turbo Burp provides the capability to register your own context menus, it provides some menus such as Content-Type conversions (supporting nested parameter conversions), NoSQL scanning, and forward selected requests to a specified proxy and so on.
+Turbo Burp draws inspiration from the popular [Turbo Intruder](https://github.com/PortSwigger/turbo-intruder/) tool and incorporates some of its code.
 
 **Note: Developed using the New Burp Suite API - [Montoya](https://portswigger.net/blog/new-burp-suite-api-we-want-your-feedback), it is recommended to use BurpSuite v2023.5.4 or later.**
 

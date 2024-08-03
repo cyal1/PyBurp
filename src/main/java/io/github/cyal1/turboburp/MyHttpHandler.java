@@ -6,7 +6,7 @@
  * license terms for those products.
  */
 
-package io.github.cyal1.bcryptmontoya;
+package io.github.cyal1.turboburp;
 
 import burp.api.montoya.core.Annotations;
 import burp.api.montoya.http.handler.*;
@@ -17,48 +17,48 @@ import java.util.ArrayList;
 
 public class MyHttpHandler implements HttpHandler
 {
-    BcryptMontoyaTab bcryptMontoyaTab;
+    TurboBurpTab turboBurpTab;
 
-    public MyHttpHandler(BcryptMontoyaTab bcryptMontoyaTab) {
-        this.bcryptMontoyaTab = bcryptMontoyaTab;
+    public MyHttpHandler(TurboBurpTab turboBurpTab) {
+        this.turboBurpTab = turboBurpTab;
     }
 
     @Override
     public RequestToBeSentAction handleHttpRequestToBeSent(HttpRequestToBeSent httpRequestToBeSent) {
 
-        if(!bcryptMontoyaTab.py_functions.containsKey("handleRequest")){
+        if(!turboBurpTab.py_functions.containsKey("handleRequest")){
             return RequestToBeSentAction.continueWith(httpRequestToBeSent, httpRequestToBeSent.annotations());
         }
 
         // url prefix allowed
-        if(!bcryptMontoyaTab.isPrefixAllowed(httpRequestToBeSent.url())){
+        if(!turboBurpTab.isPrefixAllowed(httpRequestToBeSent.url())){
             return RequestToBeSentAction.continueWith(httpRequestToBeSent, httpRequestToBeSent.annotations());
         }
         try{
-            ArrayList<Object> array = bcryptMontoyaTab.invokePyRequest(httpRequestToBeSent, httpRequestToBeSent.annotations(), "handleRequest");
+            ArrayList<Object> array = turboBurpTab.invokePyRequest(httpRequestToBeSent, httpRequestToBeSent.annotations(), "handleRequest");
             return RequestToBeSentAction.continueWith((HttpRequest) array.get(0), (Annotations) array.get(1));
         }catch (Exception e){
-            BcryptMontoyaTabs.logTextArea.append(e.getMessage());
+            TurboBurpTabs.logTextArea.append(e.getMessage());
         }
         return RequestToBeSentAction.continueWith(httpRequestToBeSent, httpRequestToBeSent.annotations());
     }
     @Override
     public ResponseReceivedAction handleHttpResponseReceived(HttpResponseReceived httpResponseReceived) {
 
-        if(!bcryptMontoyaTab.py_functions.containsKey("handleResponse")){
+        if(!turboBurpTab.py_functions.containsKey("handleResponse")){
             return ResponseReceivedAction.continueWith(httpResponseReceived, httpResponseReceived.annotations());
         }
 
         // url prefix allowed
-        if(!bcryptMontoyaTab.isPrefixAllowed(httpResponseReceived.initiatingRequest().url())){
+        if(!turboBurpTab.isPrefixAllowed(httpResponseReceived.initiatingRequest().url())){
             return ResponseReceivedAction.continueWith(httpResponseReceived, httpResponseReceived.annotations());
         }
 
         try{
-            ArrayList<Object> array = bcryptMontoyaTab.invokePyResponse(httpResponseReceived, httpResponseReceived.annotations(), "handleResponse");
+            ArrayList<Object> array = turboBurpTab.invokePyResponse(httpResponseReceived, httpResponseReceived.annotations(), "handleResponse");
             return ResponseReceivedAction.continueWith((HttpResponse) array.get(0), (Annotations) array.get(1));
         }catch (Exception e){
-            BcryptMontoyaTabs.logTextArea.append(e.getMessage());
+            TurboBurpTabs.logTextArea.append(e.getMessage());
         }
         return ResponseReceivedAction.continueWith(httpResponseReceived, httpResponseReceived.annotations());
     }

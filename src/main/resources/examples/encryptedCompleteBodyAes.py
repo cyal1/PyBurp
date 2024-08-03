@@ -45,7 +45,7 @@ def urlPrefixAllowed(urls):
 
 def handleRequest(request, annotations):
     print("handleRequest", request.bodyToString())
-    result = aes_encrypt_cbc(request.bodyToString().replace("world", "bcryptmontoya"), key, iv)
+    result = aes_encrypt_cbc(request.bodyToString().replace("world", "Turbo Burp"), key, iv)
     return request.withBody(result), annotations
 
 

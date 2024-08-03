@@ -23,18 +23,18 @@ def urlPrefixAllowed(urls):
 
 
 def handleProxyRequest(request, annotations):
-    return request.withParameter(urlParameter("motoya","brower2burp")), annotations
+    return request.withParameter(urlParameter("motoya", "brower2burp")), annotations
 
 
 # You can view the actual requests to the server in the Logger.
 def handleRequest(request, annotations):
-    return request.withParameter(urlParameter("motoya","burp2server")), annotations
+    return request.withParameter(urlParameter("motoya", "burp2server")), annotations
 
 
 def handleResponse(response, annotations):
-    return response.withAddedHeader("BcryptMontoya", "https://github.com/cyal1/BcryptMontoya"), annotations
+    return response.withAddedHeader("Turbo-Burp", "https://github.com/cyal1/BcryptMontoya"), annotations
 
 
 def handleProxyResponse(response, annotations):
-    return response.withRemovedHeader("BcryptMontoya"), annotations
+    return response.withRemovedHeader("Turbo-Burp"), annotations
 

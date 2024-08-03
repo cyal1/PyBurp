@@ -6,7 +6,7 @@
  * license terms for those products.
  */
 
-package io.github.cyal1.bcryptmontoya;
+package io.github.cyal1.turboburp;
 
 import burp.api.montoya.BurpExtension;
 import burp.api.montoya.MontoyaApi;
@@ -18,7 +18,7 @@ import burp.api.montoya.utilities.Utilities;
 import javax.swing.*;
 import java.util.Objects;
 
-public class BcryptMontoya implements BurpExtension
+public class TurboBurp implements BurpExtension
 {
     public static MontoyaApi api;
     public static Http http;
@@ -28,23 +28,23 @@ public class BcryptMontoya implements BurpExtension
 
     @Override
     public void initialize(MontoyaApi api) {
-        BcryptMontoya.api = api;
-        BcryptMontoya.http = api.http();
-        BcryptMontoya.proxy = api.proxy();
-        BcryptMontoya.organizer = api.organizer();
+        TurboBurp.api = api;
+        TurboBurp.http = api.http();
+        TurboBurp.proxy = api.proxy();
+        TurboBurp.organizer = api.organizer();
         // https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/utilities/Utilities.html
-        BcryptMontoya.utils = api.utilities();
-        api.extension().setName("BcryptMontoya");
-        BcryptMontoyaTabs bcryptMontoyaTabs = new BcryptMontoyaTabs();
+        TurboBurp.utils = api.utilities();
+        api.extension().setName("Turbo Burp");
+        TurboBurpTabs turboBurpTabs = new TurboBurpTabs();
         api.userInterface().registerContextMenuItemsProvider(new ContentTypeContextMenu());
 
         JMenuBar burpMenuBar = Objects.requireNonNull(Tools.getBurpFrame()).getJMenuBar();
-        burpMenuBar.add(bcryptMontoyaTabs.show);
+        burpMenuBar.add(turboBurpTabs.show);
         burpMenuBar.repaint();
         api.extension().registerUnloadingHandler(() -> {
-            bcryptMontoyaTabs.dispose();
+            turboBurpTabs.dispose();
             try {
-                burpMenuBar.remove(bcryptMontoyaTabs.show);
+                burpMenuBar.remove(turboBurpTabs.show);
                 burpMenuBar.repaint();
             } catch (NullPointerException ignored) {
 

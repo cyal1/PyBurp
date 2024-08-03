@@ -18,14 +18,8 @@ for path in PIP_PATH:
 
 from bs4 import BeautifulSoup # # pip2 install beautifulsoup4
 
-"""
 
-You should not make HTTP requests in the Swing thread, it will freeze the UI.
-
-Using a third-party networking library (rather than Burp's) to perform the request, the Logger does not record.
-
-"""
-@run_in_thread
+# Using a third-party networking library (rather than Burp's) to perform the request, the Logger does not record.
 def test():
     html_doc = sendRequest(httpRequestFromUrl("https://www.example.com/")).response().bodyToString()
     soup = BeautifulSoup(html_doc, 'html.parser')

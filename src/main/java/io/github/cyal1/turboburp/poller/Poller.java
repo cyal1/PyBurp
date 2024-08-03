@@ -6,7 +6,7 @@
  * license terms for those products.
  */
 
-package io.github.cyal1.bcryptmontoya.poller;
+package io.github.cyal1.turboburp.poller;
 
 import burp.api.montoya.collaborator.CollaboratorClient;
 import burp.api.montoya.collaborator.Interaction;

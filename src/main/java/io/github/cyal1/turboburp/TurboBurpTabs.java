@@ -1,4 +1,4 @@
-package io.github.cyal1.bcryptmontoya;
+package io.github.cyal1.turboburp;
 
 import burp.api.montoya.collaborator.CollaboratorClient;
 import burp.api.montoya.collaborator.SecretKey;
@@ -9,7 +9,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
 
-public class BcryptMontoyaTabs extends JFrame {
+public class TurboBurpTabs extends JFrame {
     public static int sequence = 2;
     private static JTabbedPane tabbedPane;
     public static JTextArea logTextArea;
@@ -17,9 +17,9 @@ public class BcryptMontoyaTabs extends JFrame {
     public static CollaboratorClient collaboratorClient = createCollaboratorClient();
     public JMenu show;
 
-    public BcryptMontoyaTabs() {
+    public TurboBurpTabs() {
         tabbedPane = new JTabbedPane();
-        tabbedPane.add(" 1 ", new BcryptMontoyaTab());
+        tabbedPane.add(" 1 ", new TurboBurpTab());
         tabbedPane.add("+", null);
         jSplitPane = new JSplitPane();
         jSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
@@ -37,12 +37,12 @@ public class BcryptMontoyaTabs extends JFrame {
         jSplitPane.setDividerLocation(1.0);
         this.setVisible(true);
         this.setSize(900,500);
-        this.setTitle("BcyrptMontoya");
+        this.setTitle("Turbo Burp");
         this.setDefaultCloseOperation(HIDE_ON_CLOSE);
         this.setLayout(new BorderLayout());
         this.add(jSplitPane, BorderLayout.CENTER);
 
-        show = new JMenu("BcryptMontoya");
+        show = new JMenu("Turbo Burp");
         JMenuItem showItem = new JMenuItem("Show");
         show.add(showItem);
         showItem.addActionListener(e -> this.setVisible(true));
@@ -58,7 +58,7 @@ public class BcryptMontoyaTabs extends JFrame {
                         int selected = tabbedPane.getSelectedIndex();
                         String title = tabbedPane.getTitleAt(selected);
                         if ("+".equals(title)) {
-                            BcryptMontoyaTab tab = new BcryptMontoyaTab();
+                            TurboBurpTab tab = new TurboBurpTab();
                             String newTitle = " " + sequence + " ";
                             sequence++;
                             tabbedPane.insertTab(newTitle, null, tab, null,
@@ -93,21 +93,21 @@ public class BcryptMontoyaTabs extends JFrame {
     {
         CollaboratorClient collaboratorClient;
 
-        String existingCollaboratorKey = BcryptMontoya.api.persistence().extensionData().getString("persisted_collaborator");
+        String existingCollaboratorKey = TurboBurp.api.persistence().extensionData().getString("persisted_collaborator");
 
         if (existingCollaboratorKey != null)
         {
-            BcryptMontoya.api.logging().logToOutput("Creating Collaborator client from key.");
-            collaboratorClient = BcryptMontoya.api.collaborator().restoreClient(SecretKey.secretKey(existingCollaboratorKey));
+            TurboBurp.api.logging().logToOutput("Creating Collaborator client from key.");
+            collaboratorClient = TurboBurp.api.collaborator().restoreClient(SecretKey.secretKey(existingCollaboratorKey));
         }
         else
         {
-            BcryptMontoya.api.logging().logToOutput("No previously found Collaborator client. Creating new client...");
-            collaboratorClient = BcryptMontoya.api.collaborator().createClient();
+            TurboBurp.api.logging().logToOutput("No previously found Collaborator client. Creating new client...");
+            collaboratorClient = TurboBurp.api.collaborator().createClient();
 
             // Save the secret key of the CollaboratorClient so that you can retrieve it later.
-            BcryptMontoya.api.logging().logToOutput("Saving Collaborator secret key.");
-            BcryptMontoya.api.persistence().extensionData().setString("persisted_collaborator", collaboratorClient.getSecretKey().toString());
+            TurboBurp.api.logging().logToOutput("Saving Collaborator secret key.");
+            TurboBurp.api.persistence().extensionData().setString("persisted_collaborator", collaboratorClient.getSecretKey().toString());
         }
 
         return collaboratorClient;

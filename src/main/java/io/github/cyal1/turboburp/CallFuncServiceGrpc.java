@@ -1,4 +1,4 @@
-package io.github.cyal1.bcryptmontoya;
+package io.github.cyal1.turboburp;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 

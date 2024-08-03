@@ -1,4 +1,4 @@
-package io.github.cyal1.bcryptmontoya;
+package io.github.cyal1.turboburp;
 
 import com.google.protobuf.*;
 import io.grpc.ManagedChannel;
@@ -57,7 +57,7 @@ public class CallFuncClient {
                 throw new RuntimeException("unexcept type returned, only allowed StringValue,Int64Value,DoubleValue,BoolValue,BytesValue");
             }
         } catch (Exception e){
-            BcryptMontoya.api.logging().logToError(e.getMessage());
+            TurboBurp.api.logging().logToError(e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
     }

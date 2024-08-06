@@ -17,7 +17,7 @@ from java.util.concurrent import Executors, TimeUnit
 # Import common enumeration types
 from burp.api.montoya.http import HttpMode
 from burp.api.montoya.core import HighlightColor
-from burp.api.montoya.http.message import ContentType
+from burp.api.montoya.http.message import ContentType, MimeType
 from burp.api.montoya.http.message.params import HttpParameterType
 from burp.api.montoya.scanner.audit.issues import AuditIssueSeverity, AuditIssueConfidence
 from io.github.cyal1.turboburp.MyContextMenuItemsProvider import MenuType

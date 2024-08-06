@@ -14,13 +14,14 @@ dependencies {
     compileOnly 'net.portswigger.burp.extensions:montoya-api:2023.12.1'
 //    compileOnly files('/Users/test/Downloads/montoya-api-2023.9.jar')
     implementation 'org.mozilla:rhino:1.7.14'
-    implementation 'org.json:json:20230227'
+    implementation 'org.json:json:20231013'
     implementation 'com.fifesoft:rsyntaxtextarea:3.3.3'
-    compileOnly 'org.python:jython-standalone:2.7.3'
+    implementation 'org.python:jython-standalone:2.7.3'
     runtimeOnly 'io.grpc:grpc-netty-shaded:1.54.1'
     implementation 'io.grpc:grpc-protobuf:1.54.1'
     implementation 'io.grpc:grpc-stub:1.54.1'
-    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
+    implementation "com.github.kklisura.cdt:cdt-java-client:4.0.0"
+    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.41.2.2'
     compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
 }
 

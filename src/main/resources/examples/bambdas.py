@@ -26,35 +26,51 @@ for requestResponse in history(
 
 
 """
-    Custom word list generat from history
+    Custom word list generate from history
 """
-
 words = []
 word_regex = r'[^a-zA-Z]'
-word_regex2 = r'[^a-zA-Z\-]' # word contain -
-word_regex3 = r'[^a-zA-Z_]'  # word contain _
+word_regex2 = r'[^a-zA-Z0-9\-_]' # word contain digit, -, _
 min_len = 2
 max_len = 20
-
-
-def starts_or_ends_with(text, c):
-    return text.startswith(c) or text.endswith(c)
+lower_case = False
 
 
 for requestResponse in history(
         lambda rr: rr.httpService().host().endswith(".example.com")
 ):
-    # todo - words from request, headers, url
+    # wordlist from request
+    req = requestResponse.request().toString()
+    if lower_case:
+        req = req.lower()
+    words += set(re.split(word_regex, req))
+    words += set(re.split(word_regex2, req))  # word contain digit, -, _
+
+    # wordlist from response
     if requestResponse.hasResponse() \
             and requestResponse.response().mimeType() in [ MimeType.JSON, MimeType.PLAIN_TEXT, MimeType.SCRIPT, MimeType.XML, MimeType.HTML ]:
         print(requestResponse.url())
-        body = requestResponse.response().bodyToString()
-        # body = body.lower()
-        words += set(re.split(word_regex, body) + re.split(word_regex2, body) + re.split(word_regex3, body))
+        resp = requestResponse.response().toString()
+        if lower_case:
+            resp = resp.lower()
+        words += set(re.split(word_regex, resp))
+        words += set(re.split(word_regex2, resp))  # word contain digit, -, _
 
 words = sorted(set(words))
-words = [i for i in words if ((i != '') and not starts_or_ends_with(i, '_') and not starts_or_ends_with(i, '-') and (len(i) >= min_len) and (len(i) <= max_len))]
-print(len(words))
+
+def starts_or_ends_with(text, c):
+    return text.startswith(c) or text.endswith(c)
+
+# filter
+words = [i for i in words if ((i != '') \
+                and not i[0].isdigit() \                   # exclude number and start with digit
+                and not starts_or_ends_with(i, '_') \
+                and not starts_or_ends_with(i, '-') \
+                and (len(i) >= min_len) \
+                and (len(i) <= max_len))
+        ]
+
+print(len(words)) # wordlist size
 
 # save wordlist to file
 with open("/tmp/dicts.txt", 'w') as f:

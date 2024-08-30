@@ -56,9 +56,8 @@ public class CallFuncClient {
             }else{
                 throw new RuntimeException("unexcept type returned, only allowed StringValue,Int64Value,DoubleValue,BoolValue,BytesValue");
             }
-        } catch (Exception e){
-            TurboBurp.api.logging().logToError(e.getMessage());
-            throw new RuntimeException(e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e.getCause());
         }
     }
 

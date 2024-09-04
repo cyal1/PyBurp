@@ -5,16 +5,11 @@
 # https://youtu.be/g8cT4YJwGM4
 
 
-server = Grpc("localhost",30051)
+server = Grpc("localhost", 30051)
 
-result = server.callFunc('test',"arg1",2,"arg3",1,1)
+result = server.callFunc('test')
 
-# https://protobuf.dev/reference/java/api-docs/com/google/protobuf/ByteString
-print(dir(result))
-
-result=result.toStringUtf8().encode()
-
+# https://www.jython.org/jython-old-sites/docs/library/array.html#array-efficient-arrays-of-numeric-values
 print(result, type(result))
+print(bytearray(result))
 
-result = server.callFunc('test',"arg1",2,"arg3",1).encode()
-print(result, type(result))

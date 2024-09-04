@@ -3,6 +3,7 @@ package io.github.cyal1.turboburp;
 import com.google.protobuf.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 
 public class CallFuncClient {
     private final ManagedChannel channel;
@@ -43,7 +44,11 @@ public class CallFuncClient {
         try {
             Burpextender.Response response = blockingStub.callFunc(request);
             result = response.getRes();
-            if(result.is(StringValue.class)){
+            if (result.is(ListValue.class)){
+                return null;
+            }if (result.getSerializedSize() == 0){
+                return null;
+            }else if(result.is(StringValue.class)){
                 return result.unpack(StringValue.class).getValue();
             }else if(result.is(Int64Value.class)){
                 return result.unpack(Int64Value.class).getValue();
@@ -52,12 +57,14 @@ public class CallFuncClient {
             }else if(result.is(BoolValue.class)){
                 return result.unpack(BoolValue.class).getValue();
             }else if(result.is(BytesValue.class)){
-                return result.unpack(BytesValue.class).getValue();
+                return result.unpack(BytesValue.class).getValue().toByteArray();
             }else{
                 throw new RuntimeException("unexcept type returned, only allowed StringValue,Int64Value,DoubleValue,BoolValue,BytesValue");
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e.getCause());
+        } catch (StatusRuntimeException e) {
+            throw new RuntimeException(e.getStatus().toString());
+        } catch (Exception e){
+            throw new RuntimeException(e);
         }
     }
 

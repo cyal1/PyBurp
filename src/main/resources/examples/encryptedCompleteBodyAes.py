@@ -20,13 +20,13 @@ def aes_encrypt_ecb(data, key):
         data += (16 - len(data) % 16) * chr(16 - len(data) % 16)
     data = str.encode(data)
     aes = AES.new(str.encode(key), AES.MODE_ECB)
-    return str(base64.b64encode(aes.encrypt(data)))
+    return b64encode(aes.encrypt(data))
 
 def aes_encrypt_cbc(data, key, iv):
-    bs = AES.block_size
-    pad = lambda s: s + (bs - len(s) % bs) * chr(bs - len(s) % bs)
+    while len(data) % 16 != 0:
+        data += (16 - len(data) % 16) * chr(16 - len(data) % 16)
     cipher = AES.new(key, AES.MODE_CBC, iv)
-    data = cipher.encrypt(pad(data))
+    data = cipher.encrypt(data)
     return b64encode(data)
 
 def aes_decrypt_cbc(data, key, iv):

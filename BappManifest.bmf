@@ -1,0 +1,13 @@
+Uuid: d8969aceb89d4dc38e996f3c3579880d
+ExtensionType: 1
+Name: PyBurp
+RepoName: pyburp
+ScreenVersion: 0.1.4
+SerialVersion: 1
+MinPlatformVersion: 11
+ProOnly: False
+Author: cyal1
+ShortDescription: Allows you to modify HTTP requests and responses passing through the Burp Suite proxy using Jython code or gRPC, especially when dealing with encrypted requests.
+EntryPoint: build/libs/pyburp-1.0.0.jar
+BuildCommand: ./gradlew jar
+SupportedProducts: Pro, Community

@@ -155,7 +155,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 func.__call__(pythonArguments);
             }
         }catch (Exception e){
-            PyBurpTabs.logTextArea.append(e.getMessage());
+            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e.getMessage() + "\n"));
         }
     }
 

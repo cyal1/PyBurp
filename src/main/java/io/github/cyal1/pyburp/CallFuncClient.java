@@ -6,6 +6,8 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 
+import javax.swing.*;
+
 import static io.github.cyal1.pyburp.PyBurpTabs.logTextArea;
 
 public class CallFuncClient {
@@ -38,7 +40,7 @@ public class CallFuncClient {
             }else if (arg instanceof byte[]){
                 param = Any.pack(BytesValue.newBuilder().setValue(ByteString.copyFrom((byte[]) arg)).build());
             }else{
-                logTextArea.append(arg.getClass().getName() + " param type not support. \n");
+                SwingUtilities.invokeLater(() -> logTextArea.append(arg.getClass().getName() + " param type not support. \n"));
                 param = Any.newBuilder().setValue(ByteString.empty()).build();
             }
             requestBuilder.addArgs(param);

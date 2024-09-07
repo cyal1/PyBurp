@@ -13,6 +13,7 @@ import burp.api.montoya.http.handler.*;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 
+import javax.swing.*;
 import java.util.ArrayList;
 
 public class MyHttpHandler implements HttpHandler
@@ -38,7 +39,7 @@ public class MyHttpHandler implements HttpHandler
             ArrayList<Object> array = pyBurpTab.invokePyRequest(httpRequestToBeSent, httpRequestToBeSent.annotations(), "handleRequest");
             return RequestToBeSentAction.continueWith((HttpRequest) array.get(0), (Annotations) array.get(1));
         }catch (Exception e){
-            PyBurpTabs.logTextArea.append(e.getMessage());
+            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e.getMessage() + "\n"));
         }
         return RequestToBeSentAction.continueWith(httpRequestToBeSent, httpRequestToBeSent.annotations());
     }
@@ -58,7 +59,7 @@ public class MyHttpHandler implements HttpHandler
             ArrayList<Object> array = pyBurpTab.invokePyResponse(httpResponseReceived, httpResponseReceived.annotations(), "handleResponse");
             return ResponseReceivedAction.continueWith((HttpResponse) array.get(0), (Annotations) array.get(1));
         }catch (Exception e){
-            PyBurpTabs.logTextArea.append(e.getMessage());
+            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e.getMessage() + "\n"));
         }
         return ResponseReceivedAction.continueWith(httpResponseReceived, httpResponseReceived.annotations());
     }

@@ -4,6 +4,8 @@ import burp.api.montoya.collaborator.Interaction;
 import io.github.cyal1.pyburp.poller.InteractionHandler;
 import org.python.core.Py;
 
+import javax.swing.*;
+
 public class MyInteractionHandler implements InteractionHandler {
     PyBurpTab pyBurpTab;
     public MyInteractionHandler(PyBurpTab pyBurpTab) {
@@ -15,7 +17,7 @@ public class MyInteractionHandler implements InteractionHandler {
         try {
             pyBurpTab.py_functions.get("handleInteraction").__call__(Py.java2py(interaction));
         }catch (Exception e){
-            PyBurpTabs.logTextArea.append(e.getMessage());
+            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e.getMessage() + "\n"));
         }
     }
 }

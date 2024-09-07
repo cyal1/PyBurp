@@ -6,7 +6,7 @@
  * license terms for those products.
  */
 
-package io.github.cyal1.bcryptmontoya.poller;
+package io.github.cyal1.pyburp.poller;
 
 import burp.api.montoya.collaborator.CollaboratorClient;
 import burp.api.montoya.collaborator.Interaction;
@@ -54,7 +54,8 @@ public class Poller implements Registration {
     public boolean isRegistered() {
         return true;
     }
-
+    
+    @Override
     public void deregister(){
         schedule.cancel(true);
         scheduledThreadPoolExecutor.shutdown();

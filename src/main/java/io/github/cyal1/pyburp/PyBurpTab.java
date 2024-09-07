@@ -1,19 +1,17 @@
-package io.github.cyal1.bcryptmontoya;
+package io.github.cyal1.pyburp;
 
 import burp.api.montoya.core.Annotations;
 import burp.api.montoya.core.Registration;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
-import io.github.cyal1.bcryptmontoya.poller.Poller;
+import io.github.cyal1.pyburp.poller.Poller;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.python.core.*;
 import org.python.util.PythonInterpreter;
-
 import javax.swing.*;
-import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +25,10 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-public class BcryptMontoyaTab extends JPanel {
+import static io.github.cyal1.pyburp.PyBurpTabs.collaboratorClient;
+import static io.github.cyal1.pyburp.PyBurpTabs.logTextArea;
+
+public class PyBurpTab extends JPanel {
     public enum STATUS {
         RUNNING,
         STOP
@@ -35,8 +36,8 @@ public class BcryptMontoyaTab extends JPanel {
     public ArrayList<String> ALLOWED_URL_PREFIX;
     private STATUS status = STATUS.STOP;
     public MyContextMenuItemsProvider myContextMenu;
-    public HashMap<String, PyFunction> py_functions;
-    public ArrayList<Registration> plugins;
+    public HashMap<String, PyFunction> py_functions = new HashMap<>();
+    public ArrayList<Registration> plugins = new ArrayList<>();
     private PythonInterpreter pyInterp;
     JButton saveButton = new JButton("Save");
     JButton runButton = new JButton("Run");
@@ -45,10 +46,9 @@ public class BcryptMontoyaTab extends JPanel {
     JButton loadDirectoryButton = new JButton("Choose scripts dir");
     JButton closeTab = new JButton("Close");
     RSyntaxTextArea codeEditor = new RSyntaxTextArea();
-    JSplitPane jSplitPane;
-    JTextArea logTextArea;
 
-    public BcryptMontoyaTab(){
+
+    public PyBurpTab(){
         javax.swing.text.JTextComponent.removeKeymap("RTextAreaKeymap");
         javax.swing.UIManager.put("RTextAreaUI.inputMap", null);
         javax.swing.UIManager.put("RTextAreaUI.actionMap", null);
@@ -78,30 +78,14 @@ public class BcryptMontoyaTab extends JPanel {
         toolBar.add(runButton);
         toolBar.add(clearLogButton);
         toolBar.add(closeTab);
-
-        jSplitPane = new JSplitPane();
-        jSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-        logTextArea = new JTextArea(0,0);
-        logTextArea.setLineWrap(true);
-        logTextArea.setWrapStyleWord(true);
-        DefaultCaret caret = (DefaultCaret) logTextArea.getCaret();
-        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-
-        JScrollPane bottomScrollPane= new JScrollPane(logTextArea);
         JPanel topPane = new JPanel(new BorderLayout());
         topPane.add(toolBar, BorderLayout.NORTH);
         topPane.add(scrollableTextEditor, BorderLayout.CENTER);
-        bottomScrollPane.setBorder(null);
-        jSplitPane.setTopComponent(topPane);
-        bottomScrollPane.setMinimumSize(new Dimension(0,0));
-        jSplitPane.setBottomComponent(bottomScrollPane);
-        jSplitPane.setResizeWeight(1.0);
-        jSplitPane.setDividerLocation(1.0);
         this.setLayout(new BorderLayout());
-        this.add(jSplitPane, BorderLayout.CENTER);
+        this.add(topPane, BorderLayout.CENTER);
 
         codeEditor.setText(getDefaultScript());
-        if(BcryptMontoya.Api.userInterface().currentTheme() == burp.api.montoya.ui.Theme.DARK){
+        if(PyBurp.api.userInterface().currentTheme() == burp.api.montoya.ui.Theme.DARK){
             setDarkTheme();
         }
         ALLOWED_URL_PREFIX = new ArrayList<>();
@@ -129,7 +113,7 @@ public class BcryptMontoyaTab extends JPanel {
                 stopBtnClick();
             }
             logTextArea.setText("");
-            BcryptMontoyaTabs.closeTab();
+            PyBurpTabs.closeTab();
         });
 
         loadDirectoryButton.addActionListener(e -> {
@@ -138,7 +122,7 @@ public class BcryptMontoyaTab extends JPanel {
             int option = directoryChooser.showOpenDialog(this);
             if (option == JFileChooser.APPROVE_OPTION) {
                 File file = directoryChooser.getSelectedFile();
-                BcryptMontoya.Api.persistence().preferences().setString("scriptsPath", file.getAbsolutePath());
+                PyBurp.api.persistence().preferences().setString("scriptsPath", file.getAbsolutePath());
 //                readScriptDirectories();
             }
         });
@@ -167,7 +151,7 @@ public class BcryptMontoyaTab extends JPanel {
                 codeEditor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PYTHON);
             }
             if (fileName.startsWith("examples/")) {
-                codeEditor.setText(Tools.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/"+fileName)));
+                codeEditor.setText(Tools.readFromInputStream(PyBurp.class.getResourceAsStream("/"+fileName)));
                 saveButton.setEnabled(false);
             } else {
                 saveButton.setEnabled(true);
@@ -182,66 +166,74 @@ public class BcryptMontoyaTab extends JPanel {
     }
 
     private void runBtnClick(){
-        try{
-            initPyEnv();
-            pyInterp.exec(getCode());
-            py_functions = getPyFunctions();
-//            BcryptMontoyaTabs.registerTabExtender(this);
-            registerTabExtender();
-            PyObject pythonArguments = Py.java2py(myContextMenu);
-            if(py_functions.containsKey("registerContextMenu")){
-                py_functions.get("registerContextMenu").__call__(pythonArguments);
-            }
+        PyBurpTabs.showLogConsole();
+        logTextArea.append("Tab " + PyBurpTabs.getCurrentTabId() + " is running\n");
+        try {
+            new Thread(() -> {
+                try {
+                    initPyEnv();
+                    pyInterp.exec(getCode());
+                    py_functions = getPyFunctions();
+                    registerTabExtender();
+                    PyObject pythonArguments = Py.java2py(myContextMenu);
+                    if (py_functions.containsKey("registerContextMenu")) {
+                        py_functions.get("registerContextMenu").__call__(pythonArguments);
+                    }
 
-            PyObject[] urls = Py.javas2pys(ALLOWED_URL_PREFIX);
-            if(py_functions.containsKey("urlPrefixAllowed")){
-                py_functions.get("urlPrefixAllowed").__call__(urls);
-            }
-        }catch (Exception ex){
-            logTextArea.append(ex.getMessage());
-//            JOptionPane.showMessageDialog(null, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
-            return;
+                    PyObject[] urls = Py.javas2pys(ALLOWED_URL_PREFIX);
+                    if (py_functions.containsKey("urlPrefixAllowed")) {
+                        py_functions.get("urlPrefixAllowed").__call__(urls);
+                    }
+                } catch (Exception ex) {
+                    SwingUtilities.invokeLater(() -> {
+                        logTextArea.append(ex.getMessage() + "\n");
+                        stopBtnClick();
+                    });
+                }
+            }).start();
+            codeEditor.setHighlightCurrentLine(false);
+            codeEditor.setEnabled(false);
+            loadDirectoryButton.setEnabled(false);
+            codeCombo.setEnabled(false);
+            status = STATUS.RUNNING;
+            runButton.setText("Stop");
+            PyBurp.api.persistence().preferences().setString("defaultScript", getCode().replace("\r\n", "\n"));
+            PyBurpTabs.setTabColor(Color.decode("#ec6033"));
+        }catch (Exception e){
+            logTextArea.append(e.getMessage() + "\n");
         }
-        codeEditor.setHighlightCurrentLine(false);
-        codeEditor.setEnabled(false);
-        loadDirectoryButton.setEnabled(false);
-        codeCombo.setEnabled(false);
-        status = STATUS.RUNNING;
-        runButton.setText("Stop");
-        BcryptMontoya.Api.persistence().preferences().setString("defaultScript", getCode().replace("\r\n","\n"));
-        if (jSplitPane.getResizeWeight() > 0.9) {
-            jSplitPane.setResizeWeight(0.7);
-            jSplitPane.setDividerLocation(0.7);
-        }
-        BcryptMontoyaTabs.setTabColor(Color.decode("#ec6033"));
-        logTextArea.append("start script\n");
     }
 
     public void stopBtnClick(){
         try {
+            pyInterp.set("EXIT_FLAG", true);
             if (py_functions.containsKey("finish")){
-                py_functions.get("finish").__call__();
+                try {
+                    logTextArea.append("Calling the finish function...\n");
+                    py_functions.get("finish").__call__();
+                }catch (Exception e){
+                    logTextArea.append("finish(): " + e.getMessage() + "\n");
+                }
             }
+            myContextMenu.MENUS.clear();
+            ALLOWED_URL_PREFIX.clear();
+            py_functions.clear();
+            pyInterp.cleanup();
+            pyInterp.close();
+            codeEditor.setHighlightCurrentLine(true);
+            codeEditor.setEnabled(true);
+            loadDirectoryButton.setEnabled(true);
+            codeCombo.setEnabled(true);
+            status = STATUS.STOP;
+            runButton.setText("Run");
+            for(Registration plugin: plugins){
+                plugin.deregister();
+            }
+            PyBurpTabs.setTabColor(Color.black);
         } catch (Exception e){
-            logTextArea.append(e.getMessage());
+            logTextArea.append(e.getMessage() + "\n");
         }
-        myContextMenu.MENUS.clear();
-        ALLOWED_URL_PREFIX.clear();
-        py_functions.clear();
-        pyInterp.cleanup();
-        pyInterp.close();
-        codeEditor.setHighlightCurrentLine(true);
-        codeEditor.setEnabled(true);
-        loadDirectoryButton.setEnabled(true);
-        codeCombo.setEnabled(true);
-        status = STATUS.STOP;
-        runButton.setText("Run");
-        for(Registration plugin: plugins){
-            plugin.deregister();
-        }
-        BcryptMontoyaTabs.setTabColor(Color.black);
-//        initPyEnv();
-        logTextArea.append("stopped script\n");
+        logTextArea.append("Tab " + PyBurpTabs.getCurrentTabId() + " is stopped\n");
     }
 
     private void initPyEnv(){
@@ -250,17 +242,19 @@ public class BcryptMontoyaTab extends JPanel {
             final int MAX_LINES = 10000;
             @Override
             public void write(int b) {
-                logTextArea.append(String.valueOf((char) b));
-                if (logTextArea.getLineCount() > MAX_LINES) {
-                    removeLines(logTextArea, logTextArea.getLineCount() - MAX_LINES);
-                }
+                SwingUtilities.invokeLater(() -> {
+                    logTextArea.append(String.valueOf((char) b));
+                    if (logTextArea.getLineCount() > MAX_LINES) {
+                        removeLines(logTextArea, logTextArea.getLineCount() - MAX_LINES);
+                    }
+                });
             }
         });
 //        System.setOut(printStream);
 //        System.setErr(printStream);
         pyInterp.setOut(printStream);
         pyInterp.setErr(printStream);
-        pyInterp.exec(Tools.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/initEnv.py")));
+        pyInterp.exec(Tools.readFromInputStream(PyBurp.class.getResourceAsStream("/examples/env_init.py")));
     }
 
     private static void removeLines(JTextArea textArea, int linesToRemove) {
@@ -304,7 +298,7 @@ public class BcryptMontoyaTab extends JPanel {
     private void readScriptDirectories(){
         codeCombo.removeAllItems();
         codeCombo.addItem("Last code used");
-        String scriptsPath = BcryptMontoya.Api.persistence().preferences().getString("scriptsPath");
+        String scriptsPath = PyBurp.api.persistence().preferences().getString("scriptsPath");
         if(scriptsPath != null && !scriptsPath.isEmpty()){
             File folder = new File(scriptsPath);
             if (folder.isDirectory()) {
@@ -326,8 +320,8 @@ public class BcryptMontoyaTab extends JPanel {
         }
     }
     public String getDefaultScript(){
-        String defaultScript = BcryptMontoya.Api.persistence().preferences().getString ("defaultScript");
-        return Objects.requireNonNullElseGet(defaultScript, () -> Tools.readFromInputStream(BcryptMontoya.class.getResourceAsStream("/examples/default.py")));
+        String defaultScript = PyBurp.api.persistence().preferences().getString ("defaultScript");
+        return Objects.requireNonNullElseGet(defaultScript, () -> Tools.readFromInputStream(PyBurp.class.getResourceAsStream("/examples/default.py")));
     }
 
     public void setDarkTheme(){
@@ -394,7 +388,7 @@ public class BcryptMontoyaTab extends JPanel {
         PyTuple result = (PyTuple) py_functions.get(pyFuncName).__call__(pythonArguments);
         HttpRequest newHttpRequest;
         if(result.__len__() != 2){
-            this.logTextArea.append(pyFuncName+ " return type error");
+            logTextArea.append(pyFuncName+ " return type error\n");
             return new ArrayList<>(List.of(httpRequest, annotations));
         }
         newHttpRequest = (HttpRequest) result.get(0);
@@ -410,7 +404,7 @@ public class BcryptMontoyaTab extends JPanel {
         HttpResponse newHttpResponse;
         // jython need to return response and annotations
         if (result.__len__() != 2){
-            this.logTextArea.append(pyFuncName+ " return type error");
+            logTextArea.append(pyFuncName+ " return type error\n");
             return new ArrayList<>(List.of(httpResponse, annotations));
         }
         newHttpResponse = (HttpResponse) result.get(0);
@@ -423,29 +417,28 @@ public class BcryptMontoyaTab extends JPanel {
     }
 
     public void registerTabExtender(){
-        plugins = new ArrayList<>();
         if(py_functions.containsKey("registerContextMenu")){
-            plugins.add(BcryptMontoya.Api.userInterface().registerContextMenuItemsProvider(myContextMenu));
+            plugins.add(PyBurp.api.userInterface().registerContextMenuItemsProvider(myContextMenu));
         }
 
         if(py_functions.containsKey("passiveAudit") || py_functions.containsKey("activeAudit")){
-            plugins.add(BcryptMontoya.Api.scanner().registerScanCheck(new MyScanCheck(this)));
+            plugins.add(PyBurp.api.scanner().registerScanCheck(new MyScanCheck(this)));
         }
 
         if(py_functions.containsKey("handleRequest") || py_functions.containsKey("handleResponse")){
-            plugins.add(BcryptMontoya.Api.http().registerHttpHandler(new MyHttpHandler(this)));
+            plugins.add(PyBurp.api.http().registerHttpHandler(new MyHttpHandler(this)));
         }
 
         if(py_functions.containsKey("handleProxyRequest")){
-            plugins.add(BcryptMontoya.Api.proxy().registerRequestHandler(new MyProxyRequestHandler(this)));
+            plugins.add(PyBurp.api.proxy().registerRequestHandler(new MyProxyRequestHandler(this)));
         }
 
         if(py_functions.containsKey("handleProxyResponse")){
-            plugins.add(BcryptMontoya.Api.proxy().registerResponseHandler(new MyProxyResponseHandler(this)));
+            plugins.add(PyBurp.api.proxy().registerResponseHandler(new MyProxyResponseHandler(this)));
         }
 
         if(py_functions.containsKey("handleInteraction")){
-            Poller collaboratorPoller = new Poller(BcryptMontoyaTabs.collaboratorClient, Duration.ofSeconds(10));
+            Poller collaboratorPoller = new Poller(collaboratorClient, Duration.ofSeconds(10));
             collaboratorPoller.registerInteractionHandler(new MyInteractionHandler(this));
             collaboratorPoller.start();
             plugins.add(collaboratorPoller);

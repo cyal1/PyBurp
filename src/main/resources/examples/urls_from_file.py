@@ -18,7 +18,6 @@ def send_request(url, exit_event):
 
 
 def finish():
-    print("exit")
     exit_event.set()
 
 

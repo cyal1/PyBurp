@@ -1,4 +1,4 @@
-package io.github.cyal1.bcryptmontoya;
+package io.github.cyal1.pyburp;
 
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.scanner.AuditResult;
@@ -11,18 +11,18 @@ import org.python.core.PyFunction;
 import org.python.core.PyObject;
 
 class MyScanCheck implements ScanCheck {
-    public BcryptMontoyaTab bcryptMontoyaTab;
+    public PyBurpTab pyBurpTab;
 
-    public MyScanCheck(BcryptMontoyaTab bcryptMontoyaTab) {
-        this.bcryptMontoyaTab = bcryptMontoyaTab;
+    public MyScanCheck(PyBurpTab pyBurpTab) {
+        this.pyBurpTab = pyBurpTab;
     }
 
     @Override
     public AuditResult activeAudit(HttpRequestResponse baseRequestResponse, AuditInsertionPoint auditInsertionPoint) {
-        PyFunction activeAudit = bcryptMontoyaTab.py_functions.get("activeAudit");
-//        if (activeAudit == null) {
-//            return AuditResult.auditResult();
-//        }
+        PyFunction activeAudit = pyBurpTab.py_functions.get("activeAudit");
+        if (activeAudit == null) {
+            return AuditResult.auditResult();
+        }
         PyObject[] pythonArguments = new PyObject[2];
         pythonArguments[0] = Py.java2py(baseRequestResponse);
         pythonArguments[1] = Py.java2py(auditInsertionPoint);
@@ -35,10 +35,10 @@ class MyScanCheck implements ScanCheck {
 
     @Override
     public AuditResult passiveAudit(HttpRequestResponse baseRequestResponse) {
-        PyFunction passiveAudit = bcryptMontoyaTab.py_functions.get("passiveAudit");
-//        if (passiveAudit == null) {
-//            return AuditResult.auditResult();
-//        }
+        PyFunction passiveAudit = pyBurpTab.py_functions.get("passiveAudit");
+        if (passiveAudit == null) {
+            return AuditResult.auditResult();
+        }
 
         PyObject pythonArguments = Py.java2py(baseRequestResponse);
         AuditResult r = (AuditResult) passiveAudit.__call__(pythonArguments).__tojava__(AuditResult.class);;

@@ -1,7 +1,6 @@
-package io.github.cyal1.bcryptmontoya;
+package io.github.cyal1.pyburp;
 
 import burp.api.montoya.core.ByteArray;
-import burp.api.montoya.core.Range;
 import burp.api.montoya.core.ToolType;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.http.message.requests.HttpRequest;
@@ -12,6 +11,7 @@ import burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse;
 import org.python.core.Py;
 import org.python.core.PyFunction;
 import org.python.core.PyObject;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.*;
 // https://javadoc.io/doc/org.python/jython/2.7-b3/org/python/core/util/StringUtil.html
 public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
     public EnumMap<MenuType, Map<String, PyFunction>> MENUS;
-    BcryptMontoyaTab bcryptMontoyaTab;
+    PyBurpTab pyBurpTab;
 
     public enum MenuType {
         CARET, // insertAtCursor lo4j
@@ -30,9 +30,9 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
         REQUEST_RESPONSE, // checkCachePoisoning
     }
 
-    public MyContextMenuItemsProvider(BcryptMontoyaTab tab) {
+    public MyContextMenuItemsProvider(PyBurpTab tab) {
         MENUS = new EnumMap<>(MenuType.class);
-        this.bcryptMontoyaTab = tab;
+        this.pyBurpTab = tab;
     }
 
     @Override
@@ -128,7 +128,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                         menuItemList.add(retrieveRequestItem);
                     }
                     default -> {
-                        bcryptMontoyaTab.logTextArea.append("No Such Menu Type, Menu Type must be CARET, SELECTED_TEXT, MESSAGE_EDITOR, REQUEST, REQUEST_RESPONSE");
+                        PyBurpTabs.logTextArea.append("No Such Menu Type, Menu Type must be CARET, SELECTED_TEXT, MESSAGE_EDITOR, REQUEST, REQUEST_RESPONSE");
                         throw new RuntimeException("no such Menu Type " + type);
                     }
                 }
@@ -155,7 +155,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 func.__call__(pythonArguments);
             }
         }catch (Exception e){
-            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+            PyBurpTabs.logTextArea.append(e.getMessage());
         }
     }
 
@@ -181,7 +181,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 func.__call__(pythonArguments);
             }
         }catch (Exception e){
-            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+            PyBurpTabs.logTextArea.append(e.getMessage());
         }
     }
 
@@ -204,19 +204,19 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
             String newText = (String) r.__tojava__(String.class);
             messageEditor.setRequest(HttpRequest.httpRequest(firstSection.withAppended(newText).withAppended(lastSection)));
         }catch (Exception e){
-            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+            PyBurpTabs.logTextArea.append(e.getMessage());
         }
     }
 
     public void handleSelectText(ContextMenuEvent event, PyFunction func) {
         try {
             MessageEditorHttpRequestResponse messageEditor = event.messageEditorRequestResponse().get();
-            ByteArray selectText = getSelectedText(messageEditor);
+            ByteArray selectText = Tools.getSelectedText(messageEditor);
             if (event.isFromTool(ToolType.REPEATER) && messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST) {
                 PyObject pythonArguments = Py.java2py(selectText.toString());
                 PyObject r = func.__call__(pythonArguments);
                 String newText = (String) r.__tojava__(String.class);
-                messageEditor.setRequest(replaceSelectedText(messageEditor, newText));
+                messageEditor.setRequest(Tools.replaceSelectedText(messageEditor, newText));
             } else {
                 PyObject pythonArguments = Py.java2py(selectText.toString());
                 PyObject r = func.__call__(pythonArguments);
@@ -234,7 +234,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 dialog.setVisible(true);
             }
         }catch (Exception e){
-            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+            PyBurpTabs.logTextArea.append(e.getMessage());
         }
     }
 
@@ -243,45 +243,8 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
             PyObject pythonArguments = Py.java2py(event.messageEditorRequestResponse().get());
             func.__call__(pythonArguments);
         }catch (Exception e){
-            bcryptMontoyaTab.logTextArea.append(e.getMessage());
+            PyBurpTabs.logTextArea.append(e.getMessage());
         }
 
-    }
-
-    public static HttpRequest replaceSelectedText(MessageEditorHttpRequestResponse messageEditor, String newString){
-        HttpRequest request = messageEditor.requestResponse().request();
-        if (messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST && messageEditor.selectionOffsets().isPresent()) {
-            Optional<Range> selectionRange = messageEditor.selectionOffsets();
-            int startIndex = selectionRange.get().startIndexInclusive();
-            int endIndex = selectionRange.get().endIndexExclusive();
-            ByteArray httpMessage = request.toByteArray();
-            ByteArray firstSection = httpMessage.subArray(0, startIndex);
-            ByteArray lastSection;
-            if (endIndex != httpMessage.length()) {
-                lastSection = httpMessage.subArray(endIndex, httpMessage.length());
-            } else {
-                lastSection = ByteArray.byteArray();
-            }
-            request = HttpRequest.httpRequest(request.httpService(), firstSection.withAppended(newString).withAppended(lastSection));
-            if(request.body().length() != 0){
-                request = request.withHeader("Content-Length", String.valueOf(request.body().length()));
-            }
-            return request;
-        }
-        return request;
-    }
-
-    public static ByteArray getSelectedText(MessageEditorHttpRequestResponse messageEditor){
-        if (messageEditor.selectionOffsets().isPresent()) {
-            HttpRequest request = messageEditor.requestResponse().request();
-            HttpResponse response = messageEditor.requestResponse().response();
-            Optional<Range> selectionRange = messageEditor.selectionOffsets();
-            if (messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST){
-                return request.toByteArray().subArray(selectionRange.get());
-            }else{
-                return response.toByteArray().subArray(selectionRange.get());
-            }
-        }
-        return ByteArray.byteArray();
     }
 }

@@ -1,4 +1,4 @@
-package io.github.cyal1.bcryptmontoya;
+package io.github.cyal1.pyburp;
 
 import burp.api.montoya.core.ToolType;
 import burp.api.montoya.http.message.ContentType;

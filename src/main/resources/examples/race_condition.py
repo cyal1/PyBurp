@@ -29,7 +29,7 @@ def race_condition():
         if resp is None:
             print("reqeust error")
             continue
-        print(resp.statusCode(), resp.headers())
+        print(resp.statusCode(), resp.bodyToString())
 
 
 race_condition()

@@ -7,8 +7,8 @@
     pool.run(function, *args, **kwargs)
     pool.shutdown()
     
-    # Grpc
-    server = Grpc("localhost", 30051)
+    # rpc
+    server = rpc("localhost", 30051)
     server.callFunc('remoteFuncName', *args)
     server.shutdown()
 

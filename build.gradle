@@ -20,9 +20,9 @@ dependencies {
     runtimeOnly 'io.grpc:grpc-netty-shaded:1.54.1'
     implementation 'io.grpc:grpc-protobuf:1.54.1'
     implementation 'io.grpc:grpc-stub:1.54.1'
-    implementation "com.github.kklisura.cdt:cdt-java-client:4.0.0"
     implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.41.2.2'
     compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
+    implementation "com.github.kklisura.cdt:cdt-java-client:4.0.0"
 }
 
 jar {
@@ -32,5 +32,5 @@ jar {
     }
 }
 
-sourceCompatibility = JavaVersion.VERSION_19
-targetCompatibility = JavaVersion.VERSION_19
+sourceCompatibility = JavaVersion.VERSION_18
+targetCompatibility = JavaVersion.VERSION_18

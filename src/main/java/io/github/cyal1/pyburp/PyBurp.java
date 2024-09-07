@@ -6,7 +6,7 @@
  * license terms for those products.
  */
 
-package io.github.cyal1.turboburp;
+package io.github.cyal1.pyburp;
 
 import burp.api.montoya.BurpExtension;
 import burp.api.montoya.MontoyaApi;
@@ -18,7 +18,7 @@ import burp.api.montoya.utilities.Utilities;
 import javax.swing.*;
 import java.util.Objects;
 
-public class TurboBurp implements BurpExtension
+public class PyBurp implements BurpExtension
 {
     public static MontoyaApi api;
     public static Http http;
@@ -28,23 +28,23 @@ public class TurboBurp implements BurpExtension
 
     @Override
     public void initialize(MontoyaApi api) {
-        TurboBurp.api = api;
-        TurboBurp.http = api.http();
-        TurboBurp.proxy = api.proxy();
-        TurboBurp.organizer = api.organizer();
+        PyBurp.api = api;
+        PyBurp.http = api.http();
+        PyBurp.proxy = api.proxy();
+        PyBurp.organizer = api.organizer();
         // https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/utilities/Utilities.html
-        TurboBurp.utils = api.utilities();
-        api.extension().setName("Turbo Burp");
-        TurboBurpTabs turboBurpTabs = new TurboBurpTabs();
+        PyBurp.utils = api.utilities();
+        api.extension().setName("PyBurp");
+        PyBurpTabs pyBurpTabs = new PyBurpTabs();
         api.userInterface().registerContextMenuItemsProvider(new ContentTypeContextMenu());
 
         JMenuBar burpMenuBar = Objects.requireNonNull(Tools.getBurpFrame()).getJMenuBar();
-        burpMenuBar.add(turboBurpTabs.show);
+        burpMenuBar.add(pyBurpTabs.show);
         burpMenuBar.repaint();
         api.extension().registerUnloadingHandler(() -> {
-            turboBurpTabs.dispose();
+            pyBurpTabs.dispose();
             try {
-                burpMenuBar.remove(turboBurpTabs.show);
+                burpMenuBar.remove(pyBurpTabs.show);
                 burpMenuBar.repaint();
             } catch (NullPointerException ignored) {
 

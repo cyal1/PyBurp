@@ -1,4 +1,4 @@
-package io.github.cyal1.turboburp;
+package io.github.cyal1.pyburp;
 
 import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.core.ToolType;
@@ -20,7 +20,7 @@ import java.util.*;
 // https://javadoc.io/doc/org.python/jython/2.7-b3/org/python/core/util/StringUtil.html
 public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
     public EnumMap<MenuType, Map<String, PyFunction>> MENUS;
-    TurboBurpTab turboBurpTab;
+    PyBurpTab pyBurpTab;
 
     public enum MenuType {
         CARET, // insertAtCursor lo4j
@@ -30,9 +30,9 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
         REQUEST_RESPONSE, // checkCachePoisoning
     }
 
-    public MyContextMenuItemsProvider(TurboBurpTab tab) {
+    public MyContextMenuItemsProvider(PyBurpTab tab) {
         MENUS = new EnumMap<>(MenuType.class);
-        this.turboBurpTab = tab;
+        this.pyBurpTab = tab;
     }
 
     @Override
@@ -128,7 +128,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                         menuItemList.add(retrieveRequestItem);
                     }
                     default -> {
-                        TurboBurpTabs.logTextArea.append("No Such Menu Type, Menu Type must be CARET, SELECTED_TEXT, MESSAGE_EDITOR, REQUEST, REQUEST_RESPONSE");
+                        PyBurpTabs.logTextArea.append("No Such Menu Type, Menu Type must be CARET, SELECTED_TEXT, MESSAGE_EDITOR, REQUEST, REQUEST_RESPONSE");
                         throw new RuntimeException("no such Menu Type " + type);
                     }
                 }
@@ -155,7 +155,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 func.__call__(pythonArguments);
             }
         }catch (Exception e){
-            TurboBurpTabs.logTextArea.append(e.getMessage());
+            PyBurpTabs.logTextArea.append(e.getMessage());
         }
     }
 
@@ -181,7 +181,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 func.__call__(pythonArguments);
             }
         }catch (Exception e){
-            TurboBurpTabs.logTextArea.append(e.getMessage());
+            PyBurpTabs.logTextArea.append(e.getMessage());
         }
     }
 
@@ -204,7 +204,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
             String newText = (String) r.__tojava__(String.class);
             messageEditor.setRequest(HttpRequest.httpRequest(firstSection.withAppended(newText).withAppended(lastSection)));
         }catch (Exception e){
-            TurboBurpTabs.logTextArea.append(e.getMessage());
+            PyBurpTabs.logTextArea.append(e.getMessage());
         }
     }
 
@@ -234,7 +234,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 dialog.setVisible(true);
             }
         }catch (Exception e){
-            TurboBurpTabs.logTextArea.append(e.getMessage());
+            PyBurpTabs.logTextArea.append(e.getMessage());
         }
     }
 
@@ -243,7 +243,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
             PyObject pythonArguments = Py.java2py(event.messageEditorRequestResponse().get());
             func.__call__(pythonArguments);
         }catch (Exception e){
-            TurboBurpTabs.logTextArea.append(e.getMessage());
+            PyBurpTabs.logTextArea.append(e.getMessage());
         }
 
     }

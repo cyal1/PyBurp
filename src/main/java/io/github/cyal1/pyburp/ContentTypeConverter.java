@@ -1,4 +1,4 @@
-package io.github.cyal1.turboburp;
+package io.github.cyal1.pyburp;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -25,7 +25,7 @@ public class ContentTypeConverter {
     public ContentTypeConverter() {
         context = Context.enter();
         scope = context.initStandardObjects();
-        String jsCode = Tools.readFromInputStream(TurboBurp.class.getResourceAsStream("/qs.js"));
+        String jsCode = Tools.readFromInputStream(PyBurp.class.getResourceAsStream("/qs.js"));
         context.evaluateString(scope, jsCode, "JavaScript", 1, null);
     }
     public String queryString2JSON(String qs){

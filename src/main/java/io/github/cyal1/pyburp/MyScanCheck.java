@@ -1,4 +1,4 @@
-package io.github.cyal1.turboburp;
+package io.github.cyal1.pyburp;
 
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.scanner.AuditResult;
@@ -11,15 +11,15 @@ import org.python.core.PyFunction;
 import org.python.core.PyObject;
 
 class MyScanCheck implements ScanCheck {
-    public TurboBurpTab turboBurpTab;
+    public PyBurpTab pyBurpTab;
 
-    public MyScanCheck(TurboBurpTab turboBurpTab) {
-        this.turboBurpTab = turboBurpTab;
+    public MyScanCheck(PyBurpTab pyBurpTab) {
+        this.pyBurpTab = pyBurpTab;
     }
 
     @Override
     public AuditResult activeAudit(HttpRequestResponse baseRequestResponse, AuditInsertionPoint auditInsertionPoint) {
-        PyFunction activeAudit = turboBurpTab.py_functions.get("activeAudit");
+        PyFunction activeAudit = pyBurpTab.py_functions.get("activeAudit");
         if (activeAudit == null) {
             return AuditResult.auditResult();
         }
@@ -35,7 +35,7 @@ class MyScanCheck implements ScanCheck {
 
     @Override
     public AuditResult passiveAudit(HttpRequestResponse baseRequestResponse) {
-        PyFunction passiveAudit = turboBurpTab.py_functions.get("passiveAudit");
+        PyFunction passiveAudit = pyBurpTab.py_functions.get("passiveAudit");
         if (passiveAudit == null) {
             return AuditResult.auditResult();
         }

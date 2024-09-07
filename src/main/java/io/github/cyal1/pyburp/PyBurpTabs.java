@@ -1,4 +1,4 @@
-package io.github.cyal1.turboburp;
+package io.github.cyal1.pyburp;
 
 import burp.api.montoya.collaborator.CollaboratorClient;
 import burp.api.montoya.collaborator.SecretKey;
@@ -9,7 +9,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
 
-public class TurboBurpTabs extends JFrame {
+public class PyBurpTabs extends JFrame {
     public static int sequence = 2;
     private static JTabbedPane tabbedPane;
     public static JTextArea logTextArea;
@@ -17,9 +17,9 @@ public class TurboBurpTabs extends JFrame {
     public static CollaboratorClient collaboratorClient = createCollaboratorClient();
     public JMenu show;
 
-    public TurboBurpTabs() {
+    public PyBurpTabs() {
         tabbedPane = new JTabbedPane();
-        tabbedPane.add(" 1 ", new TurboBurpTab());
+        tabbedPane.add(" 1 ", new PyBurpTab());
         tabbedPane.add("+", null);
         jSplitPane = new JSplitPane();
         jSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
@@ -35,14 +35,14 @@ public class TurboBurpTabs extends JFrame {
         jSplitPane.setBottomComponent(bottomScrollPane);
         jSplitPane.setResizeWeight(1.0);
         jSplitPane.setDividerLocation(1.0);
-        this.setVisible(true);
+//        this.setVisible(true);
         this.setSize(900,500);
-        this.setTitle("Turbo Burp");
+        this.setTitle("PyBurp");
         this.setDefaultCloseOperation(HIDE_ON_CLOSE);
         this.setLayout(new BorderLayout());
         this.add(jSplitPane, BorderLayout.CENTER);
 
-        show = new JMenu("Turbo Burp");
+        show = new JMenu("PyBurp");
         JMenuItem showItem = new JMenuItem("Show");
         show.add(showItem);
         showItem.addActionListener(e -> this.setVisible(true));
@@ -58,7 +58,7 @@ public class TurboBurpTabs extends JFrame {
                         int selected = tabbedPane.getSelectedIndex();
                         String title = tabbedPane.getTitleAt(selected);
                         if ("+".equals(title)) {
-                            TurboBurpTab tab = new TurboBurpTab();
+                            PyBurpTab tab = new PyBurpTab();
                             String newTitle = " " + sequence + " ";
                             sequence++;
                             tabbedPane.insertTab(newTitle, null, tab, null,
@@ -93,21 +93,21 @@ public class TurboBurpTabs extends JFrame {
     {
         CollaboratorClient collaboratorClient;
 
-        String existingCollaboratorKey = TurboBurp.api.persistence().extensionData().getString("persisted_collaborator");
+        String existingCollaboratorKey = PyBurp.api.persistence().extensionData().getString("persisted_collaborator");
 
         if (existingCollaboratorKey != null)
         {
-            TurboBurp.api.logging().logToOutput("Creating Collaborator client from key.");
-            collaboratorClient = TurboBurp.api.collaborator().restoreClient(SecretKey.secretKey(existingCollaboratorKey));
+            PyBurp.api.logging().logToOutput("Creating Collaborator client from key.");
+            collaboratorClient = PyBurp.api.collaborator().restoreClient(SecretKey.secretKey(existingCollaboratorKey));
         }
         else
         {
-            TurboBurp.api.logging().logToOutput("No previously found Collaborator client. Creating new client...");
-            collaboratorClient = TurboBurp.api.collaborator().createClient();
+            PyBurp.api.logging().logToOutput("No previously found Collaborator client. Creating new client...");
+            collaboratorClient = PyBurp.api.collaborator().createClient();
 
             // Save the secret key of the CollaboratorClient so that you can retrieve it later.
-            TurboBurp.api.logging().logToOutput("Saving Collaborator secret key.");
-            TurboBurp.api.persistence().extensionData().setString("persisted_collaborator", collaboratorClient.getSecretKey().toString());
+            PyBurp.api.logging().logToOutput("Saving Collaborator secret key.");
+            PyBurp.api.persistence().extensionData().setString("persisted_collaborator", collaboratorClient.getSecretKey().toString());
         }
 
         return collaboratorClient;

@@ -1,4 +1,4 @@
-package io.github.cyal1.turboburp;
+package io.github.cyal1.pyburp;
 
 import burp.api.montoya.core.Annotations;
 import burp.api.montoya.http.message.requests.HttpRequest;
@@ -9,30 +9,30 @@ import burp.api.montoya.proxy.http.ProxyRequestToBeSentAction;
 import java.util.ArrayList;
 
 public class MyProxyRequestHandler implements ProxyRequestHandler {
-    TurboBurpTab turboBurpTab;
+    PyBurpTab pyBurpTab;
 
-    public MyProxyRequestHandler(TurboBurpTab turboBurpTab) {
-        this.turboBurpTab = turboBurpTab;
+    public MyProxyRequestHandler(PyBurpTab pyBurpTab) {
+        this.pyBurpTab = pyBurpTab;
     }
 
     @Override
     public ProxyRequestReceivedAction handleRequestReceived(InterceptedRequest interceptedRequest) {
 
-//        if(!turboBurpTab.py_functions.containsKey("handleProxyRequest")){
+//        if(!pyBurpTab.py_functions.containsKey("handleProxyRequest")){
 //            return ProxyRequestReceivedAction.continueWith(interceptedRequest, interceptedRequest.annotations());
 //        }
 
         // url prefix allowed
-        if(!turboBurpTab.isPrefixAllowed(interceptedRequest.url())){
+        if(!pyBurpTab.isPrefixAllowed(interceptedRequest.url())){
             return ProxyRequestReceivedAction.continueWith(interceptedRequest, interceptedRequest.annotations());
         }
 
         // todo drop
         try{
-            ArrayList<Object> array = turboBurpTab.invokePyRequest(interceptedRequest, interceptedRequest.annotations(), "handleProxyRequest");
+            ArrayList<Object> array = pyBurpTab.invokePyRequest(interceptedRequest, interceptedRequest.annotations(), "handleProxyRequest");
             return ProxyRequestReceivedAction.continueWith((HttpRequest) array.get(0), (Annotations) array.get(1));
         }catch (Exception e){
-            TurboBurpTabs.logTextArea.append(e.getMessage());
+            PyBurpTabs.logTextArea.append(e.getMessage());
         }
         return ProxyRequestReceivedAction.continueWith(interceptedRequest, interceptedRequest.annotations());
     }

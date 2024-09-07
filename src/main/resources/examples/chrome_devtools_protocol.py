@@ -48,5 +48,5 @@ def finish():
 
 
 def registerContextMenu(menus):
-    menus.register("grpc encrypt", encrypt, MenuType.SELECTED_TEXT)
+    menus.register("rpc encrypt", encrypt, MenuType.SELECTED_TEXT)
 

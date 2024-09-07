@@ -5,9 +5,9 @@
      (browser) <-----------------------                <-----------------------
                   handleProxyResponse                        handleResponse
 
-Github: https://github.com/cyal1/BcryptMontoya
+Github: https://github.com/cyal1/PyBurp
 Cooperation with Frida: https://youtu.be/zfvNqd5VmY0
-Cooperation with Chrome: https://youtu.be/g8cT4YJwGM4
+Cooperation with Chrome: https://youtu.be/FRCnZ8a7UGI
 
 """
 
@@ -23,18 +23,18 @@ def urlPrefixAllowed(urls):
 
 
 def handleProxyRequest(request, annotations):
-    return request.withParameter(urlParameter("motoya", "brower2burp")), annotations
+    return request.withParameter(urlParameter("pyburp", "brower2burp")), annotations
 
 
 # You can view the actual requests to the server in the Logger.
 def handleRequest(request, annotations):
-    return request.withParameter(urlParameter("motoya", "burp2server")), annotations
+    return request.withParameter(urlParameter("pyburp", "burp2server")), annotations
 
 
 def handleResponse(response, annotations):
-    return response.withAddedHeader("Turbo-Burp", "https://github.com/cyal1/BcryptMontoya"), annotations
+    return response.withAddedHeader("PyBurp", "https://github.com/cyal1/PyBurp"), annotations
 
 
 def handleProxyResponse(response, annotations):
-    return response.withRemovedHeader("Turbo-Burp"), annotations
+    return response.withRemovedHeader("PyBurp"), annotations
 

@@ -1,9 +1,12 @@
-package io.github.cyal1.turboburp;
+package io.github.cyal1.pyburp;
 
+import burp.api.montoya.core.ByteArray;
 import com.google.protobuf.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
+
+import static io.github.cyal1.pyburp.PyBurpTabs.logTextArea;
 
 public class CallFuncClient {
     private final ManagedChannel channel;
@@ -16,7 +19,7 @@ public class CallFuncClient {
        this.blockingStub = CallFuncServiceGrpc.newBlockingStub(channel);
     }
 
-    public Object callFunc(String funcName, Object... args){
+    public Object callFunc(String funcName, Object... args) {
     //   https://protobuf.dev/reference/protobuf/google.protobuf/#string-value
         Burpextender.Request.Builder requestBuilder = Burpextender.Request.newBuilder().setFuncName(funcName);
         for (Object arg : args) {
@@ -30,10 +33,12 @@ public class CallFuncClient {
                 param = Any.pack(DoubleValue.of((double) arg));
             }else if (arg instanceof Boolean) {
                 param = Any.pack(BoolValue.newBuilder().setValue((Boolean) arg).build());
-            }else if (arg instanceof byte[]) {
-                param = Any.pack(BytesValue.newBuilder().setValue(ByteString.copyFrom((byte[])arg)).build());
+            }else if (arg instanceof ByteArray) {
+                param = Any.pack(BytesValue.newBuilder().setValue(ByteString.copyFrom(((ByteArray) arg).getBytes())).build());
+            }else if (arg instanceof byte[]){
+                param = Any.pack(BytesValue.newBuilder().setValue(ByteString.copyFrom((byte[]) arg)).build());
             }else{
-                System.out.println(arg.getClass().getName() + " param type not support, return empty.");
+                logTextArea.append(arg.getClass().getName() + " param type not support. \n");
                 param = Any.newBuilder().setValue(ByteString.empty()).build();
             }
             requestBuilder.addArgs(param);

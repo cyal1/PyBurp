@@ -1,4 +1,4 @@
-package io.github.cyal1.turboburp;
+package io.github.cyal1.pyburp;
 
 import burp.api.montoya.core.ByteArray;
 import burp.api.montoya.core.Marker;
@@ -71,11 +71,11 @@ public class Tools {
     }
 
     public static String getOOBCanary(){
-        return TurboBurpTabs.collaboratorClient.generatePayload().toString();
+        return PyBurpTabs.collaboratorClient.generatePayload().toString();
     }
 
     public static void addIssue(AuditIssue auditIssue){
-        TurboBurp.api.siteMap().add(auditIssue);
+        PyBurp.api.siteMap().add(auditIssue);
     }
 
     public static List<Marker> getResponseHighlights(HttpRequestResponse requestResponse, String match)

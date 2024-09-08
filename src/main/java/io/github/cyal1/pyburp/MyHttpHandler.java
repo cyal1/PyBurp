@@ -39,7 +39,7 @@ public class MyHttpHandler implements HttpHandler
             ArrayList<Object> array = pyBurpTab.invokePyRequest(httpRequestToBeSent, httpRequestToBeSent.annotations(), "handleRequest");
             return RequestToBeSentAction.continueWith((HttpRequest) array.get(0), (Annotations) array.get(1));
         }catch (Exception e){
-            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e.getMessage() + "\n"));
+            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e + "\n"));
         }
         return RequestToBeSentAction.continueWith(httpRequestToBeSent, httpRequestToBeSent.annotations());
     }
@@ -59,7 +59,7 @@ public class MyHttpHandler implements HttpHandler
             ArrayList<Object> array = pyBurpTab.invokePyResponse(httpResponseReceived, httpResponseReceived.annotations(), "handleResponse");
             return ResponseReceivedAction.continueWith((HttpResponse) array.get(0), (Annotations) array.get(1));
         }catch (Exception e){
-            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e.getMessage() + "\n"));
+            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e + "\n"));
         }
         return ResponseReceivedAction.continueWith(httpResponseReceived, httpResponseReceived.annotations());
     }

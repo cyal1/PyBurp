@@ -188,7 +188,7 @@ public class PyBurpTab extends JPanel {
                     }
                 } catch (Exception ex) {
                     SwingUtilities.invokeLater(() -> {
-                        logTextArea.append(ex.getMessage() + "\n");
+                        logTextArea.append(ex + "\n");
                         stopBtnClick();
                     });
                 }
@@ -202,7 +202,7 @@ public class PyBurpTab extends JPanel {
             PyBurp.api.persistence().preferences().setString("defaultScript", getCode().replace("\r\n", "\n"));
             PyBurpTabs.setTabColor(Color.decode("#ec6033"));
         }catch (Exception e){
-            logTextArea.append(e.getMessage() + "\n");
+            logTextArea.append(e + "\n");
         }
     }
 
@@ -214,7 +214,7 @@ public class PyBurpTab extends JPanel {
                     logTextArea.append("Calling the finish function...\n");
                     py_functions.get("finish").__call__();
                 }catch (Exception e){
-                    logTextArea.append("finish(): " + e.getMessage() + "\n");
+                    logTextArea.append("finish(): " + e + "\n");
                 }
             }
             myContextMenu.MENUS.clear();
@@ -233,7 +233,7 @@ public class PyBurpTab extends JPanel {
             }
             PyBurpTabs.setTabColor(Color.black);
         } catch (Exception e){
-            logTextArea.append(e.getMessage() + "\n");
+            logTextArea.append(e + "\n");
         }
         logTextArea.append("Tab " + PyBurpTabs.getCurrentTabId() + " is stopped\n");
     }

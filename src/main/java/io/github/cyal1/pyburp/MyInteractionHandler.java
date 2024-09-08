@@ -17,7 +17,7 @@ public class MyInteractionHandler implements InteractionHandler {
         try {
             pyBurpTab.py_functions.get("handleInteraction").__call__(Py.java2py(interaction));
         }catch (Exception e){
-            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e.getMessage() + "\n"));
+            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e + "\n"));
         }
     }
 }

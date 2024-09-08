@@ -152,7 +152,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 func.__call__(pythonArguments);
             }
         }catch (Exception e){
-            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e.getMessage() + "\n"));
+            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e + "\n"));
         }
     }
 
@@ -178,7 +178,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 func.__call__(pythonArguments);
             }
         }catch (Exception e){
-            PyBurpTabs.logTextArea.append(e.getMessage());
+            PyBurpTabs.logTextArea.append(e + "\n");
         }
     }
 
@@ -201,7 +201,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
             String newText = (String) r.__tojava__(String.class);
             messageEditor.setRequest(HttpRequest.httpRequest(firstSection.withAppended(newText).withAppended(lastSection)));
         }catch (Exception e){
-            PyBurpTabs.logTextArea.append(e.getMessage());
+            PyBurpTabs.logTextArea.append(e + "\n");
         }
     }
 
@@ -231,7 +231,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 dialog.setVisible(true);
             }
         }catch (Exception e){
-            PyBurpTabs.logTextArea.append(e.getMessage());
+            PyBurpTabs.logTextArea.append(e + "\n");
         }
     }
 
@@ -240,7 +240,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
             PyObject pythonArguments = Py.java2py(event.messageEditorRequestResponse().get());
             func.__call__(pythonArguments);
         }catch (Exception e){
-            PyBurpTabs.logTextArea.append(e.getMessage());
+            PyBurpTabs.logTextArea.append(e + "\n");
         }
 
     }

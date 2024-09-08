@@ -40,8 +40,9 @@ public class CallFuncClient {
             }else if (arg instanceof byte[]){
                 param = Any.pack(BytesValue.newBuilder().setValue(ByteString.copyFrom((byte[]) arg)).build());
             }else{
-                SwingUtilities.invokeLater(() -> logTextArea.append(arg.getClass().getName() + " param type not support. \n"));
-                param = Any.newBuilder().setValue(ByteString.empty()).build();
+                SwingUtilities.invokeLater(() -> logTextArea.append("callFunc does not support parameters of type " + arg.getClass().getName() + ", only allowed None,str,int,float,bool,bytes \n"));
+                return null;
+//                param = Any.newBuilder().setValue(ByteString.empty()).build();
             }
             requestBuilder.addArgs(param);
         }
@@ -63,7 +64,7 @@ public class CallFuncClient {
         }else if(result.is(BytesValue.class)){
             return result.unpack(BytesValue.class).getValue().toByteArray();
         }else{
-            throw new RuntimeException("unexcept type returned, only allowed None,StringValue,Int64Value,DoubleValue,BoolValue,BytesValue\n");
+            throw new RuntimeException("unexcept type returned, only allowed None,str,int,float,bool,bytes\n");
         }
     }
 

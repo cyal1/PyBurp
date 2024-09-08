@@ -8,9 +8,6 @@ import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 import burp.api.montoya.scanner.audit.issues.AuditIssue;
 import burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse;
-
-import javax.swing.*;
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -100,18 +97,6 @@ public class Tools {
             start += match.length();
         }
         return highlights;
-    }
-
-    public static JFrame getBurpFrame()
-    {
-        for(Frame f : Frame.getFrames())
-        {
-            if(f.isVisible() && f.getTitle().startsWith(("Burp Suite")))
-            {
-                return (JFrame) f;
-            }
-        }
-        return null;
     }
 }
 

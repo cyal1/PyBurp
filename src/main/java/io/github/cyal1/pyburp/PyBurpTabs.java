@@ -15,7 +15,7 @@ public class PyBurpTabs extends JFrame {
     public static JTextArea logTextArea;
     private static JSplitPane jSplitPane;
     public static CollaboratorClient collaboratorClient = createCollaboratorClient();
-    public JMenu show;
+
 
     public PyBurpTabs() {
         tabbedPane = new JTabbedPane();
@@ -41,11 +41,6 @@ public class PyBurpTabs extends JFrame {
         this.setDefaultCloseOperation(HIDE_ON_CLOSE);
         this.setLayout(new BorderLayout());
         this.add(jSplitPane, BorderLayout.CENTER);
-
-        show = new JMenu("PyBurp");
-        JMenuItem showItem = new JMenuItem("Show");
-        show.add(showItem);
-        showItem.addActionListener(e -> this.setVisible(true));
 
         tabbedPane.getModel().addChangeListener(new ChangeListener() {
             private boolean ignore = false;

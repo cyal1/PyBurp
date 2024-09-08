@@ -63,6 +63,8 @@ public class PyBurpTab extends JPanel {
         codeEditor.setCodeFoldingEnabled(true);
         codeEditor.setTabsEmulated(true);
         codeEditor.setLineWrap(true);
+        codeEditor.setMarkOccurrences(true);
+        codeEditor.setMarkOccurrencesDelay(50);
         codeEditor.setWrapStyleWord(true);
         codeEditor.setHighlightCurrentLine(true);
 //        textEditor.setWhitespaceVisible(true);

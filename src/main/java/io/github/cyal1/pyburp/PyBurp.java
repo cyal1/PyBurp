@@ -13,10 +13,13 @@ import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.http.Http;
 import burp.api.montoya.organizer.Organizer;
 import burp.api.montoya.proxy.Proxy;
+import burp.api.montoya.ui.menu.BasicMenuItem;
+import burp.api.montoya.ui.menu.Menu;
+import burp.api.montoya.ui.menu.MenuItem;
 import burp.api.montoya.utilities.Utilities;
-
-import javax.swing.*;
-import java.util.Objects;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class PyBurp implements BurpExtension
 {
@@ -27,7 +30,7 @@ public class PyBurp implements BurpExtension
     public static Organizer organizer;
 
     @Override
-    public void initialize(MontoyaApi api) {
+    public void initialize(MontoyaApi api){
         PyBurp.api = api;
         PyBurp.http = api.http();
         PyBurp.proxy = api.proxy();
@@ -38,18 +41,11 @@ public class PyBurp implements BurpExtension
         PyBurpTabs pyBurpTabs = new PyBurpTabs();
         api.userInterface().registerContextMenuItemsProvider(new ContentTypeContextMenu());
 
-        JMenuBar burpMenuBar = Objects.requireNonNull(Tools.getBurpFrame()).getJMenuBar();
-        burpMenuBar.add(pyBurpTabs.show);
-        burpMenuBar.repaint();
-        api.extension().registerUnloadingHandler(() -> {
-            pyBurpTabs.dispose();
-            try {
-                burpMenuBar.remove(pyBurpTabs.show);
-                burpMenuBar.repaint();
-            } catch (NullPointerException ignored) {
-
-            }
+        BasicMenuItem showEventItem = BasicMenuItem.basicMenuItem("Show").withAction(() -> pyBurpTabs.setVisible(true));
+        MenuItem helpEventItem = MenuItem.basicMenuItem("Help").withAction(() -> {
+            try {java.awt.Desktop.getDesktop().browse(new URI("https://github.com/cyal1/pyburp/"));} catch (URISyntaxException | IOException ignored) {}
         });
+        Menu menu = Menu.menu("PyBurp").withMenuItems(showEventItem, helpEventItem);
+        api.userInterface().menuBar().registerMenu(menu);
     }
-
 }

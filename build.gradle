@@ -17,7 +17,8 @@ dependencies {
     implementation 'org.json:json:20231013'
     implementation 'com.fifesoft:rsyntaxtextarea:3.3.3'
     implementation 'org.python:jython-standalone:2.7.3'
-    runtimeOnly 'io.grpc:grpc-netty-shaded:1.66.0'
+//    runtimeOnly 'io.grpc:grpc-netty-shaded:1.66.0'
+    implementation 'io.grpc:grpc-okhttp:1.66.0'
     implementation 'io.grpc:grpc-protobuf:1.66.0'
     implementation 'io.grpc:grpc-stub:1.66.0'
     compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
@@ -30,8 +31,14 @@ jar {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
+    exclude '**/org/sqlite/native/FreeBSD/**'
+    exclude '**/org/sqlite/native/Linux-Android/**'
+    exclude '**/org/sqlite/native/Linux-Musl/**'
+    exclude '**/org/sqlite/native/Linux/ppc64/**'
+    exclude '**/org/sqlite/native/Linux/riscv64/**'
+    exclude '**/org/sqlite/native/Windows/x86/**'
 }
 
 
-sourceCompatibility = JavaVersion.VERSION_18
-targetCompatibility = JavaVersion.VERSION_18
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17

@@ -32,7 +32,7 @@ public class MyProxyResponseHandler implements ProxyResponseHandler {
             ArrayList<Object> array = pyBurpTab.invokePyResponse(interceptedResponse, interceptedResponse.annotations(), "handleProxyResponse");
             return ProxyResponseReceivedAction.continueWith((HttpResponse) array.get(0), (Annotations) array.get(1));
         }catch (Exception e){
-            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e.getMessage() + "\n"));
+            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e + "\n"));
         }
         return ProxyResponseReceivedAction.continueWith(interceptedResponse, interceptedResponse.annotations());
     }

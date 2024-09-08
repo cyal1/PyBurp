@@ -151,7 +151,7 @@ PyBurp允许通过gRPC调用其它程序提供的方法。你需要实现 [burpe
 和 Frida 交互示例请查看[server_frida.py](https://github.com/cyal1/pyburpRPC/blob/main/examples/server_frida.py)
 
 **注意:**   
-1. pyburp 只支持`str`,`bool`,`int`,`float`,`bytes`5种类型的参数
+1. pyburp 只支持`str`,`bool`,`int`,`float`,`bytes`,`None`这几种类型的参数
 2. 如果服务端暴露的方法**只有一个参数且为bytes类型**时，在PyBurp中需要通过[bytearray](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/ByteArray.html#byteArray(java.lang.String))封装参数，或者放入`[]`中，否则`byte[]`将被视为可变参数数组，每个字节被视为一个参数。
 3. 服务端返回的`bytes`在PyBurp中为[array.array('b',initializer)](https://www.jython.org/jython-old-sites/docs/library/array.html#array-efficient-arrays-of-numeric-values)类型，你可以将其等同于`byte[]`，不同的是你需要使用`tostring()`将其转换成字符串而不是`toString()`。
 

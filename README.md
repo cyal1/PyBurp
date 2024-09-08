@@ -151,7 +151,7 @@ Here’s a Python demonstration:
 For examples of interactions with Frida, please check [server_frida.py](https://github.com/cyal1/pyburpRPC/blob/main/examples/server_frida.py)
 
 **Note:**
-1. PyBurp supports only the following parameter types: `str`,`bool`,`int`,`float`,`bytes`.
+1. PyBurp supports only the following parameter types: `str`,`bool`,`int`,`float`,`bytes`,`None`.
 2. If the server-side exposed method has **only one parameter and it is of type bytes**，in PyBurp, you need to wrap the parameter using [bytearray](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/ByteArray.html#byteArray(java.lang.String)) or place it in `[]`; otherwise, `byte[]` will be treated as a variable-length argument array, with each byte being treated as an individual argument.
 3. The `bytes` type returned by the server is of type [array.array('b',initializer)](https://www.jython.org/jython-old-sites/docs/library/array.html#array-efficient-arrays-of-numeric-values) in PyBurp，you can consider it as `byte[]`, except that you need to use `tostring()` to convert it to a string instead of `toString()`.
 

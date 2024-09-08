@@ -6,7 +6,7 @@ def encrypt(s):
     return base64encode(s)
 
 def decrypt(s):
-    return base64decode(s)
+    return base64decode(s).toString()
 
 
 def urlPrefixAllowed(urls):

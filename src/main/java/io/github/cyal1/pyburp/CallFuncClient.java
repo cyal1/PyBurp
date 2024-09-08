@@ -4,7 +4,8 @@ import burp.api.montoya.core.ByteArray;
 import com.google.protobuf.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.StatusRuntimeException;
+
+import javax.swing.*;
 
 import static io.github.cyal1.pyburp.PyBurpTabs.logTextArea;
 
@@ -15,17 +16,18 @@ public class CallFuncClient {
         this.channel = ManagedChannelBuilder.forAddress(host, port)
                 .usePlaintext()
                 .build();
-
        this.blockingStub = CallFuncServiceGrpc.newBlockingStub(channel);
     }
 
-    public Object callFunc(String funcName, Object... args) {
+    public Object callFunc(String funcName, Object... args) throws InvalidProtocolBufferException {
     //   https://protobuf.dev/reference/protobuf/google.protobuf/#string-value
         Burpextender.Request.Builder requestBuilder = Burpextender.Request.newBuilder().setFuncName(funcName);
         for (Object arg : args) {
             Any param;
             // Determine the type of the argument and set the corresponding value
-            if (arg instanceof String) {
+            if(arg == null){
+                param = Any.getDefaultInstance();
+            }else if (arg instanceof String) {
                 param = Any.pack(StringValue.of((String) arg));
             }else if(arg instanceof Integer) {
                 param = Any.pack(Int64Value.newBuilder().setValue((Integer)arg).build());
@@ -38,7 +40,7 @@ public class CallFuncClient {
             }else if (arg instanceof byte[]){
                 param = Any.pack(BytesValue.newBuilder().setValue(ByteString.copyFrom((byte[]) arg)).build());
             }else{
-                logTextArea.append(arg.getClass().getName() + " param type not support. \n");
+                SwingUtilities.invokeLater(() -> logTextArea.append(arg.getClass().getName() + " param type not support. \n"));
                 param = Any.newBuilder().setValue(ByteString.empty()).build();
             }
             requestBuilder.addArgs(param);
@@ -46,30 +48,22 @@ public class CallFuncClient {
 
         Burpextender.Request request = requestBuilder.build();
         Any result;
-        try {
-            Burpextender.Response response = blockingStub.callFunc(request);
-            result = response.getRes();
-            if (result.is(ListValue.class)){
-                return null;
-            }if (result.getSerializedSize() == 0){
-                return null;
-            }else if(result.is(StringValue.class)){
-                return result.unpack(StringValue.class).getValue();
-            }else if(result.is(Int64Value.class)){
-                return result.unpack(Int64Value.class).getValue();
-            } else if(result.is(DoubleValue.class)){
-                return result.unpack(DoubleValue.class).getValue();
-            }else if(result.is(BoolValue.class)){
-                return result.unpack(BoolValue.class).getValue();
-            }else if(result.is(BytesValue.class)){
-                return result.unpack(BytesValue.class).getValue().toByteArray();
-            }else{
-                throw new RuntimeException("unexcept type returned, only allowed StringValue,Int64Value,DoubleValue,BoolValue,BytesValue");
-            }
-        } catch (StatusRuntimeException e) {
-            throw new RuntimeException(e.getStatus().toString());
-        } catch (Exception e){
-            throw new RuntimeException(e);
+        Burpextender.Response response = blockingStub.callFunc(request);
+        result = response.getRes();
+        if (result.getSerializedSize() == 0){
+            return null;
+        }else if(result.is(StringValue.class)){
+            return result.unpack(StringValue.class).getValue();
+        }else if(result.is(Int64Value.class)){
+            return result.unpack(Int64Value.class).getValue();
+        } else if(result.is(DoubleValue.class)){
+            return result.unpack(DoubleValue.class).getValue();
+        }else if(result.is(BoolValue.class)){
+            return result.unpack(BoolValue.class).getValue();
+        }else if(result.is(BytesValue.class)){
+            return result.unpack(BytesValue.class).getValue().toByteArray();
+        }else{
+            throw new RuntimeException("unexcept type returned, only allowed None,StringValue,Int64Value,DoubleValue,BoolValue,BytesValue\n");
         }
     }
 

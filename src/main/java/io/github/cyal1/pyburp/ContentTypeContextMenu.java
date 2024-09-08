@@ -59,18 +59,18 @@ public class ContentTypeContextMenu implements ContextMenuItemsProvider {
             if(request.contentType() == ContentType.JSON){
                 try {
                     newBody = nestContentTypeConvert.json2XML(body);
+                    messageEditor.setRequest(request.withHeader("Content-Type","application/xml;charset=UTF-8").withBody(newBody));
                 } catch (Exception ex) {
-                    throw new RuntimeException(ex);
+                    PyBurpTabs.logTextArea.append(ex + "\n");
                 }
-                messageEditor.setRequest(request.withHeader("Content-Type","application/xml;charset=UTF-8").withBody(newBody));
             } else if (request.contentType() == ContentType.URL_ENCODED) {
                 try {
                     newBody = nestContentTypeConvert.queryString2JSON(body);
                     newBody = nestContentTypeConvert.json2XML(newBody);
+                    messageEditor.setRequest(request.withHeader("Content-Type","application/xml;charset=UTF-8").withBody(newBody));
                 } catch (Exception ex) {
-                    throw new RuntimeException(ex);
+                    PyBurpTabs.logTextArea.append(ex + "\n");
                 }
-                messageEditor.setRequest(request.withHeader("Content-Type","application/xml;charset=UTF-8").withBody(newBody));
             }
         });
         this.convert2querystring.addActionListener(e -> {

@@ -127,10 +127,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                         retrieveRequestItem.addActionListener(e -> handleRequestResponse(event, func));
                         menuItemList.add(retrieveRequestItem);
                     }
-                    default -> {
-                        PyBurpTabs.logTextArea.append("No Such Menu Type, Menu Type must be CARET, SELECTED_TEXT, MESSAGE_EDITOR, REQUEST, REQUEST_RESPONSE");
-                        throw new RuntimeException("no such Menu Type " + type);
-                    }
+                    default -> PyBurpTabs.logTextArea.append("No Such MenuType: "+ type +", Menu Type must be CARET, SELECTED_TEXT, MESSAGE_EDITOR, REQUEST, REQUEST_RESPONSE");
                 }
             }
         }
@@ -155,7 +152,7 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
                 func.__call__(pythonArguments);
             }
         }catch (Exception e){
-            PyBurpTabs.logTextArea.append(e.getMessage());
+            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e.getMessage() + "\n"));
         }
     }
 

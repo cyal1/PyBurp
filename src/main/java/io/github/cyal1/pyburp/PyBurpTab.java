@@ -388,7 +388,7 @@ public class PyBurpTab extends JPanel {
         PyTuple result = (PyTuple) py_functions.get(pyFuncName).__call__(pythonArguments);
         HttpRequest newHttpRequest;
         if(result.__len__() != 2){
-            logTextArea.append(pyFuncName+ " return type error\n");
+            SwingUtilities.invokeLater(() -> logTextArea.append(pyFuncName+ " return type error\n"));
             return new ArrayList<>(List.of(httpRequest, annotations));
         }
         newHttpRequest = (HttpRequest) result.get(0);
@@ -404,7 +404,7 @@ public class PyBurpTab extends JPanel {
         HttpResponse newHttpResponse;
         // jython need to return response and annotations
         if (result.__len__() != 2){
-            logTextArea.append(pyFuncName+ " return type error\n");
+            SwingUtilities.invokeLater(() -> logTextArea.append(pyFuncName+ " return type error\n"));
             return new ArrayList<>(List.of(httpResponse, annotations));
         }
         newHttpResponse = (HttpResponse) result.get(0);

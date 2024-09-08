@@ -6,6 +6,8 @@ import burp.api.montoya.proxy.http.InterceptedRequest;
 import burp.api.montoya.proxy.http.ProxyRequestHandler;
 import burp.api.montoya.proxy.http.ProxyRequestReceivedAction;
 import burp.api.montoya.proxy.http.ProxyRequestToBeSentAction;
+
+import javax.swing.*;
 import java.util.ArrayList;
 
 public class MyProxyRequestHandler implements ProxyRequestHandler {
@@ -32,7 +34,7 @@ public class MyProxyRequestHandler implements ProxyRequestHandler {
             ArrayList<Object> array = pyBurpTab.invokePyRequest(interceptedRequest, interceptedRequest.annotations(), "handleProxyRequest");
             return ProxyRequestReceivedAction.continueWith((HttpRequest) array.get(0), (Annotations) array.get(1));
         }catch (Exception e){
-            PyBurpTabs.logTextArea.append(e.getMessage());
+            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append(e.getMessage() + "\n"));
         }
         return ProxyRequestReceivedAction.continueWith(interceptedRequest, interceptedRequest.annotations());
     }

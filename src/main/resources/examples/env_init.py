@@ -100,18 +100,25 @@ def randomstring(length=8):
     return random_string
 
 
+# https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/utilities/package-summary.html
+
+
 def urlencode(text):
-    return utils.urlUtils().encode(text).encode()
+    return utils.urlUtils().encode(text)
 
 
 def urldecode(text):
-    return utils.urlUtils().decode(text).encode()
+    return utils.urlUtils().decode(text)
 
 
 def base64encode(text):
-    return utils.base64Utils().encodeToString(text).encode()
+    return utils.base64Utils().encodeToString(text)
 
 
-def base64decode(text):
-    return utils.base64Utils().decode(text).toString().encode()
+def base64decode(text):  # return ByteArray
+    return utils.base64Utils().decode(text)
+
+
+def bytestring(s):
+    return bytearray(s).getBytes()
 

@@ -151,16 +151,24 @@ Here’s a Python demonstration:
 For examples of interactions with Frida, please check [server_frida.py](https://github.com/cyal1/pyburpRPC/blob/main/examples/server_frida.py)
 
 **Note:**
-1. PyBurp supports only the following parameter types: `str`,`bool`,`int`,`float`,`bytes`.
+1. PyBurp supports only the following parameter types: `str`,`bool`,`int`,`float`,`bytes`,`None`.
 2. If the server-side exposed method has **only one parameter and it is of type bytes**，in PyBurp, you need to wrap the parameter using [bytearray](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/ByteArray.html#byteArray(java.lang.String)) or place it in `[]`; otherwise, `byte[]` will be treated as a variable-length argument array, with each byte being treated as an individual argument.
-3. The `bytes` type returned by the server is of type [array.array('B',initializer)](https://www.jython.org/jython-old-sites/docs/library/array.html#array-efficient-arrays-of-numeric-values) in PyBurp，It can be converted to a string using `tostring()` or to a [ByteArray](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/ByteArray.html) using the `bytearray` method.
+3. The `bytes` type returned by the server is of type [array.array('b',initializer)](https://www.jython.org/jython-old-sites/docs/library/array.html#array-efficient-arrays-of-numeric-values) in PyBurp，you can consider it as `byte[]`, except that you need to use `tostring()` to convert it to a string instead of `toString()`.
 
 ## Contributions
 We welcome contributions from the community for improvements, issue reporting, or code contributions to PyBurp.
 
 ## Questions
 1. Why are some Python libraries or methods not available in PyBurp？  
-   PyBurp uses the Jython interpreter rather than standard CPython, so not all third-party Python libraries are compatible. However, it can seamlessly access Java libraries.
+   PyBurp uses the Jython interpreter rather than standard CPython, so not all third-party Python libraries are compatible. However, it can seamlessly access Java libraries.  
+
+2. How do you create a byte array compatible with `byte[]` in Jython?   
+   Here are three methods to create it. Note that you need to use `tostring()` to convert it to a string instead of `toString()`.
+   * [bytestring("asdf")](https://github.com/cyal1/PyBurp/blob/main/src/main/resources/examples/env_init.py#L122)
+   * [bytearray("asdf").getBytes()](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/ByteArray.html)
+   * `import array; print(array.array('b', [97, 115, 100, 102]))`
+   
+   
 
 ## Acknowledgements
 Much of PyBurp’s inspiration comes from [Turbo Intruder](https://github.com/PortSwigger/turbo-intruder/)

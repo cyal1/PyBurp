@@ -151,9 +151,9 @@ PyBurp允许通过gRPC调用其它程序提供的方法。你需要实现 [burpe
 和 Frida 交互示例请查看[server_frida.py](https://github.com/cyal1/pyburpRPC/blob/main/examples/server_frida.py)
 
 **注意:**   
-1. pyburp 只支持`str`,`bool`,`int`,`float`,`bytes`5种类型的参数
+1. pyburp 只支持`str`,`bool`,`int`,`float`,`bytes`,`None`这几种类型的参数
 2. 如果服务端暴露的方法**只有一个参数且为bytes类型**时，在PyBurp中需要通过[bytearray](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/ByteArray.html#byteArray(java.lang.String))封装参数，或者放入`[]`中，否则`byte[]`将被视为可变参数数组，每个字节被视为一个参数。
-3. 服务端返回的bytes类型在PyBurp中为[array.array('B',initializer)](https://www.jython.org/jython-old-sites/docs/library/array.html#array-efficient-arrays-of-numeric-values)类型，可以通过`tostring()`转换成字符串，或用`bytearray`方法转换成[ByteArray](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/ByteArray.html)。
+3. 服务端返回的`bytes`在PyBurp中为[array.array('b',initializer)](https://www.jython.org/jython-old-sites/docs/library/array.html#array-efficient-arrays-of-numeric-values)类型，你可以将其等同于`byte[]`，不同的是你需要使用`tostring()`将其转换成字符串而不是`toString()`。
 
 ## 贡献与反馈
 欢迎社区成员对 PyBurp 提出改进建议、报告问题或贡献代码。
@@ -162,6 +162,12 @@ PyBurp允许通过gRPC调用其它程序提供的方法。你需要实现 [burpe
 1. 为什么有些python库或方法无法在PyBurp中使用？  
    PyBurp内置了Jython解释器而非标准的CPython，不是所有三方Python库都能使用，但能够无缝访问Java库。
 
+2. 怎么在Jython中创建`byte[]`兼容的字节数组？   
+   这里提供3个方法，请注意，将它转换成字符串时需要使用`tostring()`而不是`toString()`。   
+   * [bytestring("asdf")](https://github.com/cyal1/PyBurp/blob/main/src/main/resources/examples/env_init.py#L122)
+   * [bytearray("asdf").getBytes()](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/ByteArray.html)
+   * `import array; print(array.array('b', [97, 115, 100, 102]))`
+   
 ## 致谢
 PyBurp 大部分灵感来自 [Turbo Intruder](https://github.com/PortSwigger/turbo-intruder/)
 

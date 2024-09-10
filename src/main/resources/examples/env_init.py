@@ -10,7 +10,7 @@
 
 import random, string, sys
 from java.lang import Runnable, Thread
-from java.util.concurrent import Executors, TimeUnit
+from java.util.concurrent import Executors
 import burp.api.montoya.core.ByteArray.byteArray as bytearray
 import io.github.cyal1.pyburp.CallFuncClient as rpc
 

@@ -1,5 +1,6 @@
 package io.github.cyal1.pyburp;
 
+import burp.api.montoya.collaborator.Interaction;
 import burp.api.montoya.core.Annotations;
 import burp.api.montoya.core.Registration;
 import burp.api.montoya.http.message.requests.HttpRequest;
@@ -114,7 +115,6 @@ public class PyBurpTab extends JPanel {
             if (getStatus() == STATUS.RUNNING){
                 stopBtnClick();
             }
-            logTextArea.setText("");
             PyBurpTabs.closeTab();
         });
 
@@ -441,9 +441,14 @@ public class PyBurpTab extends JPanel {
 
         if(py_functions.containsKey("handleInteraction")){
             Poller collaboratorPoller = new Poller(collaboratorClient, Duration.ofSeconds(10));
-            collaboratorPoller.registerInteractionHandler(new MyInteractionHandler(this));
+            MyInteractionHandler interactionHandler = new MyInteractionHandler(this);
+            collaboratorPoller.registerInteractionHandler(interactionHandler);
             collaboratorPoller.start();
             plugins.add(collaboratorPoller);
+            for (Interaction allInteraction : collaboratorClient.getAllInteractions())
+            {
+                interactionHandler.handleInteraction(allInteraction);
+            }
         }
     }
 }

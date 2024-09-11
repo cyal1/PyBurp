@@ -14,14 +14,14 @@ In addition, PyBurp supports:
 **Video**
 
 Interaction with Chrome： [https://youtu.be/FRCnZ8a7UGI](https://youtu.be/FRCnZ8a7UGI)    
-Interaction with Frida： [https://youtu.be/zfvNqd5VmY0](https://youtu.be/zfvNqd5VmY0)
+Interaction with Frida： [https://youtu.be/zfvNqd5VmY0?t=45](https://youtu.be/zfvNqd5VmY0?t=45)
 
 For method calls in mobile applications, PyBurp relies on Frida for remote interaction.
 
 > Please note that the above features have been thoroughly tested on Burp Suite v2024.5.4. It is recommended to use this version or a later one for optimal compatibility and stability.
 
 ## Installation
-Download from the [Release](https://github.com/cyal1/PyBurp/releases) page or install directly from the BApp Store.
+Download from the [Release](https://github.com/cyal1/PyBurp/releases) page or install directly from the BApp Store. You can open PyBurp from the top level menu bar.
 
 To use gRPC or invoke methods in mobile applications, you also need to install [pyburp](https://github.com/cyal1/PyBurpRpc/).
 ```bash
@@ -42,6 +42,7 @@ PyBurp includes several predefined functions. When you define these functions in
 | handleProxyResponse([response](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html), [annotations](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/Annotations.html))                                        | Handles responses between the client and Burp Suite                                                                                                                                                                                                                                                                  |
 | urlPrefixAllowed(urls)                                                                                                                                                                                                                                                                                                       | Sets URL prefixes that the current PyBurp tab is allowed to handle, using `urls.add(url)` to add prefixes, must use with the above 4 functions. Without writing this function, all requests will go through the four overridden functions above. You can also define your own filters in those four functions above. |
 | registerContextMenu(menus)                                                                                                                                                                                                                                                                                                   | See [Registering Context Menus](#jump)                                                                                                                                                                                                                                                                               |
+| processPayload(str)                                                                                                                                                                                                                                                                                                          | Provides custom payload processing for Intruder                                                                                                                                                                                                                                                                      |
 | handleInteraction([interaction](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/collaborator/Interaction.html))                                                                                                                                                                           | Polls the Collaborator server. This method automatically registers a Collaborator client, and Payloads can be obtained via `getOOBCanary()`. Example script: [collaborator.py](./src/main/resources/examples/collaborator.py)                                                                                        |
 | passiveScan([baseRequestResponse](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/HttpRequestResponse.html))                                                                                                                                                                 | Passive scanning                                                                                                                                                                                                                                                                                                     |
 | activeScan([baseRequestResponse](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/HttpRequestResponse.html), [auditInsertionPoint](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/scanner/audit/insertionpoint/AuditInsertionPoint.html)) | Performs active scanning                                                                                                                                                                                                                                                                                             |
@@ -65,21 +66,23 @@ To help you get familiar with using predefined functions, PyBurp includes severa
 | [encryptedCompleteBody.py](./src/main/resources/examples/encryptedCompleteBody.py)           | Example for handling encrypted HTTP body                                                                                                                                                  |
 | [encryptedCompleteBodyAes.py](./src/main/resources/examples/encryptedCompleteBodyAes.py)     | Example for handling AES encrypted HTTP body                                                                                                                                              |
 | [encryptedJsonParam.py](./src/main/resources/examples/encryptedJsonParam.py)                 | Example for handling encrypted JSON parameters                                                                                                                                            |
-| [encryptedJsonParamRpc.py](./src/main/resources/examples/encryptedJsonParamRpc.py)           | Example of handling encryption and decryption using RPC.                                                                                                                                  |
-| [encryptedQueryForm.py](./src/main/resources/examples/encryptedQueryForm.py)                 | Example of handling encryption and decryption for query strings.                                                                                                                          |
-| [highlight_interesting_http.py](./src/main/resources/examples/highlight_interesting_http.py) | Highlights interesting requests and adds notes. It is generally recommended to use passive scanning.                                                                                      |
-| [passive_active_scan.py](./src/main/resources/examples/passive_active_scan.py)               | Example of active and passive scanning.                                                                                                                                                   |
-| [race_condition.py](./src/main/resources/examples/race_condition.py)                         | Race condition examples (single-packet for HTTP2, last-byte sync for HTTP1.1).                                                                                                            |
-| [rpc_debug.py](./src/main/resources/examples/rpc_debug.py)                                   | gRPC testing.                                                                                                                                                                             |
-| [save_subdomain_to_sqlite.py](./src/main/resources/examples/save_subdomain_to_sqlite.py)     | Collects subdomains from Proxy HTTP history and saves them to a database or file.                                                                                                         |
-| [signatureHeader.py](./src/main/resources/examples/signatureHeader.py)                       | Handles signatures in headers.                                                                                                                                                            |
-| [urls_from_file.py](./src/main/resources/examples/urls_from_file.py)                         | Reads URLs from a file and send requests (Python threading).                                                                                                                              |
+| [encryptedJsonParamRpc.py](./src/main/resources/examples/encryptedJsonParamRpc.py)           | Example of handling encryption and decryption using RPC                                                                                                                                   |
+| [encryptedQueryForm.py](./src/main/resources/examples/encryptedQueryForm.py)                 | Example of handling encryption and decryption for query strings                                                                                                                           |
+| [highlight_interesting_http.py](./src/main/resources/examples/highlight_interesting_http.py) | Highlights interesting requests and adds notes. It is generally recommended to use passive scanning                                                                                       |
+| [passive_active_scan.py](./src/main/resources/examples/passive_active_scan.py)               | Example of active and passive scanning                                                                                                                                                    |
+| [process_intruder_payload.py](./src/main/resources/examples/process_intruder_payload.py)     | Create a payload processing for Intruder                                                                                                                                                  |
+| [race_condition.py](./src/main/resources/examples/race_condition.py)                         | Race condition examples (single-packet for HTTP2, last-byte sync for HTTP1.1)                                                                                                             |
+| [rpc_debug.py](./src/main/resources/examples/rpc_debug.py)                                   | gRPC testing                                                                                                                                                                              |
+| [save_subdomain_to_sqlite.py](./src/main/resources/examples/save_subdomain_to_sqlite.py)     | Collects subdomains from Proxy HTTP history and saves them to a database or file                                                                                                          |
+| [signatureHeader.py](./src/main/resources/examples/signatureHeader.py)                       | Handles signatures in headers                                                                                                                                                             |
+| [traffic_redirector.py](./src/main/resources/examples/traffic_redirector.py)                 | Demonstrates redirecting outgoing HTTP requests from one host to another                                                                                                                  |
+| [urls_from_file.py](./src/main/resources/examples/urls_from_file.py)                         | Reads URLs from a file and send requests (Python threading)                                                                                                                               |
 | [urls_from_file2.py](./src/main/resources/examples/urls_from_file2.py)                       | Reads URLs from a file and send requests（[built-in RequestPool](https://github.com/cyal1/PyBurp/blob/main/src/main/resources/examples/env_init.py#L46)）                                   |
-| [use_pip2_packages.py](./src/main/resources/examples/use_pip2_packages.py)                   | Example of using Python third-party libraries. Not all third-party libraries are compatible with Jython.                                                                                  |
+| [use_pip2_packages.py](./src/main/resources/examples/use_pip2_packages.py)                   | Example of using Python third-party libraries. Not all third-party libraries are compatible with Jython                                                                                   |
 
 > Please note that modifications to the built-in example script files will not be saved.
-###  Registering Context Menu
 <span id="jump"></span>
+###  Registering Context Menu
 To register context menu items in your code, you first need to define a function named `registerContextMenu` that accepts a `menus` as a parameter.  
 Then, call the `register` method of the `menus` object to register specific menu items. The `register` method takes three parameters: the name of the menu, the name of the function associated with the menu item (which is called when the menu item is clicked), and the `MenuType`. The table below shows the `MenuType` options and the requirements for associated functions:
 
@@ -156,7 +159,14 @@ For examples of interactions with Frida, please check [server_frida.py](https://
 3. The `bytes` type returned by the server is of type [array.array('b',initializer)](https://www.jython.org/jython-old-sites/docs/library/array.html#array-efficient-arrays-of-numeric-values) in PyBurp，you can consider it as `byte[]`, except that you need to use `tostring()` to convert it to a string instead of `toString()`.
 
 ## Contributions
-We welcome contributions from the community for improvements, issue reporting, or code contributions to PyBurp.
+We’re excited about the future of this project and have a roadmap of upcoming work. We welcome contributions from the community to help us achieve our goals. Whether you’re fixing bugs, adding features, or improving documentation, your help is greatly appreciated!. Here’s what we’re focusing on next:
+
+1. Simplify the `HttpRequestEditorProvider` and `HttpResponseEditorProvider` registration process
+2. Code Completion, [here](https://github.com/bobbylight/AutoComplete/tree/master/AutoCompleteDemo/src/main/java/org/fife/ui/autocomplete/demo) is an example.
+3. Perhaps a lightweight search box is needed.
+4. HyperLink clickable.
+
+Thank you for your support and involvement!
 
 ## Questions
 1. Why are some Python libraries or methods not available in PyBurp？  

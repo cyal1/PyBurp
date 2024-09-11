@@ -357,6 +357,7 @@ public class PyBurpTab extends JPanel {
                 "handleProxyRequest", "handleProxyResponse",
                 "urlPrefixAllowed",
                 "handleInteraction",
+                "processPayload",
                 "finish"
         ));
 
@@ -450,5 +451,10 @@ public class PyBurpTab extends JPanel {
                 interactionHandler.handleInteraction(allInteraction);
             }
         }
+
+        if(py_functions.containsKey("processPayload")){
+            plugins.add(PyBurp.api.intruder().registerPayloadProcessor(new MyPayloadProcessor(this)));
+        }
+
     }
 }

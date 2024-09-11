@@ -47,5 +47,6 @@ public class PyBurp implements BurpExtension
         });
         Menu menu = Menu.menu("PyBurp").withMenuItems(showEventItem, helpEventItem);
         api.userInterface().menuBar().registerMenu(menu);
+        api.extension().registerUnloadingHandler(pyBurpTabs::dispose);
     }
 }

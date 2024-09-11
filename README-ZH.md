@@ -14,14 +14,14 @@ PyBurp 是一个强大的BurpSuite插件，它允许你编写简单的Python代�
 **Video**
 
 与Chrome交互： [https://youtu.be/FRCnZ8a7UGI](https://youtu.be/FRCnZ8a7UGI)    
-与Frida交互： [https://youtu.be/zfvNqd5VmY0](https://youtu.be/zfvNqd5VmY0)
+与Frida交互： [https://youtu.be/zfvNqd5VmY0?t=45](https://youtu.be/zfvNqd5VmY0?t=45)
 
 对于移动应用的方法调用，PyBurp本身不直接支持，而是依赖于Frida来实现远程交互。
 
 > 请注意，以上功能仅在Burp Suite v2024.5.4上进行了全面测试。建议使用该版本或更新版本以确保最佳兼容性和稳定性。
 
 ## 安装
-从[Release](https://github.com/cyal1/PyBurp/releases)页面下载或直接在BApp Store中安装。
+从[Release](https://github.com/cyal1/PyBurp/releases)页面下载或直接在BApp Store中安装，然后从顶部菜单栏打开 PyBurp。
 
 如果要使用gRPC或调用移动应用程序中的方法，还需要安装 [pyburp](https://github.com/cyal1/PyBurpRpc/)
 ```bash
@@ -42,6 +42,7 @@ PyBurp中预定义了一些函数，当你在脚本中定义这些函数时，�
 | handleProxyResponse([response](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html), [annotations](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/Annotations.html))                                        | 处理客户端和Burp Suite之间的响应                                                                                                                           |
 | urlPrefixAllowed(urls)                                                                                                                                                                                                                                                                                                       | 设置当前PyBurp标签允许处理的url前缀，通过`urls.add(url)`添加，需要配合上面4个方法使用。不写这个函数那么所有请求会过上面4个被重写过的函数，你也可以在上面4个函数中定义自己的filter                                       |
 | registerContextMenu(menus)                                                                                                                                                                                                                                                                                                   | 见[注册上下文菜单](#jump)                                                                                                                               |
+| processPayload(str)                                                                                                                                                                                                                                                                                                          | 注册自定义intruder payload处理程序                                                                                                                       |
 | handleInteraction([interaction](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/collaborator/Interaction.html))                                                                                                                                                                           | 轮询Collaborator服务器。该方法会自动注册Collaborator客户端，可以通过`getOOBCanary()`获得Payloads，示例脚本: [collaborator.py](./src/main/resources/examples/collaborator.py) |
 | passiveScan([baseRequestResponse](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/HttpRequestResponse.html))                                                                                                                                                                 | 被动扫描                                                                                                                                            |
 | activeScan([baseRequestResponse](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/HttpRequestResponse.html), [auditInsertionPoint](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/scanner/audit/insertionpoint/AuditInsertionPoint.html)) | 主动扫描                                                                                                                                            |
@@ -69,17 +70,19 @@ PyBurp中预定义了一些函数，当你在脚本中定义这些函数时，�
 | [encryptedQueryForm.py](./src/main/resources/examples/encryptedQueryForm.py)                 | 处理 Query String 加解密示例                                                                                          |
 | [highlight_interesting_http.py](./src/main/resources/examples/highlight_interesting_http.py) | 高亮显示http请求和添加Notes示例，通常情况下更建议使用被动扫描                                                                            |
 | [passive_active_scan.py](./src/main/resources/examples/passive_active_scan.py)               | 主动扫描和被动扫描示例                                                                                                    |
+| [process_intruder_payload.py](./src/main/resources/examples/process_intruder_payload.py)     | 创建供 Intruder 使用的 payload processing                                                                            |
 | [race_condition.py](./src/main/resources/examples/race_condition.py)                         | 条件竞争（HTTP2使用single-packet，HTTP1.1使用last-byte sync）                                                             |
 | [rpc_debug.py](./src/main/resources/examples/rpc_debug.py)                                   | RPC测试                                                                                                          |
 | [save_subdomain_to_sqlite.py](./src/main/resources/examples/save_subdomain_to_sqlite.py)     | 从Proxy HTTP history中收集子域名保存到数据库或文件                                                                             |
 | [signatureHeader.py](./src/main/resources/examples/signatureHeader.py)                       | 处理header中的签名                                                                                                   |
+| [traffic_redirector.py](./src/main/resources/examples/traffic_redirector.py)                 | 演示了重定向 outgoing HTTP requests 从一个主机到另一个主机                                                                      |
 | [urls_from_file.py](./src/main/resources/examples/urls_from_file.py)                         | 从文件中读取url并发送请求（Python多线程）                                                                                      |
 | [urls_from_file2.py](./src/main/resources/examples/urls_from_file2.py)                       | 从文件中读取url并发送请求（[内置线程池](https://github.com/cyal1/PyBurp/blob/main/src/main/resources/examples/env_init.py#L46)） |
 | [use_pip2_packages.py](./src/main/resources/examples/use_pip2_packages.py)                   | 使用python三方库示例，不是所有三方库都能在Jython中使用，尤其是用到了C库的                                                                    |
 
 > 请注意，对内置examples脚本文件的修改不会被保存。
-###  注册上下文菜单
 <span id="jump"></span>
+###  注册上下文菜单
 要在你的代码中注册上下文菜单项，首先需要定义一个名为 `registerContextMenu` 的函数，该函数接受一个菜单项集合menus作为参数。  
 随后，通过调用 menus 对象的 `register` 方法来注册具体的菜单项。`register` 方法接收三个参数：菜单的名称，与菜单项相关联的函数名称（当菜单项被选中时调用的函数）和菜单类型(`MenuType`)，下表展示了`MenuType`5种类型和关联函数要求。
 
@@ -156,7 +159,14 @@ PyBurp允许通过gRPC调用其它程序提供的方法。你需要实现 [burpe
 3. 服务端返回的`bytes`在PyBurp中为[array.array('b',initializer)](https://www.jython.org/jython-old-sites/docs/library/array.html#array-efficient-arrays-of-numeric-values)类型，你可以将其等同于`byte[]`，不同的是你需要使用`tostring()`将其转换成字符串而不是`toString()`。
 
 ## 贡献与反馈
-欢迎社区成员对 PyBurp 提出改进建议、报告问题或贡献代码。
+我们对这个项目的未来充满期待，并制定了未来工作的路线图。我们欢迎社区做出贡献，帮助我们实现目标，无论您是修复错误、添加功能还是改进文档，我们都非常感谢您的帮助。以下是我们接下来要关注的内容：
+
+1. 简化 `HttpRequestEditorProvider` and `HttpResponseEditorProvider`注册流程
+2. 代码提示， [这里](https://github.com/bobbylight/AutoComplete/tree/master/AutoCompleteDemo/src/main/java/org/fife/ui/autocomplete/demo) 有一个示例程序
+3. 也许需要个简单的搜索框
+4. 代码区链接可点击
+
+感谢您的支持和参与！
 
 ## 常见问题
 1. 为什么有些python库或方法无法在PyBurp中使用？  

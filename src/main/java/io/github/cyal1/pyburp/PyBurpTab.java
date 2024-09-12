@@ -12,12 +12,14 @@ import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.python.core.*;
 import org.python.util.PythonInterpreter;
+import javax.annotation.Nonnull;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -174,7 +176,7 @@ public class PyBurpTab extends JPanel {
             new Thread(() -> {
                 try {
                     initPyEnv();
-                    pyInterp.exec(getCode());
+                    pyInterp.exec(Py.newStringUTF8(getCode()));
                     py_functions = getPyFunctions();
                     registerTabExtender();
                     PyObject pythonArguments = Py.java2py(myContextMenu);
@@ -243,9 +245,12 @@ public class PyBurpTab extends JPanel {
         PrintStream printStream = new PrintStream(new OutputStream() {
             final int MAX_LINES = 10000;
             @Override
-            public void write(int b) {
+            public void write(int b) {}
+            @Override
+            public void write(@Nonnull byte[] b, int off, int len) {
+                String text = new String(b, off, len, StandardCharsets.UTF_8);
                 SwingUtilities.invokeLater(() -> {
-                    logTextArea.append(String.valueOf((char) b));
+                    logTextArea.append(text);
                     if (logTextArea.getLineCount() > MAX_LINES) {
                         removeLines(logTextArea, logTextArea.getLineCount() - MAX_LINES);
                     }

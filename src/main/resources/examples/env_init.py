@@ -9,7 +9,7 @@
 
 
 import random, string, sys
-from java.lang import Runnable, Thread
+from java.lang import Runnable, Thread, String
 from java.util.concurrent import Executors
 import burp.api.montoya.core.ByteArray.byteArray as bytearray
 import io.github.cyal1.pyburp.CallFuncClient as rpc
@@ -122,3 +122,6 @@ def base64decode(text):  # return ByteArray
 def bytestring(s):
     return bytearray(s).getBytes()
 
+
+def stringutf8(s):
+    return str(String(s, "UTF-8"))

@@ -11,9 +11,11 @@ import burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse;
 import org.python.core.Py;
 import org.python.core.PyFunction;
 import org.python.core.PyObject;
+import org.python.core.PyString;
 
 import javax.swing.*;
 import java.awt.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.*;
 
@@ -208,16 +210,12 @@ public class MyContextMenuItemsProvider implements ContextMenuItemsProvider {
     public void handleSelectText(ContextMenuEvent event, PyFunction func) {
         try {
             MessageEditorHttpRequestResponse messageEditor = event.messageEditorRequestResponse().get();
-            ByteArray selectText = Tools.getSelectedText(messageEditor);
+            String selectText = Tools.getSelectedText(messageEditor);
+            PyString param = Py.newStringUTF8(selectText);
+            String newText = func.__call__(param).__unicode__().toString(); // todo
             if (event.isFromTool(ToolType.REPEATER) && messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST) {
-                PyObject pythonArguments = Py.java2py(selectText.toString());
-                PyObject r = func.__call__(pythonArguments);
-                String newText = (String) r.__tojava__(String.class);
-                messageEditor.setRequest(Tools.replaceSelectedText(messageEditor, newText));
+                messageEditor.setRequest(Tools.replaceSelectedText(messageEditor, new String(newText.getBytes(), StandardCharsets.UTF_8)));
             } else {
-                PyObject pythonArguments = Py.java2py(selectText.toString());
-                PyObject r = func.__call__(pythonArguments);
-                String newText = (String) r.__tojava__(String.class);
                 JFrame parentFrame = new JFrame();
                 JDialog dialog = new JDialog(parentFrame, "Editable Message Box", true);
                 JTextArea textArea = new JTextArea();

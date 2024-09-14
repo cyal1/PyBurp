@@ -9,7 +9,7 @@
 
 
 import random, string, sys
-from java.lang import Runnable, Thread
+from java.lang import Runnable, Thread, String
 from java.util.concurrent import Executors
 import burp.api.montoya.core.ByteArray.byteArray as bytearray
 import io.github.cyal1.pyburp.CallFuncClient as rpc
@@ -28,7 +28,7 @@ from burp.api.montoya.http.HttpService import httpService
 from burp.api.montoya.scanner.AuditResult import auditResult
 from burp.api.montoya.scanner.audit.issues.AuditIssue import auditIssue
 from burp.api.montoya.http.message.HttpRequestResponse import httpRequestResponse
-from burp.api.montoya.http.message.requests.HttpRequest import httpRequestFromUrl, httpRequest
+from burp.api.montoya.http.message.requests.HttpRequest import httpRequestFromUrl, httpRequest, http2Request
 from burp.api.montoya.scanner.audit.insertionpoint.AuditInsertionPoint import auditInsertionPoint
 from burp.api.montoya.http.message.params.HttpParameter import bodyParameter, cookieParameter, parameter, urlParameter
 from io.github.cyal1.pyburp.PyBurp import http, proxy, utils, organizer
@@ -104,7 +104,7 @@ def randomstring(length=8):
 
 
 def urlencode(text):
-    return utils.urlUtils().encode(text)
+    return utils.urlUtils().encode(text.decode())
 
 
 def urldecode(text):
@@ -116,9 +116,12 @@ def base64encode(text):
 
 
 def base64decode(text):  # return ByteArray
-    return utils.base64Utils().decode(text)
+    return utils.base64Utils().decode(text.decode())
 
 
 def bytestring(s):
     return bytearray(s).getBytes()
 
+
+def strz(s, charset="UTF8"):
+    return str(String(s, charset))

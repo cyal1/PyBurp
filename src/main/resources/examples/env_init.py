@@ -32,7 +32,7 @@ from burp.api.montoya.http.message.requests.HttpRequest import httpRequestFromUr
 from burp.api.montoya.scanner.audit.insertionpoint.AuditInsertionPoint import auditInsertionPoint
 from burp.api.montoya.http.message.params.HttpParameter import bodyParameter, cookieParameter, parameter, urlParameter
 from io.github.cyal1.pyburp.PyBurp import http, proxy, utils, organizer
-from io.github.cyal1.pyburp.Tools import addIssue, getResponseHighlights, getOOBCanary, getSelectedText, replaceSelectedText
+from io.github.cyal1.pyburp.Tools import addIssue, getResponseHighlights, getOOBCanary, getSelectedText, replaceSelectedText, sendWithProxy
 
 
 # Set the default encoding used by the Python interpreter

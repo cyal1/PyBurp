@@ -28,7 +28,7 @@ from burp.api.montoya.http.HttpService import httpService
 from burp.api.montoya.scanner.AuditResult import auditResult
 from burp.api.montoya.scanner.audit.issues.AuditIssue import auditIssue
 from burp.api.montoya.http.message.HttpRequestResponse import httpRequestResponse
-from burp.api.montoya.http.message.requests.HttpRequest import httpRequestFromUrl, httpRequest
+from burp.api.montoya.http.message.requests.HttpRequest import httpRequestFromUrl, httpRequest, http2Request
 from burp.api.montoya.scanner.audit.insertionpoint.AuditInsertionPoint import auditInsertionPoint
 from burp.api.montoya.http.message.params.HttpParameter import bodyParameter, cookieParameter, parameter, urlParameter
 from io.github.cyal1.pyburp.PyBurp import http, proxy, utils, organizer
@@ -123,5 +123,5 @@ def bytestring(s):
     return bytearray(s).getBytes()
 
 
-def stringutf8(s):
-    return str(String(s, "UTF-8"))
+def strz(s, charset="UTF8"):
+    return str(String(s, charset))

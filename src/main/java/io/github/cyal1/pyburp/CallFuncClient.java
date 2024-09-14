@@ -4,6 +4,7 @@ import burp.api.montoya.core.ByteArray;
 import com.google.protobuf.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import org.python.core.Py;
 
 import javax.swing.*;
 
@@ -54,7 +55,7 @@ public class CallFuncClient {
         if (result.getSerializedSize() == 0){
             return null;
         }else if(result.is(StringValue.class)){
-            return result.unpack(StringValue.class).getValue();
+            return Py.newStringUTF8(result.unpack(StringValue.class).getValue());
         }else if(result.is(Int64Value.class)){
             return result.unpack(Int64Value.class).getValue();
         } else if(result.is(DoubleValue.class)){

@@ -12,9 +12,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+
+import static burp.api.montoya.core.ByteArray.byteArray;
 
 public class Tools {
     public static String readFromInputStream(InputStream inputStream){
@@ -34,37 +38,41 @@ public class Tools {
         HttpRequest request = messageEditor.requestResponse().request();
         if (messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST && messageEditor.selectionOffsets().isPresent()) {
             Optional<Range> selectionRange = messageEditor.selectionOffsets();
+            if(selectionRange.isEmpty()){return request;}
             int startIndex = selectionRange.get().startIndexInclusive();
             int endIndex = selectionRange.get().endIndexExclusive();
-            ByteArray httpMessage = request.toByteArray();
-            ByteArray firstSection = httpMessage.subArray(0, startIndex);
-            ByteArray lastSection;
+            String httpMessage = new String(request.toByteArray().getBytes(), StandardCharsets.UTF_8);
+            String firstSection = httpMessage.substring(0, startIndex);
+            String lastSection;
             if (endIndex != httpMessage.length()) {
-                lastSection = httpMessage.subArray(endIndex, httpMessage.length());
+                lastSection = httpMessage.substring(endIndex);
             } else {
-                lastSection = ByteArray.byteArray();
+                lastSection = "";
             }
-            request = HttpRequest.httpRequest(request.httpService(), firstSection.withAppended(newString).withAppended(lastSection));
-            if(request.body().length() != 0){
-                request = request.withHeader("Content-Length", String.valueOf(request.body().length()));
-            }
+            request = HttpRequest.httpRequest(request.httpService(), byteArray((firstSection + newString + lastSection).getBytes()));
+            request = request.withUpdatedHeader("Content-Length", String.valueOf(request.body().length()));
             return request;
         }
         return request;
     }
 
-    public static ByteArray getSelectedText(MessageEditorHttpRequestResponse messageEditor){
+    public static String getSelectedText(MessageEditorHttpRequestResponse messageEditor){
         if (messageEditor.selectionOffsets().isPresent()) {
             HttpRequest request = messageEditor.requestResponse().request();
             HttpResponse response = messageEditor.requestResponse().response();
             Optional<Range> selectionRange = messageEditor.selectionOffsets();
+            if (selectionRange.isEmpty()){
+                return "";
+            }
+            String requestUtf8 = new String(request.toByteArray().getBytes(), StandardCharsets.UTF_8);
+            String responseUtf8 = new String(response.toByteArray().getBytes(), StandardCharsets.UTF_8);
             if (messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST){
-                return request.toByteArray().subArray(selectionRange.get());
+                return requestUtf8.substring(selectionRange.get().startIndexInclusive(), selectionRange.get().endIndexExclusive());
             }else{
-                return response.toByteArray().subArray(selectionRange.get());
+                return responseUtf8.substring(selectionRange.get().startIndexInclusive(), selectionRange.get().endIndexExclusive());
             }
         }
-        return ByteArray.byteArray();
+        return "";
     }
 
     public static String getOOBCanary(){

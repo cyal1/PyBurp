@@ -104,7 +104,7 @@ def randomstring(length=8):
 
 
 def urlencode(text):
-    return utils.urlUtils().encode(text)
+    return utils.urlUtils().encode(text.decode())
 
 
 def urldecode(text):
@@ -116,7 +116,7 @@ def base64encode(text):
 
 
 def base64decode(text):  # return ByteArray
-    return utils.base64Utils().decode(text)
+    return utils.base64Utils().decode(text.decode())
 
 
 def bytestring(s):

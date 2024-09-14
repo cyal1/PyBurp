@@ -8,8 +8,11 @@ import burp.api.montoya.ui.contextmenu.ContextMenuItemsProvider;
 import burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse;
 import javax.swing.*;
 import java.awt.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import static burp.api.montoya.core.ByteArray.byteArray;
 
 public class ContentTypeContextMenu implements ContextMenuItemsProvider {
     JMenuItem convert2json,convert2xml,convert2querystring;
@@ -43,23 +46,23 @@ public class ContentTypeContextMenu implements ContextMenuItemsProvider {
     }
     private void contentTypeConvert(MessageEditorHttpRequestResponse messageEditor, HttpRequest request){
         this.convert2json.addActionListener(e -> {
-            String body = request.bodyToString();
+            String body = new String(request.body().getBytes(), StandardCharsets.UTF_8);
             if(request.contentType() == ContentType.URL_ENCODED){
                 String newBody = nestContentTypeConvert.queryString2JSON(body);
-                messageEditor.setRequest(request.withHeader("Content-Type","application/json;charset=UTF-8").withBody(newBody));
+                messageEditor.setRequest(request.withHeader("Content-Type","application/json;charset=UTF-8").withBody(byteArray(newBody.getBytes())));
             }
             else if(request.contentType() == ContentType.XML){
                 String newBody = nestContentTypeConvert.xml2JSON(body);
-                messageEditor.setRequest(request.withHeader("Content-Type","application/json;charset=UTF-8").withBody(newBody));
+                messageEditor.setRequest(request.withHeader("Content-Type","application/json;charset=UTF-8").withBody(byteArray(newBody.getBytes())));
             }
         });
         this.convert2xml.addActionListener(e -> {
-            String body = request.bodyToString();
+            String body = new String(request.body().getBytes(), StandardCharsets.UTF_8);
             String newBody;
             if(request.contentType() == ContentType.JSON){
                 try {
                     newBody = nestContentTypeConvert.json2XML(body);
-                    messageEditor.setRequest(request.withHeader("Content-Type","application/xml;charset=UTF-8").withBody(newBody));
+                    messageEditor.setRequest(request.withHeader("Content-Type","application/xml;charset=UTF-8").withBody(byteArray(newBody.getBytes())));
                 } catch (Exception ex) {
                     PyBurpTabs.logTextArea.append(ex + "\n");
                 }
@@ -67,21 +70,21 @@ public class ContentTypeContextMenu implements ContextMenuItemsProvider {
                 try {
                     newBody = nestContentTypeConvert.queryString2JSON(body);
                     newBody = nestContentTypeConvert.json2XML(newBody);
-                    messageEditor.setRequest(request.withHeader("Content-Type","application/xml;charset=UTF-8").withBody(newBody));
+                    messageEditor.setRequest(request.withHeader("Content-Type","application/xml;charset=UTF-8").withBody(byteArray(newBody.getBytes())));
                 } catch (Exception ex) {
                     PyBurpTabs.logTextArea.append(ex + "\n");
                 }
             }
         });
         this.convert2querystring.addActionListener(e -> {
-            String body = request.bodyToString();
+            String body = new String(request.body().getBytes(), StandardCharsets.UTF_8);
             if(request.contentType() == ContentType.JSON){
                 String newBody = nestContentTypeConvert.json2QueryString(body);
-                messageEditor.setRequest(request.withHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF-8").withBody(newBody));
+                messageEditor.setRequest(request.withHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF-8").withBody(byteArray(newBody.getBytes())));
             } else if (request.contentType() == ContentType.XML) {
                 String newBody = nestContentTypeConvert.xml2JSON(body);
                 newBody = nestContentTypeConvert.json2QueryString(newBody);
-                messageEditor.setRequest(request.withHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF-8").withBody(newBody));
+                messageEditor.setRequest(request.withHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF-8").withBody(byteArray(newBody.getBytes())));
             }
         });
     }

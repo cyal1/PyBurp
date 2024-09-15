@@ -9,7 +9,6 @@ import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 import burp.api.montoya.scanner.audit.issues.AuditIssue;
 import burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse;
-
 import javax.net.ssl.*;
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -32,7 +31,7 @@ import java.net.URL;
 import static burp.api.montoya.core.ByteArray.byteArray;
 
 public class Tools {
-    public static String readFromInputStream(InputStream inputStream){
+    public static String readFromInputStream(InputStream inputStream) {
         StringBuilder resultStringBuilder = new StringBuilder();
         try (BufferedReader br
                      = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -45,11 +44,14 @@ public class Tools {
         }
         return resultStringBuilder.toString();
     }
-    public static HttpRequest replaceSelectedText(MessageEditorHttpRequestResponse messageEditor, String newString){
+
+    public static HttpRequest replaceSelectedText(MessageEditorHttpRequestResponse messageEditor, String newString) {
         HttpRequest request = messageEditor.requestResponse().request();
         if (messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST && messageEditor.selectionOffsets().isPresent()) {
             Optional<Range> selectionRange = messageEditor.selectionOffsets();
-            if(selectionRange.isEmpty()){return request;}
+            if (selectionRange.isEmpty()) {
+                return request;
+            }
             int startIndex = selectionRange.get().startIndexInclusive();
             int endIndex = selectionRange.get().endIndexExclusive();
             String httpMessage = new String(request.toByteArray().getBytes(), StandardCharsets.UTF_8);
@@ -67,50 +69,47 @@ public class Tools {
         return request;
     }
 
-    public static String getSelectedText(MessageEditorHttpRequestResponse messageEditor){
+    public static String getSelectedText(MessageEditorHttpRequestResponse messageEditor) {
         if (messageEditor.selectionOffsets().isPresent()) {
             HttpRequest request = messageEditor.requestResponse().request();
             HttpResponse response = messageEditor.requestResponse().response();
             Optional<Range> selectionRange = messageEditor.selectionOffsets();
-            if (selectionRange.isEmpty()){
+            if (selectionRange.isEmpty()) {
                 return "";
             }
             String requestUtf8 = new String(request.toByteArray().getBytes(), StandardCharsets.UTF_8);
             String responseUtf8 = new String(response.toByteArray().getBytes(), StandardCharsets.UTF_8);
-            if (messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST){
+            if (messageEditor.selectionContext() == MessageEditorHttpRequestResponse.SelectionContext.REQUEST) {
                 return requestUtf8.substring(selectionRange.get().startIndexInclusive(), selectionRange.get().endIndexExclusive());
-            }else{
+            } else {
                 return responseUtf8.substring(selectionRange.get().startIndexInclusive(), selectionRange.get().endIndexExclusive());
             }
         }
         return "";
     }
 
-    public static String getOOBCanary(){
+    public static String getOOBCanary() {
         return PyBurpTabs.collaboratorClient.generatePayload().toString();
     }
 
-    public static void addIssue(AuditIssue auditIssue){
+    public static void addIssue(AuditIssue auditIssue) {
         PyBurp.api.siteMap().add(auditIssue);
     }
 
-    public static List<Marker> getResponseHighlights(HttpRequestResponse requestResponse, String match)
-    {
+    public static List<Marker> getResponseHighlights(HttpRequestResponse requestResponse, String match) {
         List<Marker> highlights = new LinkedList<>();
         String response = requestResponse.response().toString();
 
         int start = 0;
 
-        while (start < response.length())
-        {
+        while (start < response.length()) {
             start = response.indexOf(match, start);
 
-            if (start == -1)
-            {
+            if (start == -1) {
                 break;
             }
 
-            Marker marker = Marker.marker(start, start+match.length());
+            Marker marker = Marker.marker(start, start + match.length());
             highlights.add(marker);
 
             start += match.length();
@@ -118,73 +117,70 @@ public class Tools {
         return highlights;
     }
 
-    public static void sendWithProxy(HttpRequest request, String host, int port){
-        try {
-        // Set up a TrustManager that trusts all certificates
-        TrustManager[] trustAll = new TrustManager[] {
-                new X509TrustManager() {
-                    @Override
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-
-                    @Override
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                        // Trust all certificates
-                    }
-
-                    @Override
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                        // Trust all certificates
-                    }
-                }
-        };
-        // Set up an SSL context to use the trust manager
-        SSLContext sslContext = SSLContext.getInstance("SSL");
-        sslContext.init(null, trustAll, new java.security.SecureRandom());
-        HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-
-        // Set up hostname verification to ignore hostnames
-        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-            @Override
-            public boolean verify(String hostname, SSLSession session) {
-                // Trust all hostnames
-                return true;
-            }
-        });
+    public static void sendWithProxy(HttpRequest request, String host, int port) {
         if (SwingUtilities.isEventDispatchThread()) {
             throw new IllegalStateException("Network requests must not be executed on the event dispatch thread, please ensure that you perform network operations in a separate thread or an asynchronous task.");
         }
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
-        String urlString = request.url();
-        ByteArray body = request.body();
-        HttpURLConnection connection = null;
         try {
-            URL url = new URL(urlString);
-            connection = (HttpURLConnection) url.openConnection(proxy);
-            connection.setConnectTimeout(10000);
-            connection.setReadTimeout(15000);
-            for (HttpHeader header : request.headers()) {
-                connection.setRequestProperty(header.name(), header.value());
-            }
-            connection.setRequestMethod(request.method());
-            if (!request.method().equals("GET")){
-                connection.setDoOutput(true);
-                try (OutputStream os = connection.getOutputStream()) {
-                    os.write(body.getBytes());
-                    os.flush();
+            // Set up a TrustManager that trusts all certificates
+            TrustManager[] trustAll = new TrustManager[]{
+                    new X509TrustManager() {
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return null;
+                        }
+
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                            // Trust all certificates
+                        }
+
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                            // Trust all certificates
+                        }
+                    }
+            };
+            // Set up an SSL context to use the trust manager
+            SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, trustAll, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+
+            // Set up hostname verification to ignore hostnames
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> {
+                // Trust all hostnames
+                return true;
+            });
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
+            String urlString = request.url();
+            ByteArray body = request.body();
+            HttpURLConnection connection = null;
+            try {
+                URL url = new URL(urlString);
+                connection = (HttpURLConnection) url.openConnection(proxy);
+                connection.setConnectTimeout(10000);
+                connection.setReadTimeout(15000);
+                for (HttpHeader header : request.headers()) {
+                    connection.setRequestProperty(header.name(), header.value());
+                }
+                connection.setRequestMethod(request.method());
+                if (!request.method().equals("GET")) {
+                    connection.setDoOutput(true);
+                    try (OutputStream os = connection.getOutputStream()) {
+                        os.write(body.getBytes());
+                        os.flush();
+                    }
+                }
+                int responseCode = connection.getResponseCode();
+                SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append("Send with proxy success, url: " + urlString + " => " + responseCode + "\n"));
+            } catch (IOException e) {
+                SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append("Send with proxy error! url: " + request.url() + " " + e + "\n"));
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
                 }
             }
-            int responseCode = connection.getResponseCode();
-            SwingUtilities.invokeLater(() -> PyBurpTabs.logTextArea.append("Send with proxy success, url: " + urlString + " => " + responseCode + "\n"));
-        } catch (IOException e) {
-            SwingUtilities.invokeLater(() ->PyBurpTabs.logTextArea.append("Send with proxy error! url: " + request.url() + " " + e + "\n"));
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
-    } catch (NoSuchAlgorithmException | KeyManagementException e) {
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
             throw new RuntimeException(e);
         }
     }

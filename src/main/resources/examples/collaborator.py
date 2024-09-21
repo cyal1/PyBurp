@@ -3,6 +3,7 @@
 # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/collaborator/Interaction.html
 
 canary = getOOBCanary()
+print(canary)
 
 
 def handleInteraction(interaction):
@@ -36,11 +37,10 @@ def handleInteraction(interaction):
         ))
 
 
-def urlPrefixAllowed(urls):
-    urls.add("https://portswigger-labs.net/ssrf-dns.php")
-
-
 # curl -x http://127.0.0.1:8080/ "https://portswigger-labs.net/ssrf-dns.php?host=www.google.com"
 def handleProxyRequest(request, annotations):
     return request.withUpdatedParameters(urlParameter("host", canary)), annotations
 
+# curl -x http://127.0.0.1:8080/ "https://portswigger-labs.net/ssrf-dns.php?host=$oob_plz"
+def handleRequest(request, annotations):
+    return request.withBody(request.body().getBytes().tostring().replace("$oob_plz", getOOBCanary())), annotations

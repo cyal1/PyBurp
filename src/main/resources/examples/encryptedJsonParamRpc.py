@@ -1,6 +1,7 @@
 # Server code
 # Server https://github.com/cyal1/pyburpRPC/tree/main/python
-# https://youtu.be/FRCnZ8a7UGI
+# You can view the actual requests to the server in the Logger.
+
 import json
 
 

@@ -363,6 +363,8 @@ public class PyBurpTab extends JPanel {
                 "urlPrefixAllowed",
                 "handleInteraction",
                 "processPayload",
+                "handleWsTextMsg", "handleWsBinMsg",
+                "handleProxyWsTextMsg", "handleProxyWsBinMsg",
                 "finish"
         ));
 
@@ -443,6 +445,14 @@ public class PyBurpTab extends JPanel {
 
         if(py_functions.containsKey("handleProxyResponse")){
             plugins.add(PyBurp.api.proxy().registerResponseHandler(new MyProxyResponseHandler(this)));
+        }
+
+        if(py_functions.containsKey("handleWsTextMsg") || py_functions.containsKey("handleWsBinMsg")){
+            plugins.add(PyBurp.api.websockets().registerWebSocketCreatedHandler(new MyWebSocketCreatedHandler(this)));
+        }
+
+        if(py_functions.containsKey("handleProxyWsTextMsg") || py_functions.containsKey("handleProxyWsBinMsg")){
+            plugins.add(PyBurp.api.proxy().registerWebSocketCreationHandler(new MyProxyWebSocketCreationHandler(this)));
         }
 
         if(py_functions.containsKey("handleInteraction")){

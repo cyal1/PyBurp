@@ -92,16 +92,12 @@ public class PyBurpTabs extends JFrame {
 
         if (existingCollaboratorKey != null)
         {
-            PyBurp.api.logging().logToOutput("Creating Collaborator client from key.");
             collaboratorClient = PyBurp.api.collaborator().restoreClient(SecretKey.secretKey(existingCollaboratorKey));
         }
         else
         {
-            PyBurp.api.logging().logToOutput("No previously found Collaborator client. Creating new client...");
             collaboratorClient = PyBurp.api.collaborator().createClient();
-
             // Save the secret key of the CollaboratorClient so that you can retrieve it later.
-            PyBurp.api.logging().logToOutput("Saving Collaborator secret key.");
             PyBurp.api.persistence().extensionData().setString("persisted_collaborator", collaboratorClient.getSecretKey().toString());
         }
 

@@ -1,4 +1,3 @@
-
 """
 
     You do not need to run this file.
@@ -7,8 +6,7 @@
 
 """
 
-
-import random, string, sys
+import random, string, sys, time
 from java.lang import Runnable, Thread, String
 from java.util.concurrent import Executors
 import burp.api.montoya.core.ByteArray.byteArray as bytearray
@@ -29,11 +27,12 @@ from burp.api.montoya.scanner.AuditResult import auditResult
 from burp.api.montoya.scanner.audit.issues.AuditIssue import auditIssue
 from burp.api.montoya.http.message.HttpRequestResponse import httpRequestResponse
 from burp.api.montoya.http.message.requests.HttpRequest import httpRequestFromUrl, httpRequest, http2Request
+from burp.api.montoya.websocket.Direction import CLIENT_TO_SERVER, SERVER_TO_CLIENT
+import burp.api.montoya.proxy.websocket.TextMessageReceivedAction as TextMessageReceivedAction
 from burp.api.montoya.scanner.audit.insertionpoint.AuditInsertionPoint import auditInsertionPoint
 from burp.api.montoya.http.message.params.HttpParameter import bodyParameter, cookieParameter, parameter, urlParameter
 from io.github.cyal1.pyburp.PyBurp import http, proxy, utils, organizer
 from io.github.cyal1.pyburp.Tools import addIssue, getResponseHighlights, getOOBCanary, getSelectedText, replaceSelectedText, sendWithProxy
-
 
 # Set the default encoding used by the Python interpreter
 reload(sys)
@@ -60,7 +59,9 @@ def run_in_pool(pool):
     def decorator(func):
         def wrapper(*args, **kwargs):
             return pool.run(func, *args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -72,8 +73,10 @@ def run_in_thread(func):
                 # You can check if EXIT_FLAG is True in custom function to exit the thread.
                 if EXIT_FLAG is False:
                     func(*args, **kwargs)
+
         thread = Thread(JavaRunnable())
         thread.start()
+
     return wrapper
 
 
@@ -101,10 +104,13 @@ def randomstring(length=8):
 
 
 # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/utilities/package-summary.html
+# https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/utilities/json/JsonUtils.html#read(java.lang.String,java.lang.String)
+def jq(*args):
+    return utils.jsonUtils().read(*args)
 
 
-def urlencode(text):
-    return utils.urlUtils().encode(text.decode())
+def urlencode(text):  # text: str
+    return utils.urlUtils().encode(text)
 
 
 def urldecode(text):
@@ -115,8 +121,8 @@ def base64encode(text):
     return utils.base64Utils().encodeToString(text)
 
 
-def base64decode(text):  # return ByteArray
-    return utils.base64Utils().decode(text.decode())
+def base64decode(text):  # text: str
+    return utils.base64Utils().decode(text).getBytes().tostring()
 
 
 def bytestring(s):
@@ -125,3 +131,8 @@ def bytestring(s):
 
 def strz(s, charset="UTF8"):
     return str(String(s, charset))
+
+
+def ts():
+    return str(int(time.time() * 1000))
+

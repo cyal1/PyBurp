@@ -17,19 +17,25 @@ import static burp.api.montoya.core.ByteArray.byteArray;
 public class ContentTypeContextMenu implements ContextMenuItemsProvider {
     JMenuItem convert2json,convert2xml,convert2querystring;
     ContentTypeConverter  nestContentTypeConvert;
-    public ContentTypeContextMenu() {
+    private final PyBurpTabs pyBurpTabs;
+    public ContentTypeContextMenu(PyBurpTabs pyBurpTabs) {
         nestContentTypeConvert = new ContentTypeConverter();
+        this.pyBurpTabs = pyBurpTabs;
     }
 
     @Override
     public List<Component> provideMenuItems(ContextMenuEvent event) {
+        List<Component> menuItemList = new ArrayList<>();
+        JMenuItem o = new JMenuItem("Open PyBurp");
+        o.addActionListener(e -> pyBurpTabs.setVisible(true));
+        menuItemList.add(o);
+        menuItemList.add(new JSeparator(JSeparator.HORIZONTAL));
         if(!event.invocationType().containsHttpMessage()){
-            return null;
+            return menuItemList;
         }
         if(event.messageEditorRequestResponse().isPresent()){
             MessageEditorHttpRequestResponse messageEditor = event.messageEditorRequestResponse().get();
             HttpRequest request = messageEditor.requestResponse().request();
-            List<Component> menuItemList = new ArrayList<>();
             if(event.isFromTool(ToolType.REPEATER) && (request.contentType() == ContentType.JSON||request.contentType() == ContentType.URL_ENCODED||request.contentType() == ContentType.XML)){
                     convert2json = new JMenuItem("Convert to JSON");
                     convert2xml = new JMenuItem("Convert to XML");
@@ -42,7 +48,7 @@ public class ContentTypeContextMenu implements ContextMenuItemsProvider {
                     return menuItemList;
             }
         }
-        return null;
+        return menuItemList;
     }
     private void contentTypeConvert(MessageEditorHttpRequestResponse messageEditor, HttpRequest request){
         this.convert2json.addActionListener(e -> {

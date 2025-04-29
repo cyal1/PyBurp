@@ -2,12 +2,13 @@
 # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/requests/HttpRequest.html
 # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html
 # Enum Class HttpParameterType: BODY, COOKIE, JSON, MULTIPART_ATTRIBUTE, URL, XML, XML_ATTRIBUTE
+# You can view the actual requests to the server in the Logger
 
 def encrypt(s):
     return base64encode(s)
 
 def decrypt(s):
-    return base64decode(s).toString()
+    return base64decode(s)
 
 
 def urlPrefixAllowed(urls):
@@ -31,7 +32,7 @@ def handleProxyRequest(request, annotations):
     pname = "ec"
     #    ptype = HttpParameterType.URL
     pvalue = request.parameterValue(pname, ptype)
-    return request.withUpdatedParameters(parameter(pname, decrypt(pvalue), ptype)), annotations
+    return request.withUpdatedParameters(parameter(pname, decrypt(pvalue.decode()), ptype)), annotations
 
 
 def handleResponse(response, annotations):

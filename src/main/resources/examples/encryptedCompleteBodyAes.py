@@ -1,5 +1,7 @@
 # https://docs.oracle.com/en/java/javase/17/docs/api/java.base/javax/crypto/Cipher.html
 # https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html
+# You can view the actual requests to the server in the Logger.
+
 from javax.crypto import Cipher
 from javax.crypto.spec import SecretKeySpec, IvParameterSpec
 
@@ -44,13 +46,13 @@ def handleRequest(request, annotations):
 
 def handleProxyRequest(request, annotations):
     print("handleProxyRequest", request.bodyToString())
-    result = decrypt(base64decode(request.body()).getBytes(), key, iv)
+    result = decrypt(base64decode(request.body()), key, iv)
     return request.withBody(bytearray(result)), annotations
 
 
 def handleResponse(response, annotations):
     print("handleResponse", response.bodyToString())
-    result = decrypt(base64decode(response.body()).getBytes(), key, iv)
+    result = decrypt(base64decode(response.body()), key, iv)
     return response.withBody(bytearray(result)), annotations
 
 
@@ -64,7 +66,7 @@ def enc(text):
     return base64encode(encrypt(text, key, iv).tostring())
 
 def dec(text):
-    return decrypt(base64decode(text).getBytes(), key, iv).tostring()
+    return decrypt(base64decode(text.decode()), key, iv).tostring()
 
 def registerContextMenu(menus):
     menus.register("aes encrypt", enc, MenuType.SELECTED_TEXT)

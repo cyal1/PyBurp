@@ -6,9 +6,7 @@
                   handleProxyResponse                        handleResponse
 
 Github: https://github.com/cyal1/PyBurp
-Cooperation with Frida: https://youtu.be/zfvNqd5VmY0
-Cooperation with Chrome: https://youtu.be/FRCnZ8a7UGI
-
+You can view the actual requests to the server in the Logger.
 """
 
 
@@ -26,7 +24,6 @@ def handleProxyRequest(request, annotations):
     return request.withParameter(urlParameter("pyburp", "brower2burp")), annotations
 
 
-# You can view the actual requests to the server in the Logger.
 def handleRequest(request, annotations):
     return request.withParameter(urlParameter("pyburp", "burp2server")), annotations
 

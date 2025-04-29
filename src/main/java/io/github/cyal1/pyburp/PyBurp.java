@@ -13,13 +13,20 @@ import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.http.Http;
 import burp.api.montoya.organizer.Organizer;
 import burp.api.montoya.proxy.Proxy;
+import burp.api.montoya.ui.contextmenu.ContextMenuEvent;
+import burp.api.montoya.ui.contextmenu.ContextMenuItemsProvider;
 import burp.api.montoya.ui.menu.BasicMenuItem;
 import burp.api.montoya.ui.menu.Menu;
 import burp.api.montoya.ui.menu.MenuItem;
 import burp.api.montoya.utilities.Utilities;
+
+import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PyBurp implements BurpExtension
 {
@@ -39,7 +46,7 @@ public class PyBurp implements BurpExtension
         PyBurp.utils = api.utilities();
         api.extension().setName("PyBurp");
         PyBurpTabs pyBurpTabs = new PyBurpTabs();
-        api.userInterface().registerContextMenuItemsProvider(new ContentTypeContextMenu());
+        api.userInterface().registerContextMenuItemsProvider(new ContentTypeContextMenu(pyBurpTabs));
 
         BasicMenuItem showEventItem = BasicMenuItem.basicMenuItem("Show").withAction(() -> pyBurpTabs.setVisible(true));
         MenuItem helpEventItem = MenuItem.basicMenuItem("Help").withAction(() -> {

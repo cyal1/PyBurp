@@ -1,12 +1,13 @@
 
 # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/requests/HttpRequest.html
 # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html
+# You can view the actual requests to the server in the Logger.
 
 def encrypt(s):
     return base64encode(s)
 
 def decrypt(s):
-    return base64decode(s).toString()
+    return base64decode(s.decode())
 
 
 def urlPrefixAllowed(urls):

@@ -3,6 +3,7 @@
 # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/collaborator/Interaction.html
 
 canary = getOOBCanary()
+print(canary)
 
 
 def handleInteraction(interaction):

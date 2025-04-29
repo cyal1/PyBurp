@@ -1,40 +1,16 @@
 # https://portswigger.net/burp/documentation/desktop/tools/proxy/http-history/bambdas
 # https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/HttpRequestResponse.html
-import re
-
-
-"""
-    Find large redirect responses
-"""
-for requestResponse in history(
-        lambda rr: rr.hasResponse()
-                   and rr.response().statusCode()/100 == 3
-                   and rr.response().body().length() > 1
-):
-
-    print(requestResponse.request().url(), requestResponse.response().statusCode(), requestResponse.response().body().length())
-
-
-"""
-    Find secretKey from history
-"""
-for requestResponse in history(
-        lambda rr: rr.hasResponse()
-                   and rr.response().contains("secretKey", False)
-):
-    print(requestResponse.request().url())
-
-
 """
     Custom word list generate from history
 """
+import re
+
 words = []
-word_regex = r'[^a-zA-Z]'
-word_regex2 = r'[^a-zA-Z0-9\-_]' # word contain digit, -, _
+word_regex = re.compile(r'[^a-zA-Z]')
+word_regex2 = re.compile(r'[^a-zA-Z0-9\-_]') # word contain digit, -, _
 min_len = 2
 max_len = 20
 lower_case = False
-
 
 for requestResponse in history(
         lambda rr: rr.httpService().host().endswith(".example.com")
@@ -43,18 +19,18 @@ for requestResponse in history(
     req = requestResponse.request().toString()
     if lower_case:
         req = req.lower()
-    words += set(re.split(word_regex, req))
-    words += set(re.split(word_regex2, req))  # word contain digit, -, _
+    words += set(word_regex.split(req))
+    words += set(word_regex2.split(req))
 
     # wordlist from response
     if requestResponse.hasResponse() \
             and requestResponse.response().mimeType() in [ MimeType.JSON, MimeType.PLAIN_TEXT, MimeType.SCRIPT, MimeType.XML, MimeType.HTML ]:
-        print(requestResponse.url())
+        # print(requestResponse.url())
         resp = requestResponse.response().toString()
         if lower_case:
             resp = resp.lower()
-        words += set(re.split(word_regex, resp))
-        words += set(re.split(word_regex2, resp))  # word contain digit, -, _
+        words += set(word_regex.split(resp))
+        words += set(word_regex2.split(resp))
 
 words = sorted(set(words))
 
@@ -77,3 +53,28 @@ with open("/tmp/dicts.txt", 'w') as f:
     for word in words:
         f.write(word + "\n")
 
+
+
+"""
+
+######## Find secretKey from history ########
+
+for requestResponse in history(
+        lambda rr: rr.hasResponse()
+                   and rr.response().contains("secretKey", False)
+):
+    print(requestResponse.request().url())
+
+
+######## Find large redirect responses ########
+
+for requestResponse in history(
+        lambda rr: rr.hasResponse()
+                   and rr.response().statusCode()/100 == 3
+                   and rr.response().body().length() > 1
+):
+
+    print(requestResponse.request().url(), requestResponse.response().statusCode(), requestResponse.response().body().length())
+
+
+"""

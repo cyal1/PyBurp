@@ -1,7 +1,7 @@
 import json
 from com.github.kklisura.cdt.services.impl import ChromeServiceImpl
 # https://github.com/kklisura/chrome-devtools-java-client
-# Launch Chrome: /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --remote-allow-origins='*'
+# Launch Chrome: /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --remote-allow-origins='*' --user-data-dir="/tmp/chrome_debug"
 # You can view the actual requests to the server in the Logger
 
 def getTabByUrl(url):

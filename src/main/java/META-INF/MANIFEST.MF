@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Main-Class: 
+Class-Path: jackson-databind-2.11.3.jar tyrus-spi-1.13.1.jar gson-2.11.0
+ .jar grpc-protobuf-1.66.0.jar kotlin-stdlib-common-1.8.0.jar grpc-conte
+ xt-1.66.0.jar kotlin-stdlib-1.8.0.jar rsyntaxtextarea-3.5.1.jar grizzly
+ -http-2.3.25.jar json-20231013.jar perfmark-api-0.27.0.jar grizzly-fram
+ ework-2.3.25.jar slf4j-api-1.7.25.jar okio-jvm-3.4.0.jar annotations-13
+ .0.jar proto-google-common-protos-2.41.0.jar tyrus-client-1.13.1.jar pr
+ otobuf-java-3.25.3.jar guava-33.2.1-jre.jar jackson-core-2.11.3.jar tyr
+ us-core-1.13.1.jar sqlite-jdbc-3.41.2.2.jar kotlin-stdlib-jdk8-1.8.0.ja
+ r tyrus-container-grizzly-client-1.13.1.jar grpc-util-1.66.0.jar listen
+ ablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar failureaccess-
+ 1.0.2.jar checker-qual-3.42.0.jar grpc-protobuf-lite-1.66.0.jar animal-
+ sniffer-annotations-1.24.jar jackson-annotations-2.11.3.jar annotations
+ -4.1.1.4.jar error_prone_annotations-2.28.0.jar grpc-core-1.66.0.jar jy
+ thon-standalone-2.7.1.jar cdt-java-client-4.0.0.jar javax.websocket-api
+ -1.1.jar grpc-stub-1.66.0.jar grpc-api-1.66.0.jar kotlin-stdlib-jdk7-1.
+ 8.0.jar javassist-3.24.1-GA.jar grizzly-http-server-2.3.25.jar jsr305-3
+ .0.2.jar grpc-okhttp-1.66.0.jar rhino-1.7.14.jar
+

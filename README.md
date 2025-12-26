@@ -22,6 +22,12 @@ Download from the [Release](https://github.com/cyal1/PyBurp/releases) page or in
 
 ## Usage Guide
 
+### Build
+
+```
+./gradlew clean shadowJar 
+```
+
 ### Predefined Functions
 PyBurp provides several predefined functions that automatically register corresponding functionality in Burp Suite when defined in your script. Here's a detailed list:
 

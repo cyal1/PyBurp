@@ -5,9 +5,9 @@
 import json
 
 
-server = rpc("localhost", 30051)
+client = rpc("localhost", 30051)
 
-print(server.callFunc('encrypt', "1234"))
+print(client.callFunc('encrypt', "1234"))
 
 
 def urlPrefixAllowed(urls):
@@ -16,10 +16,10 @@ def urlPrefixAllowed(urls):
 
 def handleRequest(request, annotations):
     json_obj = json.loads(request.bodyToString())
-    json_obj["password"] = server.callFunc('encrypt', json_obj["password"])
+    json_obj["password"] = client.callFunc('encrypt', json_obj["password"])
     return request.withBody(json.dumps(json_obj)), annotations
 
 
 def finish():
-    server.shutdown()
+    client.shutdown()
 

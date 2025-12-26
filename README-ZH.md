@@ -22,6 +22,12 @@ PyBurp 是一个 Burp Suite 扩展，提供预定义的 Python 函数用于 HTTP
 
 ## 使用指南
 
+### 构建
+
+```
+./gradlew clean shadowJar 
+```
+
 ### 预定义函数
 PyBurp 提供了几个预定义函数，当在脚本中定义时，会自动在 Burp Suite 中注册相应的功能。以下是详细列表：
 

@@ -36,7 +36,6 @@ shadowJar {
     exclude '**/org/sqlite/native/Linux-Musl/**'
     exclude '**/org/sqlite/native/Linux/ppc64/**'
     exclude '**/org/sqlite/native/Linux/riscv64/**'
-    exclude '**/org/sqlite/native/Windows/x86/**'
 
     archiveClassifier.set('')
 

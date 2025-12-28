@@ -157,7 +157,3 @@ def registerContextMenu(menus):
 
     menus.register("Spring Bypass", router_bypass, MenuType.REQUEST_RESPONSE)
 
-
-def finish():
-    pool.shutdown()
-

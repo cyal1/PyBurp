@@ -43,15 +43,26 @@ EXIT_FLAG = False  # This will become True when click the Stop button
 
 # Class for managing a pool of threads to execute function
 class RequestPool:
+    _all_pools = []
+
     def __init__(self, nThreads):
         self.executor = Executors.newFixedThreadPool(nThreads)
+        RequestPool._all_pools.append(self)
 
     def run(self, func, *args, **kwargs):
+        if EXIT_FLAG:
+            return
         self.executor.execute(lambda: func(*args, **kwargs))
 
     def shutdown(self):
-        self.executor.shutdownNow()
-        print("RequestPool shutdown")
+        if not self.executor.isShutdown():
+            self.executor.shutdownNow()
+            print("RequestPool shutdown")
+
+
+def __pool_shutdown__():
+    for pool in RequestPool._all_pools:
+        pool.shutdown()
 
 
 # Decorator to run a function in the thread pool
@@ -59,9 +70,7 @@ def run_in_pool(pool):
     def decorator(func):
         def wrapper(*args, **kwargs):
             return pool.run(func, *args, **kwargs)
-
         return wrapper
-
     return decorator
 
 
@@ -71,12 +80,10 @@ def run_in_thread(func):
         class JavaRunnable(Runnable):
             def run(self):
                 # You can check if EXIT_FLAG is True in custom function to exit the thread.
-                if EXIT_FLAG is False:
+                if not EXIT_FLAG:
                     func(*args, **kwargs)
-
         thread = Thread(JavaRunnable())
         thread.start()
-
     return wrapper
 
 

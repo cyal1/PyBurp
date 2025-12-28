@@ -10,8 +10,6 @@ ERROR_PATTERNS = {"unknown operator", "MongoError", "cannot be applied to a fiel
 INFO_PATTERNS = {"83b3j45b"}
 SKIP_HEADERS = {'content-length', 'host', 'transfer-encoding', 'cache-control', 'user-agent', 'pragma', 'priority', 'connection', 'cookie', 'content-type', 'upgrade-insecure-requests'}
 
-def finish():
-    pool.shutdown()
 
 def fuzz_value(req, resp):
     fuzz_params(req, resp, payload=".x()'\")", urlencode=True, concat=True, fuzz_cookie=True, fuzz_header=True)

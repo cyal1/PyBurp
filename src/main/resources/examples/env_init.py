@@ -57,12 +57,7 @@ class RequestPool:
     def shutdown(self):
         if not self.executor.isShutdown():
             self.executor.shutdownNow()
-            print("RequestPool shutdown")
-
-
-def __pool_shutdown__():
-    for pool in RequestPool._all_pools:
-        pool.shutdown()
+            print("[*] All RequestPool have been force shutdown")
 
 
 # Decorator to run a function in the thread pool
@@ -74,17 +69,37 @@ def run_in_pool(pool):
     return decorator
 
 
+_threads_instances = []
+
+
 # Decorator to run a function in a thread
 def run_in_thread(func):
     def wrapper(*args, **kwargs):
         class JavaRunnable(Runnable):
             def run(self):
-                # You can check if EXIT_FLAG is True in custom function to exit the thread.
-                if not EXIT_FLAG:
+                current_thread = Thread.currentThread()
+                try:
+                    if EXIT_FLAG: return # You can check if EXIT_FLAG is True in custom function to exit the thread.
                     func(*args, **kwargs)
+                except Exception as e:
+                    print("[Thread Error] " + str(e))
+                finally:
+                    if current_thread in _threads_instances:
+                        _threads_instances.remove(current_thread)
         thread = Thread(JavaRunnable())
         thread.start()
+        _threads_instances.append(thread)
     return wrapper
+
+
+def __pool_shutdown__():
+    for pool in RequestPool._all_pools:
+        pool.shutdown()
+    if len(_threads_instances) != 0:
+        for t in _threads_instances:
+            if t.isAlive():
+                t.interrupt()
+        print("[*] All running threads have been force interrupted")
 
 
 # Commonly used function wrappers

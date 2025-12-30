@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE api SYSTEM "CompletionXml.dtd" [
+        <!ENTITY API_BASE "https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya">
+        ]>
+
+<api language="Python">
+    <environment paramStartChar="(" paramEndChar=")" paramSeparator=", " terminal=""/>
+    <completionTypes>
+        <functionCompletionType type="io.github.cyal1.pyburp.autoComplete.CallbackFunctionCompletion"/>
+    </completionTypes>
+    <keywords>
+        <!-- Enumeration Types -->
+        <keyword name="HttpMode" type="other" definedIn="burp.api.montoya.http">
+            <desc>Enumeration representing HTTP modes (e.g., HTTP/1, HTTP/2)</desc>
+        </keyword>
+        <keyword name="HighlightColor" type="other" definedIn="burp.api.montoya.core">
+            <desc>Enumeration for highlight colors used in Burp Suite UI</desc>
+        </keyword>
+        <keyword name="ContentType" type="other" definedIn="burp.api.montoya.http.message">
+            <desc>Enumeration of HTTP content types (e.g., JSON, FORM_URL_ENCODED)</desc>
+        </keyword>
+        <keyword name="MimeType" type="other" definedIn="burp.api.montoya.http.message">
+            <desc>Enumeration of MIME types for HTTP messages</desc>
+        </keyword>
+        <keyword name="HttpParameterType" type="other" definedIn="burp.api.montoya.http.message.params">
+            <desc>Enumeration of HTTP parameter types (BODY, URL, COOKIE)</desc>
+        </keyword>
+        <keyword name="AuditIssueSeverity" type="other" definedIn="burp.api.montoya.scanner.audit.issues">
+            <desc>Enumeration of audit issue severities (INFORMATION, HIGH, etc.)</desc>
+        </keyword>
+        <keyword name="AuditIssueConfidence" type="other" definedIn="burp.api.montoya.scanner.audit.issues">
+            <desc>Enumeration of audit issue confidences (CERTAIN, etc.)</desc>
+        </keyword>
+        <keyword name="MenuType" type="other" definedIn="io.github.cyal1.pyburp.MyContextMenuItemsProvider">
+            <desc>Enumeration of context menu types (e.g., REQUEST_RESPONSE, REQUEST)</desc>
+        </keyword>
+        <keyword name="Direction" type="other" definedIn="burp.api.montoya.websocket">
+            <desc>Enumeration of WebSocket message directions (CLIENT_TO_SERVER, SERVER_TO_CLIENT)</desc>
+        </keyword>
+        <keyword name="TextMessageReceivedAction" type="other" definedIn="burp.api.montoya.proxy.websocket">
+            <desc>Enumeration of actions for handling received WebSocket text messages</desc>
+        </keyword>
+
+        <!-- Methods -->
+        <keyword name="annotations" type="function" returnType="&lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;" definedIn="burp.api.montoya.core.Annotations">
+            <params/>
+            <desc>Creates an empty Annotations object</desc>
+            <returnValDesc>Empty Annotations instance</returnValDesc>
+        </keyword>
+        <keyword name="httpService" type="function" returnType="&lt;a href=&quot;&API_BASE;/http/HttpService.html&quot;&gt;HttpService&lt;/a&gt;" definedIn="burp.api.montoya.http.HttpService">
+            <params/>
+            <desc>Creates an HttpService object</desc>
+            <returnValDesc>HttpService instance</returnValDesc>
+        </keyword>
+        <keyword name="auditResult" type="function" returnType="&lt;a href=&quot;&API_BASE;/scanner/AuditResult.html&quot;&gt;AuditResult&lt;/a&gt;" definedIn="burp.api.montoya.scanner.AuditResult">
+            <params/>
+            <desc>Creates an AuditResult object</desc>
+            <returnValDesc>AuditResult instance</returnValDesc>
+        </keyword>
+        <keyword name="auditIssue" type="function" returnType="&lt;a href=&quot;&API_BASE;/scanner/audit/issues/AuditIssue.html&quot;&gt;AuditIssue&lt;/a&gt;" definedIn="burp.api.montoya.scanner.audit.issues.AuditIssue">
+            <params>
+                <param type="str" name="name"><desc>Name of the audit issue</desc></param>
+                <param type="str" name="detail"><desc>Detailed description of the issue</desc></param>
+                <param type="str" name="remediation"><desc>Remediation advice</desc></param>
+                <param type="str" name="url"><desc>URL where the issue was found</desc></param>
+                <param type="AuditIssueSeverity" name="severity"><desc>Severity of the issue</desc></param>
+                <param type="AuditIssueConfidence" name="confidence"><desc>Confidence in the issue</desc></param>
+                <param type="str" name="background"><desc>Background information about the issue</desc></param>
+                <param type="str" name="remediationBackground"><desc>Background on remediation</desc></param>
+                <param type="AuditIssueSeverity" name="remediationSeverity"><desc>Severity for remediation</desc></param>
+                <param type="HttpRequestResponse" name="requestResponse"><desc>Associated request/response</desc></param>
+            </params>
+            <desc>Creates an AuditIssue object</desc>
+            <returnValDesc>AuditIssue instance</returnValDesc>
+        </keyword>
+        <keyword name="httpRequestResponse" type="function" returnType="&lt;a href=&quot;&API_BASE;/http/message/HttpRequestResponse.html&quot;&gt;HttpRequestResponse&lt;/a&gt;" definedIn="burp.api.montoya.http.message.HttpRequestResponse">
+            <params/>
+            <desc>Creates an HttpRequestResponse object</desc>
+            <returnValDesc>HttpRequestResponse instance</returnValDesc>
+        </keyword>
+        <keyword name="httpRequestFromUrl" type="function" returnType="&lt;a href=&quot;&API_BASE;/http/message/requests/HttpRequest.html&quot;&gt;HttpRequest&lt;/a&gt;" definedIn="burp.api.montoya.http.message.requests.HttpRequest">
+            <params>
+                <param type="str" name="url"><desc>URL to create request from</desc></param>
+            </params>
+            <desc>Creates an HTTP request from a URL</desc>
+            <returnValDesc>HttpRequest instance</returnValDesc>
+        </keyword>
+        <keyword name="httpRequest" type="function" returnType="&lt;a href=&quot;&API_BASE;/http/message/requests/HttpRequest.html&quot;&gt;HttpRequest&lt;/a&gt;" definedIn="burp.api.montoya.http.message.requests.HttpRequest">
+            <params/>
+            <desc>Creates an empty HTTP request</desc>
+            <returnValDesc>HttpRequest instance</returnValDesc>
+        </keyword>
+        <keyword name="http2Request" type="function" returnType="&lt;a href=&quot;&API_BASE;/http/message/requests/HttpRequest.html&quot;&gt;HttpRequest&lt;/a&gt;" definedIn="burp.api.montoya.http.message.requests.HttpRequest">
+            <params/>
+            <desc>Creates an empty HTTP/2 request</desc>
+            <returnValDesc>HttpRequest instance</returnValDesc>
+        </keyword>
+        <keyword name="auditInsertionPoint" type="function" returnType="&lt;a href=&quot;&API_BASE;/scanner/audit/insertionpoint/AuditInsertionPoint.html&quot;&gt;AuditInsertionPoint&lt;/a&gt;" definedIn="burp.api.montoya.scanner.audit.insertionpoint.AuditInsertionPoint">
+            <params/>
+            <desc>Creates an AuditInsertionPoint object</desc>
+            <returnValDesc>AuditInsertionPoint instance</returnValDesc>
+        </keyword>
+        <keyword name="bodyParameter" type="function" returnType="&lt;a href=&quot;&API_BASE;/http/message/params/HttpParameter.html&quot;&gt;HttpParameter&lt;/a&gt;" definedIn="burp.api.montoya.http.message.params.HttpParameter">
+            <params>
+                <param type="str" name="name"><desc>Parameter name</desc></param>
+                <param type="str" name="value"><desc>Parameter value</desc></param>
+            </params>
+            <desc>Creates a body parameter</desc>
+            <returnValDesc>HttpParameter instance of type BODY</returnValDesc>
+        </keyword>
+        <keyword name="cookieParameter" type="function" returnType="&lt;a href=&quot;&API_BASE;/http/message/params/HttpParameter.html&quot;&gt;HttpParameter&lt;/a&gt;" definedIn="burp.api.montoya.http.message.params.HttpParameter">
+            <params>
+                <param type="str" name="name"><desc>Cookie name</desc></param>
+                <param type="str" name="value"><desc>Cookie value</desc></param>
+            </params>
+            <desc>Creates a cookie parameter</desc>
+            <returnValDesc>HttpParameter instance of type COOKIE</returnValDesc>
+        </keyword>
+        <keyword name="parameter" type="function" returnType="&lt;a href=&quot;&API_BASE;/http/message/params/HttpParameter.html&quot;&gt;HttpParameter&lt;/a&gt;" definedIn="burp.api.montoya.http.message.params.HttpParameter">
+            <params>
+                <param type="str" name="name"><desc>Parameter name</desc></param>
+                <param type="str" name="value"><desc>Parameter value</desc></param>
+                <param type="HttpParameterType" name="type"><desc>Parameter type</desc></param>
+            </params>
+            <desc>Creates a parameter with specified type</desc>
+            <returnValDesc>HttpParameter instance</returnValDesc>
+        </keyword>
+        <keyword name="urlParameter" type="function" returnType="&lt;a href=&quot;&API_BASE;/http/message/params/HttpParameter.html&quot;&gt;HttpParameter&lt;/a&gt;" definedIn="burp.api.montoya.http.message.params.HttpParameter">
+            <params>
+                <param type="str" name="name"><desc>Parameter name</desc></param>
+                <param type="str" name="value"><desc>Parameter value</desc></param>
+            </params>
+            <desc>Creates a URL parameter</desc>
+            <returnValDesc>HttpParameter instance of type URL</returnValDesc>
+        </keyword>
+        <keyword name="addIssue" type="function" returnType="None" definedIn="io.github.cyal1.pyburp.Tools">
+            <params>
+                <param type="AuditIssue" name="issue"><desc>Audit issue to add</desc></param>
+            </params>
+            <desc>Adds an audit issue to Burp Scanner</desc>
+            <returnValDesc>None</returnValDesc>
+        </keyword>
+        <keyword name="getResponseHighlights" type="function" returnType="list" definedIn="io.github.cyal1.pyburp.Tools">
+            <params>
+                <param type="HttpRequestResponse" name="requestResponse"><desc>Associated request/response</desc></param>
+                <param type="str" name="highlight"><desc>Text to highlight in response</desc></param>
+            </params>
+            <desc>Gets highlights for a response containing specified text</desc>
+            <returnValDesc>List of highlight markers</returnValDesc>
+        </keyword>
+        <keyword name="getOOBCanary" type="function" returnType="str" definedIn="io.github.cyal1.pyburp.Tools">
+            <params/>
+            <desc>Gets an OOB (Out-of-Band) canary value</desc>
+            <returnValDesc>OOBCanary string</returnValDesc>
+        </keyword>
+        <keyword name="getSelectedText" type="function" returnType="str" definedIn="io.github.cyal1.pyburp.Tools">
+            <params/>
+            <desc>Gets selected text from Burp UI</desc>
+            <returnValDesc>Selected text string</returnValDesc>
+        </keyword>
+        <keyword name="replaceSelectedText" type="function" returnType="None" definedIn="io.github.cyal1.pyburp.Tools">
+            <params>
+                <param type="str" name="text"><desc>Replacement text</desc></param>
+            </params>
+            <desc>Replaces selected text in Burp UI</desc>
+            <returnValDesc>None</returnValDesc>
+        </keyword>
+        <keyword name="sendWithProxy" type="function" returnType="HttpRequestResponse" definedIn="io.github.cyal1.pyburp.Tools">
+            <params>
+                <param type="HttpRequest" name="request"><desc>Request to send</desc></param>
+            </params>
+            <desc>Sends a request through Burp Proxy</desc>
+            <returnValDesc>Resulting HttpRequestResponse</returnValDesc>
+        </keyword>
+        <keyword name="sendRequest" type="function" returnType="HttpRequestResponse" definedIn="env_init.py">
+            <params>
+                <param type="HttpRequest" name="request"><desc>Request to send</desc></param>
+            </params>
+            <desc>Wrapper for http.sendRequest to send an HTTP request</desc>
+            <returnValDesc>Resulting HttpRequestResponse</returnValDesc>
+        </keyword>
+        <keyword name="sendRequests" type="function" returnType="list[HttpRequestResponse]" definedIn="env_init.py">
+            <params>
+                <param type="list[HttpRequest]" name="requests"><desc>List of requests to send</desc></param>
+            </params>
+            <desc>Wrapper for http.sendRequests to send multiple HTTP requests</desc>
+            <returnValDesc>List of resulting HttpRequestResponse objects</returnValDesc>
+        </keyword>
+        <keyword name="sendToOrganizer" type="function" returnType="None" definedIn="env_init.py">
+            <params>
+                <param type="HttpRequestResponse" name="requestResponse"><desc>Request/response to send</desc></param>
+            </params>
+            <desc>Wrapper for organizer.sendToOrganizer to send to Burp Organizer</desc>
+            <returnValDesc>None</returnValDesc>
+        </keyword>
+        <keyword name="history" type="function" returnType="list[HttpRequestResponse]" definedIn="env_init.py">
+            <params/>
+            <desc>Wrapper for proxy.history to get proxy history</desc>
+            <returnValDesc>List of HttpRequestResponse objects from proxy history</returnValDesc>
+        </keyword>
+        <keyword name="randomstring" type="function" returnType="str" definedIn="env_init.py">
+            <params>
+                <param type="int" name="length"><desc>(optional) Length of random string (default: 8)</desc></param>
+            </params>
+            <desc>Generates a random string of alphanumeric characters</desc>
+            <returnValDesc>Random string</returnValDesc>
+        </keyword>
+        <keyword name="jq" type="function" returnType="object" definedIn="env_init.py">
+            <params>
+                <param type="str" name="json"><desc>JSON string to process</desc></param>
+                <param type="str" name="query"><desc>JQ query to apply</desc></param>
+            </params>
+            <desc>Wrapper for utils.jsonUtils().read to process JSON with JQ query</desc>
+            <returnValDesc>Result of JQ query execution</returnValDesc>
+        </keyword>
+        <keyword name="urlencode" type="function" returnType="str" definedIn="env_init.py">
+            <params>
+                <param type="str" name="text"><desc>Text to URL-encode</desc></param>
+            </params>
+            <desc>Wrapper for utils.urlUtils().encode to URL-encode text</desc>
+            <returnValDesc>URL-encoded string</returnValDesc>
+        </keyword>
+        <keyword name="urldecode" type="function" returnType="str" definedIn="env_init.py">
+            <params>
+                <param type="str" name="text"><desc>URL-encoded text to decode</desc></param>
+            </params>
+            <desc>Wrapper for utils.urlUtils().decode to URL-decode text</desc>
+            <returnValDesc>URL-decoded string</returnValDesc>
+        </keyword>
+        <keyword name="base64encode" type="function" returnType="str" definedIn="env_init.py">
+            <params>
+                <param type="str" name="text"><desc>Text to Base64-encode</desc></param>
+            </params>
+            <desc>Wrapper for utils.base64Utils().encodeToString to Base64-encode text</desc>
+            <returnValDesc>Base64-encoded string</returnValDesc>
+        </keyword>
+        <keyword name="base64decode" type="function" returnType="str" definedIn="env_init.py">
+            <params>
+                <param type="str" name="text"><desc>Base64-encoded text to decode</desc></param>
+            </params>
+            <desc>Wrapper for utils.base64Utils().decode to Base64-decode text</desc>
+            <returnValDesc>Base64-decoded string</returnValDesc>
+        </keyword>
+        <keyword name="bytestring" type="function" returnType="bytes" definedIn="env_init.py">
+            <params>
+                <param type="str" name="s"><desc>String to convert to byte array</desc></param>
+            </params>
+            <desc>Converts a string to a byte array</desc>
+            <returnValDesc>Byte array representation of the string</returnValDesc>
+        </keyword>
+        <keyword name="strz" type="function" returnType="str" definedIn="env_init.py">
+            <params>
+                <param type="str" name="s"><desc>String to convert</desc></param>
+                <param type="str" name="charset" ><desc>(optional) Character set (default: UTF8)</desc></param>
+            </params>
+            <desc>Converts a string using specified charset</desc>
+            <returnValDesc>Converted string</returnValDesc>
+        </keyword>
+        <keyword name="ts" type="function" returnType="str" definedIn="env_init.py">
+            <params/>
+            <desc>Gets current timestamp in milliseconds</desc>
+            <returnValDesc>Timestamp string</returnValDesc>
+        </keyword>
+
+        <!-- Classes -->
+        <keyword name="RequestPool" type="other" definedIn="env_init.py">
+            <desc>Class for managing a pool of threads to execute functions, method run(func, *args) and shutdown()</desc>
+            <!--            <methods>-->
+            <!--                <method name="__init__" returnType="None">-->
+            <!--                    <params>-->
+            <!--                        <param type="int" name="nThreads"><desc>Number of threads in the pool</desc></param>-->
+            <!--                    </params>-->
+            <!--                    <desc>Initializes a RequestPool with specified number of threads</desc>-->
+            <!--                </method>-->
+            <!--                <method name="run" returnType="None">-->
+            <!--                    <params>-->
+            <!--                        <param type="function" name="func"><desc>Function to execute</desc></param>-->
+            <!--                        <param type="any" name="*args"><desc>Positional arguments for the function</desc></param>-->
+            <!--                        <param type="any" name="**kwargs"><desc>Keyword arguments for the function</desc></param>-->
+            <!--                    </params>-->
+            <!--                    <desc>Executes a function in the thread pool if not exiting</desc>-->
+            <!--                </method>-->
+            <!--                <method name="shutdown" returnType="None">-->
+            <!--                    <params/>-->
+            <!--                    <desc>Shuts down the thread pool</desc>-->
+            <!--                </method>-->
+            <!--            </methods>-->
+        </keyword>
+
+        <!-- Decorators -->
+        <keyword name="run_in_pool" type="other" definedIn="env_init.py">
+            <params>
+                <param type="RequestPool" name="pool"><desc>Thread pool to use</desc></param>
+
+            </params>
+            <desc>Decorator to run a function in the specified thread pool</desc>
+        </keyword>
+        <keyword name="run_in_thread" type="other" definedIn="env_init.py">
+            <params/>
+            <desc>Decorator to run a function in a new thread</desc>
+        </keyword>
+
+        <!-- Constants -->
+        <keyword name="EXIT_FLAG" type="constant" returnType="bool" definedIn="env_init.py">
+            <desc>Flag indicating if execution should stop (False by default, True when Stop button is clicked)</desc>
+        </keyword>
+        <keyword name="CLIENT_TO_SERVER" type="constant" returnType="Direction" definedIn="burp.api.montoya.websocket.Direction">
+            <desc>Constant representing client-to-server WebSocket direction</desc>
+        </keyword>
+        <keyword name="SERVER_TO_CLIENT" type="constant" returnType="Direction" definedIn="burp.api.montoya.websocket.Direction">
+            <desc>Constant representing server-to-client WebSocket direction</desc>
+        </keyword>
+    </keywords>
+</api>

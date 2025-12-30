@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE api SYSTEM "CompletionXml.dtd" [
+        <!ENTITY API_BASE "https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya">
+        ]>
+
+<api language="Python">
+    <environment paramStartChar="(" paramEndChar=")" paramSeparator=", " terminal=""/>
+    <completionTypes>
+        <functionCompletionType type="io.github.cyal1.pyburp.autoComplete.CallbackFunctionCompletion"/>
+    </completionTypes>
+    <keywords>
+        <keyword name="registerContextMenu" type="function" returnType="None" definedIn="PyBurp Predefined">
+            <params>
+                <param type="ContextMenuRegistry" name="menus">
+                    <desc>Registry object for managing context menu items, providing methods to register new menu entries</desc>
+                </param>
+            </params>
+            <desc>Register custom context menu items for different Burp Suite components (e.g., message editor, selected text). Supports menu types including CARET, SELECTED_TEXT, REQUEST, REQUEST_RESPONSE, MESSAGE_EDITOR</desc>
+            <returnValDesc>None</returnValDesc>
+        </keyword>
+
+        <keyword name="passiveAudit" type="function" returnType="&lt;a href=&quot;&API_BASE;/scanner/AuditResult.html&quot;&gt;AuditResult&lt;/a&gt;" definedIn="PyBurp Predefined">
+            <params>
+                <param type="&lt;a href=&quot;&API_BASE;/scanner/HttpRequestResponse.html&quot;&gt;HttpRequestResponse&lt;/a&gt;" name="baseRequestResponse">
+                    <desc>Request/response pair to analyze for potential security issues without sending additional requests</desc>
+                </param>
+            </params>
+            <desc>Perform passive scanning checks by analyzing the content of requests and responses. Identifies vulnerabilities through static analysis without modifying or resending requests</desc>
+            <returnValDesc>AuditResult containing any detected security issues from passive analysis</returnValDesc>
+        </keyword>
+
+        <keyword name="activeAudit" type="function" returnType="&lt;a href=&quot;&API_BASE;/scanner/AuditResult.html&quot;&gt;AuditResult&lt;/a&gt;" definedIn="PyBurp Predefined">
+            <params>
+                <param type="&lt;a href=&quot;&API_BASE;/scanner/HttpRequestResponse.html&quot;&gt;HttpRequestResponse&lt;/a&gt;" name="baseRequestResponse">
+                    <desc>Base request/response pair to use as a template for active scanning</desc>
+                </param>
+                <param type="&lt;a href=&quot;&API_BASE;/scanner/AuditInsertionPoint.html&quot;&gt;AuditInsertionPoint&lt;/a&gt;" name="insertionPoint">
+                    <desc>Specific location in the request where payloads will be injected for active testing</desc>
+                </param>
+            </params>
+            <desc>Perform active scanning checks by injecting test payloads into specified insertion points and analyzing the resulting responses. Used to detect vulnerabilities that require interaction with the target</desc>
+            <returnValDesc>AuditResult containing any detected security issues from active payload injection</returnValDesc>
+        </keyword>
+
+        <keyword name="handleRequest" type="function" returnType="tuple[&lt;a href=&quot;&API_BASE;/http/message/requests/HttpRequest.html&quot;&gt;HttpRequest&lt;/a&gt;, &lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;]" definedIn="PyBurp Predefined">
+            <params>
+                <param type="&lt;a href=&quot;&API_BASE;/http/message/requests/HttpRequest.html&quot;&gt;HttpRequest&lt;/a&gt;" name="request">
+                    <desc>HTTP request object intercepted before being sent to the server</desc>
+                </param>
+                <param type="&lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;" name="annotations">
+                    <desc>Metadata (notes, tags) associated with the intercepted request</desc>
+                </param>
+            </params>
+            <desc>Intercept and process HTTP requests. Allows modification of request content (headers, body, parameters) before they are forwarded to the target server</desc>
+            <returnValDesc>Tuple containing the modified HttpRequest and updated Annotations</returnValDesc>
+        </keyword>
+
+        <keyword name="handleResponse" type="function" returnType="tuple[&lt;a href=&quot;&API_BASE;/http/message/responses/HttpResponse.html&quot;&gt;HttpResponse&lt;/a&gt;, &lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;]" definedIn="PyBurp Predefined">
+            <params>
+                <param type="&lt;a href=&quot;&API_BASE;/http/message/responses/HttpResponse.html&quot;&gt;HttpResponse&lt;/a&gt;" name="response">
+                    <desc>HTTP response object intercepted after being received from the server</desc>
+                </param>
+                <param type="&lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;" name="annotations">
+                    <desc>Metadata (notes, tags) associated with the intercepted response</desc>
+                </param>
+                <param type="&lt;a href=&quot;&API_BASE;/http/message/requests/HttpRequest.html&quot;&gt;HttpRequest&lt;/a&gt;" name="originalRequest">
+                    <desc>The original HTTP request that corresponds to this response</desc>
+                </param>
+            </params>
+            <desc>Intercept and process HTTP responses. Allows modification of response content (headers, body) before they are forwarded to the client</desc>
+            <returnValDesc>Tuple containing the modified HttpResponse and updated Annotations</returnValDesc>
+        </keyword>
+
+        <keyword name="handleProxyRequest" type="function" returnType="tuple[&lt;a href=&quot;&API_BASE;/http/message/requests/HttpRequest.html&quot;&gt;HttpRequest&lt;/a&gt;, &lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;]" definedIn="PyBurp Predefined">
+            <params>
+                <param type="&lt;a href=&quot;&API_BASE;/http/message/requests/HttpRequest.html&quot;&gt;HttpRequest&lt;/a&gt;" name="request">
+                    <desc>HTTP request object intercepted by Burp Proxy from the client</desc>
+                </param>
+                <param type="&lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;" name="annotations">
+                    <desc>Proxy-specific annotations for the intercepted request</desc>
+                </param>
+            </params>
+            <desc>Specifically handle requests intercepted by Burp Proxy. Enables proxy-specific modifications and processing of client requests</desc>
+            <returnValDesc>Tuple containing the modified proxy HttpRequest and updated Annotations</returnValDesc>
+        </keyword>
+
+        <keyword name="handleProxyResponse" type="function" returnType="tuple[&lt;a href=&quot;&API_BASE;/http/message/responses/HttpResponse.html&quot;&gt;HttpResponse&lt;/a&gt;, &lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;]" definedIn="PyBurp Predefined">
+            <params>
+                <param type="&lt;a href=&quot;&API_BASE;/http/message/responses/HttpResponse.html&quot;&gt;HttpResponse&lt;/a&gt;" name="response">
+                    <desc>HTTP response object intercepted by Burp Proxy from the server</desc>
+                </param>
+                <param type="&lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;" name="annotations">
+                    <desc>Proxy-specific annotations for the intercepted response</desc>
+                </param>
+                <param type="&lt;a href=&quot;&API_BASE;/http/message/requests/HttpRequest.html&quot;&gt;HttpRequest&lt;/a&gt;" name="originalRequest">
+                    <desc>The original proxy request corresponding to this response</desc>
+                </param>
+            </params>
+            <desc>Specifically handle responses intercepted by Burp Proxy. Enables proxy-specific modifications and processing of server responses</desc>
+            <returnValDesc>Tuple containing the modified proxy HttpResponse and updated Annotations</returnValDesc>
+        </keyword>
+
+        <keyword name="urlPrefixAllowed" type="function" returnType="List[str]" definedIn="PyBurp Predefined">
+            <params>
+                <param type="List[str]" name="prefixes">
+                    <desc>List of URL prefix strings to filter requests/responses</desc>
+                </param>
+            </params>
+            <desc>Define URL prefixes to determine which requests/responses should be processed by the extension. Acts as a filter to limit extension activity to specific targets</desc>
+            <returnValDesc>List of allowed URL prefix strings that the extension should process</returnValDesc>
+        </keyword>
+
+        <keyword name="handleInteraction" type="function" returnType="None" definedIn="PyBurp Predefined">
+            <params>
+                <param type="&lt;a href=&quot;&API_BASE;/collaborator/Interaction.html&quot;&gt;Interaction&lt;/a&gt;" name="interaction">
+                    <desc>Details of a Burp Collaborator interaction (DNS, HTTP, HTTPS) received from a target</desc>
+                </param>
+            </params>
+            <desc>Process interactions detected by Burp Collaborator. Used to handle out-of-band (OOB) signals from targets, useful for detecting blind vulnerabilities</desc>
+            <returnValDesc>None</returnValDesc>
+        </keyword>
+
+        <keyword name="processPayload" type="function" returnType="str" definedIn="PyBurp Predefined">
+            <params>
+                <param type="str" name="payload">
+                    <desc>Original payload string generated by Burp Intruder</desc>
+                </param>
+            </params>
+            <desc>Modify or transform payloads before they are sent by Burp Intruder. Supports operations like encryption, encoding, or custom transformations of attack payloads</desc>
+            <returnValDesc>Processed payload string to be used by Burp Intruder</returnValDesc>
+        </keyword>
+
+        <keyword name="handleWsTextMsg" type="function" returnType="tuple[WebSocketMessage, &lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;]" definedIn="PyBurp Predefined">
+            <params>
+                <param type="WebSocketMessage" name="message">
+                    <desc>WebSocket text message intercepted in transit</desc>
+                </param>
+                <param type="&lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;" name="annotations">
+                    <desc>Annotations associated with the WebSocket text message</desc>
+                </param>
+            </params>
+            <desc>Intercept and process WebSocket text messages. Allows modification of text-based WebSocket communication</desc>
+            <returnValDesc>Tuple containing the modified WebSocket text message and updated Annotations</returnValDesc>
+        </keyword>
+
+        <keyword name="handleWsBinMsg" type="function" returnType="tuple[WebSocketMessage, &lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;]" definedIn="PyBurp Predefined">
+            <params>
+                <param type="WebSocketMessage" name="message">
+                    <desc>WebSocket binary message intercepted in transit</desc>
+                </param>
+                <param type="&lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;" name="annotations">
+                    <desc>Annotations associated with the WebSocket binary message</desc>
+                </param>
+            </params>
+            <desc>Intercept and process WebSocket binary messages. Allows modification of binary WebSocket communication</desc>
+            <returnValDesc>Tuple containing the modified WebSocket binary message and updated Annotations</returnValDesc>
+        </keyword>
+
+        <keyword name="handleProxyWsTextMsg" type="function" returnType="tuple[WebSocketMessage, &lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;]" definedIn="PyBurp Predefined">
+            <params>
+                <param type="WebSocketMessage" name="message">
+                    <desc>WebSocket text message intercepted by Burp Proxy</desc>
+                </param>
+                <param type="&lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;" name="annotations">
+                    <desc>Proxy-specific annotations for the WebSocket text message</desc>
+                </param>
+            </params>
+            <desc>Specifically handle WebSocket text messages intercepted by Burp Proxy. Enables proxy-specific processing of text-based WebSocket traffic</desc>
+            <returnValDesc>Tuple containing the modified proxy WebSocket text message and updated Annotations</returnValDesc>
+        </keyword>
+
+        <keyword name="handleProxyWsBinMsg" type="function" returnType="tuple[WebSocketMessage, &lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;]" definedIn="PyBurp Predefined">
+            <params>
+                <param type="WebSocketMessage" name="message">
+                    <desc>WebSocket binary message intercepted by Burp Proxy</desc>
+                </param>
+                <param type="&lt;a href=&quot;&API_BASE;/core/Annotations.html&quot;&gt;Annotations&lt;/a&gt;" name="annotations">
+                    <desc>Proxy-specific annotations for the WebSocket binary message</desc>
+                </param>
+            </params>
+            <desc>Specifically handle WebSocket binary messages intercepted by Burp Proxy. Enables proxy-specific processing of binary WebSocket traffic</desc>
+            <returnValDesc>Tuple containing the modified proxy WebSocket binary message and updated Annotations</returnValDesc>
+        </keyword>
+
+        <keyword name="finish" type="function" returnType="None" definedIn="PyBurp Predefined">
+            <params/>
+            <desc>Perform cleanup operations when the extension is stopped or unloaded. Used to release resources, close connections, or save state before extension termination</desc>
+            <returnValDesc>None</returnValDesc>
+        </keyword>
+    </keywords>
+</api>

@@ -5,20 +5,20 @@ import burp.api.montoya.core.Annotations;
 import burp.api.montoya.core.Registration;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
+import io.github.cyal1.pyburp.autoComplete.CCellRender;
 import io.github.cyal1.pyburp.poller.Poller;
+import org.fife.ui.autocomplete.*;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.fife.ui.rtextarea.ToolTipSupplier;
 import org.python.core.*;
 import org.python.util.PythonInterpreter;
 import javax.annotation.Nonnull;
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -49,6 +49,25 @@ public class PyBurpTab extends JPanel {
     JButton loadDirectoryButton = new JButton("Choose scripts dir");
     JButton closeTab = new JButton("Close");
     RSyntaxTextArea codeEditor = new RSyntaxTextArea();
+    private CompletionProvider createCodeCompletionProvider() {
+        DefaultCompletionProvider cp = new DefaultCompletionProvider();
+        cp.setAutoActivationRules(true,"");
+        ClassLoader cl = getClass().getClassLoader();
+        try {
+            cp.loadFromXML(cl.getResourceAsStream("pyburp_functions.xml"));
+            cp.loadFromXML(cl.getResourceAsStream("env_init_functions.xml"));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+        return cp;
+    }
+
+    private CompletionProvider createCompletionProvider() {
+        CompletionProvider cp = createCodeCompletionProvider();
+        LanguageAwareCompletionProvider provider = new
+        LanguageAwareCompletionProvider(cp);
+        return provider;
+    }
 
 
     public PyBurpTab(){
@@ -70,6 +89,28 @@ public class PyBurpTab extends JPanel {
         codeEditor.setMarkOccurrencesDelay(50);
         codeEditor.setWrapStyleWord(true);
         codeEditor.setHighlightCurrentLine(true);
+
+        CompletionProvider provider = createCompletionProvider();
+        AutoCompletion ac = new AutoCompletion(provider);
+
+        CCellRender cc = new CCellRender();
+        cc.setFont(codeEditor.getFont().deriveFont(14.0F));
+        cc.setBorder(BorderFactory.createEmptyBorder(5,5,10,5));
+        ac.setListCellRenderer(cc);
+        ac.setShowDescWindow(true);
+        ac.setParameterAssistanceEnabled(true);
+        ac.setAutoActivationEnabled(true);
+        ac.setAutoCompleteSingleChoices(false);
+        ac.setAutoActivationDelay(800);
+        ac.install(codeEditor);
+        try {
+            UIManager.setLookAndFeel(UIManager.getLookAndFeel());
+        } catch (UnsupportedLookAndFeelException e) {
+            throw new RuntimeException(e);
+        }
+        codeEditor.setToolTipSupplier((ToolTipSupplier)provider);
+        ToolTipManager.sharedInstance().registerComponent(codeEditor);
+
 //        textEditor.setWhitespaceVisible(true);
         RTextScrollPane scrollableTextEditor = new RTextScrollPane( codeEditor );
         JPanel toolBar = new JPanel();

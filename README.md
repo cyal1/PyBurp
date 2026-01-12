@@ -22,6 +22,12 @@ Download from the [Release](https://github.com/cyal1/PyBurp/releases) page or in
 
 ## Usage Guide
 
+### Build
+
+```
+./gradlew clean shadowJar 
+```
+
 ### Predefined Functions
 PyBurp provides several predefined functions that automatically register corresponding functionality in Burp Suite when defined in your script. Here's a detailed list:
 
@@ -48,6 +54,7 @@ PyBurp includes a variety of example scripts to demonstrate its capabilities:
 
 | File                                                                      | Description |
 |---------------------------------------------------------------------------|-------------|
+| [`randomplz_match_and_replace.py`](src/main/resources/examples/randomplz_match_and_replace.py) | Match and replace a defined string with a blind XSS payload including a random string for xsshunter-go payload source correlation |
 | [`env_init.py`](src/main/resources/examples/env_init.py)                  | Automatically runs before each user script execution, providing common classes and methods |
 | [`bambdas.py`](src/main/resources/examples/bambdas.py)                                       | Quick information extraction from Proxy history |
 | [`chrome_devtools_protocol.py`](src/main/resources/examples/chrome_devtools_protocol.py)     | Remote Chrome DevTools method invocation |
@@ -119,13 +126,13 @@ Here's a Python demonstration:
 
 2. Run the client code in PyBurp as follows:
     ```python
-   server = rpc("localhost", 30051)
-   result1 = server.callFunc('test1', bytearray("123"))
-   result2 = server.callFunc('test2', 3, 4)
+   client = rpc("localhost", 30051)
+   result1 = client.callFunc('test1', bytearray("123"))
+   result2 = client.callFunc('test2', 3, 4)
    print(result1)
    print(result1.tostring()) # or print(bytearray(result1))
    print(result2)
-   server.shutdown()
+   client.shutdown()
     ```
 **Note:**
 1. pyburp supports only the following parameter types: `str`,`bool`,`int`,`float`,`bytes`,`None`.

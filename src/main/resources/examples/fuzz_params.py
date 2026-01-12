@@ -10,14 +10,12 @@ ERROR_PATTERNS = {"unknown operator", "MongoError", "cannot be applied to a fiel
 INFO_PATTERNS = {"83b3j45b"}
 SKIP_HEADERS = {'content-length', 'host', 'transfer-encoding', 'cache-control', 'user-agent', 'pragma', 'priority', 'connection', 'cookie', 'content-type', 'upgrade-insecure-requests'}
 
-def finish():
-    pool.shutdown()
 
 def fuzz_value(req, resp):
-    fuzz_params(req, resp, payload="'\")", urlencode=True, concat=True, fuzz_cookie=True, fuzz_header=True)
+    fuzz_params(req, resp, payload=".x()'\")", urlencode=True, concat=True, fuzz_cookie=True, fuzz_header=True)
 
 def fuzz_key(req, resp):
-    fuzz_params(req, resp, payload="'()", urlencode=False, concat=True, fuzz_cookie=True, fuzz_key_only=True)
+    fuzz_params(req, resp, payload=".x()'", urlencode=False, concat=True, fuzz_cookie=True, fuzz_key_only=True)
 
 def nosql(req, resp):
     fuzz_params(req, resp, payload={"$83b3j45b":"83b3j45b"}, urlencode=False, fuzz_cookie=True)
@@ -140,14 +138,26 @@ def fuzz_params(request, origin_response, payload="'", urlencode=False, concat=T
 
     def process_parameter(param):
         key, value, ptype = param.name(), param.value().strip(), param.type()
-        decode_value = urllib.unquote(value)
-        if len(decode_value) > 2 and decode_value[0] in ['{', '[']:  # param's value is json
+        decode_value = urllib.unquote(value).strip()
+        # detect base64 in parameter's value and decode value is json
+        if decode_value.startswith("eyJ") or decode_value.startswith("IC") or decode_value.startswith("IH") or decode_value.startswith("Cg") or decode_value.startswith("Cn"): 
+            try:
+                b64decode_value = base64decode(decode_value).strip()
+                if len(b64decode_value) > 2 and b64decode_value[0] in ['{', '[']:
+                    json_obj = json.loads(b64decode_value)
+                    for i in iter_and_modify_json(json_obj, payload, concat if isinstance(payload, (str, unicode)) else False, fuzz_key_only):
+                        compare_req(request.withUpdatedParameters(parameter(key,  urllib.quote(base64encode(json.dumps(i,separators=(',',':')))) if urlencode else base64encode(json.dumps(i,separators=(',',':'))), ptype)), origin_response)
+            except Exception as e:
+                print(e)
+        # detect json string in parameter's value
+        if len(decode_value) > 2 and decode_value[0] in ['{', '[']: 
             try:
                 json_obj = json.loads(decode_value)
                 for i in iter_and_modify_json(json_obj, payload, concat if isinstance(payload, (str, unicode)) else False, fuzz_key_only):
                     compare_req(request.withUpdatedParameters(parameter(key, urllib.quote(json.dumps(i,separators=(',',':'))) if urlencode else json.dumps(i,separators=(',',':')), ptype)), origin_response)
             except Exception as e:
                 print(e)
+        # normal value
         if isinstance(payload, (str, unicode)):
             if fuzz_key_only:
                 compare_req(request.withRemovedParameters(param).withParameter(parameter(urllib.quote(key + payload) if urlencode else key + payload, param.value(),  ptype)), origin_response)

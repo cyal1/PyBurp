@@ -1,9 +1,10 @@
 plugins {
     id 'java'
+    id 'io.github.goooler.shadow' version '8.1.8'
 }
 
 group 'net.portswigger.burp.extensions.example'
-version '1.0.1'
+version '1.0.2'
 
 repositories {
     mavenLocal()
@@ -11,35 +12,43 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'net.portswigger.burp.extensions:montoya-api:2025.2'
+    compileOnly 'net.portswigger.burp.extensions:montoya-api:2025.11'
 //    compileOnly files('/Users/test/Downloads/montoya-api-2023.9.jar')
-    implementation 'org.mozilla:rhino:1.7.14'
+    compileOnly 'org.mozilla:rhino:1.7.14.1' // jython build-in rhino
+    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
+
     implementation 'org.json:json:20231013'
-    implementation 'com.fifesoft:rsyntaxtextarea:3.5.1'
+    implementation 'com.fifesoft:rsyntaxtextarea:3.5.4'
     implementation 'org.python:jython-standalone:2.7.1'
-//    runtimeOnly 'io.grpc:grpc-netty-shaded:1.66.0'
     implementation 'io.grpc:grpc-okhttp:1.66.0'
     implementation 'io.grpc:grpc-protobuf:1.66.0'
     implementation 'io.grpc:grpc-stub:1.66.0'
-    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
-    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.41.2.2'
+    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.6.0'
     implementation "com.github.kklisura.cdt:cdt-java-client:4.0.0"
 }
 
-jar {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
+shadowJar {
+    mergeServiceFiles()
+    relocate 'com.google.protobuf', 'pyburp.external.protobuf'
+
     exclude '**/org/sqlite/native/FreeBSD/**'
     exclude '**/org/sqlite/native/Linux-Android/**'
     exclude '**/org/sqlite/native/Linux-Musl/**'
     exclude '**/org/sqlite/native/Linux/ppc64/**'
     exclude '**/org/sqlite/native/Linux/riscv64/**'
-    exclude '**/org/sqlite/native/Windows/x86/**'
+
+    archiveClassifier.set('')
+
+    manifest {
+        attributes 'Main-Class': 'io.github.cyal1.pyburp.BurpExtender'
+    }
 }
 
-
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17

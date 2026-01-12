@@ -38,7 +38,7 @@ public class ContentTypeConverter {
         String functionName = "convert2qs";
         Context context1 = Context.enter();
         Object jsonResult = context1.evaluateString(scope, "JSON.parse(" + JSONObject.quote(jsonString) + ")", "JavaScript", 1, null);
-        context1.close();
+        Context.exit();
         Object[] functionArgs = {jsonResult};
         Object result = ScriptableObject.callMethod(scope, functionName, functionArgs);
         return Context.toString(result);

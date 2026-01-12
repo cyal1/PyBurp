@@ -22,6 +22,12 @@ PyBurp 是一个 Burp Suite 扩展，提供预定义的 Python 函数用于 HTTP
 
 ## 使用指南
 
+### 构建
+
+```
+./gradlew clean shadowJar 
+```
+
 ### 预定义函数
 PyBurp 提供了几个预定义函数，当在脚本中定义时，会自动在 Burp Suite 中注册相应的功能。以下是详细列表：
 
@@ -119,13 +125,13 @@ pip install pyburp
 
 2. 在 PyBurp 中运行客户端代码：
     ```python
-   server = rpc("localhost", 30051)
-   result1 = server.callFunc('test1', bytearray("123"))
-   result2 = server.callFunc('test2', 3, 4)
+   client = rpc("localhost", 30051)
+   result1 = client.callFunc('test1', bytearray("123"))
+   result2 = client.callFunc('test2', 3, 4)
    print(result1)
    print(result1.tostring()) # 或 print(bytearray(result1))
    print(result2)
-   server.shutdown()
+   client.shutdown()
     ```
 
 **注意：**

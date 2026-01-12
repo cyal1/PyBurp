@@ -2,8 +2,8 @@ Uuid: d8969aceb89d4dc38e996f3c3579880d
 ExtensionType: 1
 Name: PyBurp
 RepoName: pyburp
-ScreenVersion: 1.0.1
-SerialVersion: 5
+ScreenVersion: 1.0.2
+SerialVersion: 6
 MinPlatformVersion: 27
 ProOnly: False
 Author: cyal1

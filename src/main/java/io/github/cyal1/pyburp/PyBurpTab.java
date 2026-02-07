@@ -6,19 +6,24 @@ import burp.api.montoya.core.Registration;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 import io.github.cyal1.pyburp.autoComplete.CCellRender;
+import io.github.cyal1.pyburp.autoComplete.EnhancedAutoCompletion;
+import io.github.cyal1.pyburp.autoComplete.MyCompletionProvider;
 import io.github.cyal1.pyburp.poller.Poller;
 import org.fife.ui.autocomplete.*;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
-import org.fife.ui.rtextarea.RTextScrollPane;
-import org.fife.ui.rtextarea.ToolTipSupplier;
+import org.fife.ui.rtextarea.*;
 import org.python.core.*;
 import org.python.util.PythonInterpreter;
 import javax.annotation.Nonnull;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.*;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -49,8 +54,52 @@ public class PyBurpTab extends JPanel {
     JButton loadDirectoryButton = new JButton("Choose scripts dir");
     JButton closeTab = new JButton("Close");
     RSyntaxTextArea codeEditor = new RSyntaxTextArea();
+
+//    private static JFrame mainFrame;
+//    private static RSyntaxTextArea textArea;
+    private SearchManager searchManager;
+    
+    // 搜索相关方法已移至SearchManager类
+    /**
+     * 绑定快捷键（根据操作系统自动选择合适的快捷键）
+     */
+    private void bindSearchShortcut(RSyntaxTextArea codeE, Frame mainFrame) {
+        searchManager.bindSearchShortcut(codeE, mainFrame);
+    }
+
+    // 搜索相关方法已移至SearchManager类
+    
+    /**
+     * 向下查找
+     */
+    private void performSearchNext() {
+        searchManager.performSearch(true);
+    }
+    
+    /**
+     * 向上查找
+     */
+    private void performSearchPrevious() {
+        searchManager.performSearch(false);
+    }
+    // scrollToSelection方法已移至SearchManager类
+    /**
+     * 辅助方法：选中匹配结果并滚动到可视区域（适配低版本API）
+
+     */
+
+
+
     private CompletionProvider createCodeCompletionProvider() {
         DefaultCompletionProvider cp = new DefaultCompletionProvider();
+        cp.addCompletion(new BasicCompletion(cp, "break"));
+        cp.addCompletion(new BasicCompletion(cp, "continue"));
+
+        cp.addCompletion(new BasicCompletion(cp, "try"));
+        cp.addCompletion(new BasicCompletion(cp, "while"));
+        cp.addCompletion(new BasicCompletion(cp, "for"));
+        cp.addCompletion(new ShorthandCompletion(cp, "if",
+                "if a:\n\tpass\n\telse:\n\tpass", "if else"));
         cp.setAutoActivationRules(true,"");
         ClassLoader cl = getClass().getClassLoader();
         try {
@@ -89,16 +138,27 @@ public class PyBurpTab extends JPanel {
         codeEditor.setMarkOccurrencesDelay(50);
         codeEditor.setWrapStyleWord(true);
         codeEditor.setHighlightCurrentLine(true);
+        // 初始化搜索管理器
+        searchManager = new SearchManager(codeEditor);
 
         CompletionProvider provider = createCompletionProvider();
-        AutoCompletion ac = new AutoCompletion(provider);
+
+        EnhancedAutoCompletion ac = new EnhancedAutoCompletion(provider);
+//        ac.setParamChoicesRenderer(new HTMLParameterCellRenderer());
+        ac.setExternalURLHandler((e, c, callback) -> {
+            try {
+                Desktop.getDesktop().browse(e.getURL().toURI());} catch (
+                    URISyntaxException | IOException ignored) {}
+        });
+
+
 
         CCellRender cc = new CCellRender();
         cc.setFont(codeEditor.getFont().deriveFont(14.0F));
         cc.setBorder(BorderFactory.createEmptyBorder(5,5,10,5));
         ac.setListCellRenderer(cc);
         ac.setShowDescWindow(true);
-        ac.setParameterAssistanceEnabled(true);
+        ac.setParameterAssistanceEnabled(true); //false will not complete params
         ac.setAutoActivationEnabled(true);
         ac.setAutoCompleteSingleChoices(false);
         ac.setAutoActivationDelay(800);
@@ -131,6 +191,15 @@ public class PyBurpTab extends JPanel {
         this.add(topPane, BorderLayout.CENTER);
 
         codeEditor.setText(getDefaultScript());
+        // 2. 初始化搜索功能
+        // 延迟初始化，确保组件已经添加到窗口层次结构中
+        SwingUtilities.invokeLater(() -> {
+            Window ancestor = SwingUtilities.getWindowAncestor(PyBurpTab.this);
+            if (ancestor instanceof Frame frame) {
+                searchManager.initSearchDialog(frame);
+                bindSearchShortcut(codeEditor, frame);
+            }
+        });
         if(PyBurp.api.userInterface().currentTheme() == burp.api.montoya.ui.Theme.DARK){
             setDarkTheme();
         }

@@ -34,12 +34,8 @@ public class CCellRender extends CompletionCellRenderer {
         super();
 
         // 2. 强制重置 UI，防止 Burp 的全局 LookAndFeel 注入定制的 LabelUI
-        setUI(new javax.swing.plaf.basic.BasicLabelUI());
+//        setUI(new javax.swing.plaf.basic.BasicLabelUI());
 
-        // 3. 设置为不透明，确保背景颜色受控
-        setOpaque(true);
-
-        // 4. 加载图片（注意路径：建议加上开头的斜杠）
         variableIcon = getIcon("/img/var.png");
         functionIcon = getIcon("/img/function.png");
         macroIcon = getIcon("/img/macro.png");

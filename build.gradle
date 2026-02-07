@@ -33,6 +33,7 @@ dependencies {
 shadowJar {
     mergeServiceFiles()
     relocate 'com.google.protobuf', 'pyburp.external.protobuf'
+//    relocate 'org.fife', 'pyburp.org.fife'
 
     exclude '**/org/sqlite/native/FreeBSD/**'
     exclude '**/org/sqlite/native/Linux-Android/**'

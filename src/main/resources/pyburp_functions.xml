@@ -112,8 +112,8 @@
 
         <keyword name="handleInteraction" type="function" returnType="None" definedIn="PyBurp Predefined">
             <params>
-                <param type="&lt;a href=&quot;&API_BASE;/collaborator/Interaction.html&quot;&gt;Interaction&lt;/a&gt;" name="interaction">
-                    <desc>Details of a Burp Collaborator interaction (DNS, HTTP, HTTPS) received from a target</desc>
+                <param type="Interaction" name="interaction">
+                    <desc>(&lt;a href=&quot;&API_BASE;/collaborator/Interaction.html&quot;&gt;Interaction&lt;/a&gt;): Details of a Burp Collaborator interaction (DNS, HTTP, HTTPS) received from a target</desc>
                 </param>
             </params>
             <desc>Process interactions detected by Burp Collaborator. Used to handle out-of-band (OOB) signals from targets, useful for detecting blind vulnerabilities</desc>

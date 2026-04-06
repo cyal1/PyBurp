@@ -17,7 +17,10 @@ public class PyBurpTabs extends JFrame {
     public static CollaboratorClient collaboratorClient = createCollaboratorClient();
 
 
+    private static PyBurpTabs instance;
+
     public PyBurpTabs() {
+        instance = this;
         tabbedPane = new JTabbedPane();
         tabbedPane.add(" 1 ", new PyBurpTab());
         tabbedPane.add("+", null);
@@ -68,6 +71,23 @@ public class PyBurpTabs extends JFrame {
         });
     }
 
+
+    public static Frame getMainFrame() {
+        return instance;
+    }
+
+    @Override
+    public void dispose() {
+        for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+            String title = tabbedPane.getTitleAt(i);
+            if ("+".equals(title)) continue;
+            Component comp = tabbedPane.getComponentAt(i);
+            if (comp instanceof PyBurpTab tab && tab.getStatus() == PyBurpTab.STATUS.RUNNING) {
+                tab.stopBtnClick();
+            }
+        }
+        super.dispose();
+    }
 
     public static void closeTab(){
         int selected = tabbedPane.getSelectedIndex();

@@ -7,8 +7,8 @@ import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
 import io.github.cyal1.pyburp.autoComplete.CCellRender;
 import io.github.cyal1.pyburp.autoComplete.EnhancedAutoCompletion;
-import io.github.cyal1.pyburp.autoComplete.MyCompletionProvider;
 import io.github.cyal1.pyburp.poller.Poller;
+import io.github.cyal1.pyburp.search.SearchManager;
 import org.fife.ui.autocomplete.*;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -19,9 +19,6 @@ import org.python.util.PythonInterpreter;
 import javax.annotation.Nonnull;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -192,14 +189,9 @@ public class PyBurpTab extends JPanel {
 
         codeEditor.setText(getDefaultScript());
         // 2. 初始化搜索功能
-        // 延迟初始化，确保组件已经添加到窗口层次结构中
-        SwingUtilities.invokeLater(() -> {
-            Window ancestor = SwingUtilities.getWindowAncestor(PyBurpTab.this);
-            if (ancestor instanceof Frame frame) {
-                searchManager.initSearchDialog(frame);
-                bindSearchShortcut(codeEditor, frame);
-            }
-        });
+        Frame mainFrame = PyBurpTabs.getMainFrame();
+        searchManager.initSearchDialog(mainFrame);
+        bindSearchShortcut(codeEditor, mainFrame);
         if(PyBurp.api.userInterface().currentTheme() == burp.api.montoya.ui.Theme.DARK){
             setDarkTheme();
         }

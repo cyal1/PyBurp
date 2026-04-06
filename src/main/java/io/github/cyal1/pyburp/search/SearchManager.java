@@ -5,6 +5,7 @@ import org.fife.ui.rtextarea.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -26,20 +27,24 @@ public class SearchManager {
         this.searchContext.setMatchCase(false);
         this.searchContext.setWholeWord(false);
         this.searchContext.setSearchForward(true);
-        
-        // 设置查找高亮颜色
-        textArea.setMarkAllHighlightColor(new Color(200, 200, 200)); // 灰色背景标记所有匹配项
-        textArea.setHighlightCurrentLine(false); // 禁用当前行高亮
     }
     
     /**
      * 初始化搜索对话框
      */
     public void initSearchDialog(Frame mainFrame) {
-        searchDialog = new JDialog(mainFrame, "Find", false);
+        searchDialog = new JDialog(mainFrame, "Find", true);
         searchDialog.setSize(400, 120);
         searchDialog.setResizable(true);
         searchDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+        searchDialog.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "close");
+        searchDialog.getRootPane().getActionMap().put("close", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clearSearchHighlights();
+                searchDialog.setVisible(false);
+            }
+        });
         
         // 使用GridBagLayout实现精确布局
         JPanel mainPanel = new JPanel(new GridBagLayout());
@@ -94,6 +99,7 @@ public class SearchManager {
         searchDialog.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
+                clearSearchHighlights();
                 searchDialog.setVisible(false);
             }
         });
@@ -129,10 +135,6 @@ public class SearchManager {
         searchContext.setMatchCase(caseSensitiveCheckBox.isSelected());
         searchContext.setWholeWord(false);
         searchContext.setSearchForward(forward);
-
-        // 标记所有匹配项（灰色背景）
-        // TODO: 标记所有匹配项（需要正确的API调用）
-        // textArea.markAll(searchText, caseSensitiveCheckBox.isSelected(), false);
 
         // 执行搜索
         SearchResult searchResult = SearchEngine.find(textArea, searchContext);
@@ -173,6 +175,18 @@ public class SearchManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 清除搜索高亮
+     */
+    private void clearSearchHighlights() {
+        SwingUtilities.invokeLater(() -> {
+            textArea.setMarkOccurrences(false);
+            textArea.clearMarkAllHighlights();
+            textArea.setSelectionStart(textArea.getCaretPosition());
+            textArea.setSelectionEnd(textArea.getCaretPosition());
+        });
     }
     
     /**

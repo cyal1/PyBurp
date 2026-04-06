@@ -5,6 +5,7 @@ import org.fife.ui.rtextarea.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -36,6 +37,13 @@ public class SearchManager {
         searchDialog.setSize(400, 120);
         searchDialog.setResizable(true);
         searchDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+        searchDialog.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "close");
+        searchDialog.getRootPane().getActionMap().put("close", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                searchDialog.setVisible(false);
+            }
+        });
         
         // 使用GridBagLayout实现精确布局
         JPanel mainPanel = new JPanel(new GridBagLayout());

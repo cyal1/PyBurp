@@ -14,7 +14,7 @@ repositories {
 dependencies {
     compileOnly 'net.portswigger.burp.extensions:montoya-api:2025.11'
 //    compileOnly files('/Users/test/Downloads/montoya-api-2023.9.jar')
-    compileOnly 'org.mozilla:rhino:1.7.14.1' // jython build-in rhino
+    implementation 'org.mozilla:rhino:1.7.14.1' // jython build-in rhino
     compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
 
     implementation 'org.json:json:20231013'

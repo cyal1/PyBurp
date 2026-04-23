@@ -3,7 +3,7 @@ ExtensionType: 1
 Name: PyBurp
 RepoName: pyburp
 ScreenVersion: 1.0.2
-SerialVersion: 6
+SerialVersion: 7
 MinPlatformVersion: 27
 ProOnly: False
 Author: cyal1

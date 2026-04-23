@@ -5,20 +5,22 @@ import burp.api.montoya.core.Annotations;
 import burp.api.montoya.core.Registration;
 import burp.api.montoya.http.message.requests.HttpRequest;
 import burp.api.montoya.http.message.responses.HttpResponse;
+import io.github.cyal1.pyburp.autoComplete.CCellRender;
+import io.github.cyal1.pyburp.autoComplete.EnhancedAutoCompletion;
 import io.github.cyal1.pyburp.poller.Poller;
+import io.github.cyal1.pyburp.search.SearchManager;
+import org.fife.ui.autocomplete.*;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
-import org.fife.ui.rtextarea.RTextScrollPane;
+import org.fife.ui.rtextarea.*;
 import org.python.core.*;
 import org.python.util.PythonInterpreter;
 import javax.annotation.Nonnull;
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -50,6 +52,69 @@ public class PyBurpTab extends JPanel {
     JButton closeTab = new JButton("Close");
     RSyntaxTextArea codeEditor = new RSyntaxTextArea();
 
+//    private static JFrame mainFrame;
+//    private static RSyntaxTextArea textArea;
+    private SearchManager searchManager;
+    
+    // 搜索相关方法已移至SearchManager类
+    /**
+     * 绑定快捷键（根据操作系统自动选择合适的快捷键）
+     */
+    private void bindSearchShortcut(RSyntaxTextArea codeE, Frame mainFrame) {
+        searchManager.bindSearchShortcut(codeE, mainFrame);
+    }
+
+    // 搜索相关方法已移至SearchManager类
+    
+    /**
+     * 向下查找
+     */
+    private void performSearchNext() {
+        searchManager.performSearch(true);
+    }
+    
+    /**
+     * 向上查找
+     */
+    private void performSearchPrevious() {
+        searchManager.performSearch(false);
+    }
+    // scrollToSelection方法已移至SearchManager类
+    /**
+     * 辅助方法：选中匹配结果并滚动到可视区域（适配低版本API）
+
+     */
+
+
+
+    private CompletionProvider createCodeCompletionProvider() {
+        DefaultCompletionProvider cp = new DefaultCompletionProvider();
+        cp.addCompletion(new BasicCompletion(cp, "break"));
+        cp.addCompletion(new BasicCompletion(cp, "continue"));
+
+        cp.addCompletion(new BasicCompletion(cp, "try"));
+        cp.addCompletion(new BasicCompletion(cp, "while"));
+        cp.addCompletion(new BasicCompletion(cp, "for"));
+        cp.addCompletion(new ShorthandCompletion(cp, "if",
+                "if a:\n\tpass\n\telse:\n\tpass", "if else"));
+        cp.setAutoActivationRules(true,"");
+        ClassLoader cl = getClass().getClassLoader();
+        try {
+            cp.loadFromXML(cl.getResourceAsStream("pyburp_functions.xml"));
+            cp.loadFromXML(cl.getResourceAsStream("env_init_functions.xml"));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+        return cp;
+    }
+
+    private CompletionProvider createCompletionProvider() {
+        CompletionProvider cp = createCodeCompletionProvider();
+        LanguageAwareCompletionProvider provider = new
+        LanguageAwareCompletionProvider(cp);
+        return provider;
+    }
+
 
     public PyBurpTab(){
         javax.swing.text.JTextComponent.removeKeymap("RTextAreaKeymap");
@@ -70,6 +135,39 @@ public class PyBurpTab extends JPanel {
         codeEditor.setMarkOccurrencesDelay(50);
         codeEditor.setWrapStyleWord(true);
         codeEditor.setHighlightCurrentLine(true);
+        // 初始化搜索管理器
+        searchManager = new SearchManager(codeEditor);
+
+        CompletionProvider provider = createCompletionProvider();
+
+        EnhancedAutoCompletion ac = new EnhancedAutoCompletion(provider);
+//        ac.setParamChoicesRenderer(new HTMLParameterCellRenderer());
+        ac.setExternalURLHandler((e, c, callback) -> {
+            try {
+                Desktop.getDesktop().browse(e.getURL().toURI());} catch (
+                    URISyntaxException | IOException ignored) {}
+        });
+
+
+
+        CCellRender cc = new CCellRender();
+        cc.setFont(codeEditor.getFont().deriveFont(14.0F));
+        cc.setBorder(BorderFactory.createEmptyBorder(5,5,10,5));
+        ac.setListCellRenderer(cc);
+        ac.setShowDescWindow(true);
+        ac.setParameterAssistanceEnabled(true); //false will not complete params
+        ac.setAutoActivationEnabled(true);
+        ac.setAutoCompleteSingleChoices(false);
+        ac.setAutoActivationDelay(800);
+        ac.install(codeEditor);
+        try {
+            UIManager.setLookAndFeel(UIManager.getLookAndFeel());
+        } catch (UnsupportedLookAndFeelException e) {
+            throw new RuntimeException(e);
+        }
+        codeEditor.setToolTipSupplier((ToolTipSupplier)provider);
+        ToolTipManager.sharedInstance().registerComponent(codeEditor);
+
 //        textEditor.setWhitespaceVisible(true);
         RTextScrollPane scrollableTextEditor = new RTextScrollPane( codeEditor );
         JPanel toolBar = new JPanel();
@@ -90,6 +188,10 @@ public class PyBurpTab extends JPanel {
         this.add(topPane, BorderLayout.CENTER);
 
         codeEditor.setText(getDefaultScript());
+        // 2. 初始化搜索功能
+        Frame mainFrame = PyBurpTabs.getMainFrame();
+        searchManager.initSearchDialog(mainFrame);
+        bindSearchShortcut(codeEditor, mainFrame);
         if(PyBurp.api.userInterface().currentTheme() == burp.api.montoya.ui.Theme.DARK){
             setDarkTheme();
         }

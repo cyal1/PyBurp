@@ -37,7 +37,7 @@ PyBurp provides several predefined functions that automatically register corresp
 | handleResponse(response: [HttpResponse](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html), annotations: [Annotations](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/Annotations.html)) | Processes responses between Burp Suite and the server       |
 | handleProxyRequest(request: [HttpRequest](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/requests/HttpRequest.html), annotations: [Annotations](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/Annotations.html)) | Processes requests between the client and Burp Suite        |
 | handleProxyResponse(response: [HttpResponse](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html), annotations: [Annotations](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/Annotations.html)) | Processes responses between the client and Burp Suite       |
-| urlPrefixAllowed(urls) | Sets allowed URL prefixes for the current PyBurp tab        |
+| urlPrefixAllowed(prefixes) | Sets allowed URL prefixes for the current PyBurp tab        |
 | registerContextMenu(menus) | Registers custom context menu items                         |
 | processPayload(str) | Registers custom Intruder payload processor                 |
 | handleInteraction(interaction: [Interaction](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/collaborator/Interaction.html)) | Polls Collaborator server |
@@ -183,8 +183,6 @@ Most of the code is based on [PortSwigger's Burp Extensions Montoya API Examples
 I welcome contributions from the community to help improve PyBurp. Whether you're fixing bugs, adding features, or improving documentation, your help is greatly appreciated! Here's what I'm focusing on next:
 
 - Simplify the `HttpRequestEditorProvider` and `HttpResponseEditorProvider` registration process
-- Add code completion support (see [example](https://github.com/bobbylight/AutoComplete/tree/master/AutoCompleteDemo/src/main/java/org/fife/ui/autocomplete/demo))
-- Implement a lightweight search box
 - Make hyperlinks clickable
 - Create better video demonstrations
 - Enhance error handling

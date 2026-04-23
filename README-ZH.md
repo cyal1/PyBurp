@@ -37,7 +37,7 @@ PyBurp 提供了几个预定义函数，当在脚本中定义时，会自动在 
 | handleResponse(response: [HttpResponse](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html), annotations: [Annotations](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/Annotations.html)) | 处理 Burp Suite 和服务器之间的响应 |
 | handleProxyRequest(request: [HttpRequest](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/requests/HttpRequest.html), annotations: [Annotations](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/Annotations.html)) | 处理客户端和 Burp Suite 之间的请求 |
 | handleProxyResponse(response: [HttpResponse](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/http/message/responses/HttpResponse.html), annotations: [Annotations](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/core/Annotations.html)) | 处理客户端和 Burp Suite 之间的响应 |
-| urlPrefixAllowed(urls) | 设置当前 PyBurp 标签页允许的 URL 前缀 |
+| urlPrefixAllowed(prefixes) | 设置当前 PyBurp 标签页允许的 URL 前缀 |
 | registerContextMenu(menus) | 注册自定义上下文菜单项 |
 | processPayload(str) | 注册自定义 Intruder 负载处理器 |
 | handleInteraction(interaction: [Interaction](https://portswigger.github.io/burp-extensions-montoya-api/javadoc/burp/api/montoya/collaborator/Interaction.html)) | 轮询 Collaborator 服务器 |
@@ -181,8 +181,6 @@ PyBurp/
 欢迎社区贡献来帮助改进 PyBurp。无论您是修复错误、添加功能还是改进文档，您的帮助都将受到极大的赞赏！以下是我接下来要关注的内容：
 
 - 简化 `HttpRequestEditorProvider` 和 `HttpResponseEditorProvider` 的注册过程
-- 添加代码补全支持（参见[示例](https://github.com/bobbylight/AutoComplete/tree/master/AutoCompleteDemo/src/main/java/org/fife/ui/autocomplete/demo)）
-- 实现轻量级搜索框
 - 使超链接可点击
 - 创建更好的视频演示
 - 增强错误处理
